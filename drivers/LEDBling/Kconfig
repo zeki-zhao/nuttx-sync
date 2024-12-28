@@ -1,0 +1,8 @@
+menu "LEDBling"
+ 
+config MY_LED_BLING
+        bool "MY_LED_BLING device support"
+        default n
+        ---help---
+                Enable driver support for the Led Bling controler.
+endmenu # LEDBling

@@ -1,0 +1,5 @@
+config MY_LED
+	bool "my RGB led device support"
+	default n
+	---help---
+		Enable driver support for the my LED controler.

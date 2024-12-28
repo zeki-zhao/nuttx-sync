@@ -1,0 +1,28 @@
+{
+    "files.associations": {
+        "*.tcc": "cpp",
+        "fstream": "cpp",
+        "userled.h": "c",
+        "*.defs": "xml",
+        "compiler.h": "c",
+        "ioctl.h": "c",
+        "config.h": "c",
+        "myled.h": "c",
+        "fs.h": "c",
+        "types.h": "c",
+        "fixedmath.h": "c",
+        "stm32f429i-disco.h": "c",
+        "stm32.h": "c",
+        "nuttx.h": "c",
+        "signal.h": "c",
+        "irq.h": "c",
+        "debug.h": "c",
+        "memory_resource": "c",
+        "memory": "c",
+        "tuple": "c",
+        "random": "c",
+        "board.h": "c",
+        "fb.h": "c",
+        "kmalloc.h": "c"
+    }
+}

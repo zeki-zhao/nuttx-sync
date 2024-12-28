@@ -1,0 +1,5 @@
+config MY_TOUCH
+	bool "my touch device support"
+	default n
+	---help---
+		Enable driver support for the my touch.
