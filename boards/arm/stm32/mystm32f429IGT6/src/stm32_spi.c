@@ -35,7 +35,7 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "stm32.h"
-#include "stm32f429i-disco.h"
+#include "mystm32f429igt6.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3) ||\
     defined(CONFIG_STM32_SPI4) || defined(CONFIG_STM32_SPI5)

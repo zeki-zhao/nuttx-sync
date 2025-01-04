@@ -72,7 +72,7 @@ int register_blockdriver(FAR const char *path,
    * we will have a momentarily bad true until we populate the inode with
    * valid data.
    */
-
+  syslog(7,"in %s:%d\n",__func__,__LINE__);
   ret = inode_lock();
   if (ret < 0)
     {

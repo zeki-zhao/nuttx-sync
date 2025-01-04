@@ -354,6 +354,7 @@ static int stm32_i2c_transfer(struct i2c_master_s *dev,
                               struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
 static int stm32_i2c_reset(struct i2c_master_s *dev);
+static int stm32_i2c_Myreset(struct i2c_master_s *dev);
 #endif
 
 /* DMA support */
@@ -375,7 +376,7 @@ static const struct i2c_ops_s stm32_i2c_ops =
 {
   .transfer = stm32_i2c_transfer
 #ifdef CONFIG_I2C_RESET
-  , .reset  = stm32_i2c_reset
+  , .reset  = stm32_i2c_Myreset
 #endif
 };
 
@@ -522,6 +523,20 @@ static inline uint16_t stm32_i2c_getreg(struct stm32_i2c_priv_s *priv,
 }
 
 /****************************************************************************
+ * Name: stm32_i2c_getreg
+ *
+ * Description:
+ *   Get a 32-bit register value by offset
+ *
+ ****************************************************************************/
+
+static inline uint16_t stm32_i2c_getreg32(struct stm32_i2c_priv_s *priv,
+                                        uint8_t offset)
+{
+  return getreg32(priv->config->base + offset);
+}
+
+/****************************************************************************
  * Name: stm32_i2c_putreg
  *
  * Description:
@@ -649,14 +664,104 @@ static inline int stm32_i2c_sem_waitdone(struct stm32_i2c_priv_s *priv)
   return ret;
 }
 #else
+
+
+int I2C_CheckEvent(uint32_t Register1,uint32_t Register2, uint32_t I2C_EVENT)
+{
+  uint32_t lastevent = 0;
+  uint32_t flag1 = 0, flag2 = 0;
+  int status = 0;
+
+
+  // /* Read the I2Cx status register */
+  flag1 = Register1;
+  flag2 = Register2;
+  flag2 = flag2 << 16;
+
+  // /* Get the last event value from I2C status register */
+  lastevent = (flag1 | flag2) & ((uint32_t)0x00FFFFFF);
+
+  /* Check whether the last event contains the I2C_EVENT */
+  if ((lastevent & I2C_EVENT) == I2C_EVENT)
+  {
+    /* SUCCESS: last event is equal to I2C_EVENT */
+    status = 1;
+  }
+  else
+  {
+    /* ERROR: last event is different from I2C_EVENT */
+    status = 0;
+  }
+  /* Return status */
+  return status;
+}
+
 static inline int stm32_i2c_sem_waitdone(struct stm32_i2c_priv_s *priv)
 {
+  /***************************************************/
+  // char TempButtfer[2] = {0x80,0X47};
+  // int num = sizeof(TempButtfer)/sizeof(TempButtfer[0]);
+  // syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
+
+  // //写
+  // while(!I2C_CheckEvent(stm32_i2c_getreg(priv, STM32_I2C_SR1_OFFSET),
+  //                       stm32_i2c_getreg(priv, STM32_I2C_SR2_OFFSET), 
+  //                       I2C_EVENT_MASTER_MODE_SELECT))
+  // {
+  // }
+  // syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
+  // stm32_i2c_putreg(priv, STM32_I2C_DR_OFFSET,0xBA);
+
+  // while(!I2C_CheckEvent(stm32_i2c_getreg(priv, STM32_I2C_SR1_OFFSET),
+  //                       stm32_i2c_getreg(priv, STM32_I2C_SR2_OFFSET), 
+  //                       I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) 
+  // {
+	// }
+  // syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
+  // while(num--)
+  // {
+  //   stm32_i2c_putreg(priv,STM32_I2C_DR_OFFSET, TempButtfer[0]);
+
+  //   while(!I2C_CheckEvent(stm32_i2c_getreg(priv, STM32_I2C_SR1_OFFSET),
+  //                         stm32_i2c_getreg(priv, STM32_I2C_SR2_OFFSET),
+  //                         I2C_EVENT_MASTER_BYTE_TRANSMITTED)); //EV8
+  // }
+  // syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
+
+  //读
+  // while(!I2C_CheckEvent(stm32_i2c_getreg(priv, STM32_I2C_SR1_OFFSET),
+  //                       stm32_i2c_getreg(priv, STM32_I2C_SR2_OFFSET), 
+  //                       I2C_EVENT_MASTER_MODE_SELECT))
+  // {
+  // }
+  // syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
+  // stm32_i2c_putreg(priv, STM32_I2C_DR_OFFSET,0xBA);
+
+  // while(!I2C_CheckEvent(stm32_i2c_getreg(priv, STM32_I2C_SR1_OFFSET),
+  //                       stm32_i2c_getreg(priv, STM32_I2C_SR2_OFFSET), 
+  //                       I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) 
+  // {
+	// }
+  // syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
+  // while(num--)
+  // {
+  //   stm32_i2c_putreg(priv,STM32_I2C_DR_OFFSET, TempButtfer[0]);
+
+  //   while(!I2C_CheckEvent(stm32_i2c_getreg(priv, STM32_I2C_SR1_OFFSET),
+  //                         stm32_i2c_getreg(priv, STM32_I2C_SR2_OFFSET),
+  //                         I2C_EVENT_MASTER_BYTE_TRANSMITTED)); //EV8
+  // }
+  // syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
+
+  // return 0;
+  /***************************************************/
+
   clock_t timeout;
   clock_t start;
   clock_t elapsed;
   int ret;
 
-  /* Get the timeout value */
+//   /* Get the timeout value */
 
 #ifdef CONFIG_STM32_I2C_DYNTIMEO
   timeout = stm32_i2c_toticks(priv->msgc, priv->msgv);
@@ -1148,8 +1253,14 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 #ifdef CONFIG_STM32_I2C_DMA
   uint16_t cr2;
 #endif
-
+// syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
   i2cinfo("I2C ISR called\n");
+
+  // syslog(LOG_DEBUG,"In %d,Flag:%d\t OriginAdd:%d\t \n",
+  //             __LINE__,
+  //             priv->flags,
+  //             priv->msgv->addr
+  //             );
 
   /* Get state of the I2C controller (register SR1 only)
    *
@@ -1296,9 +1407,10 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
    *
    * Remember that after a start bit an address has always to be sent.
    */
-
+// syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
   if ((status & I2C_SR1_SB) != 0)
     {
+      syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
       /* Start bit is set */
 
       i2cinfo("Entering address handling, status = %" PRIi32 "\n", status);
@@ -1326,6 +1438,8 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
                            0 : ((priv->msgv->addr << 1) |
                            (priv->flags & I2C_M_READ)));
 
+          // stm32_i2c_putreg(priv, STM32_I2C_DR_OFFSET,0xBA);
+
           i2cinfo("Address sent. Addr=%#02x Write/Read bit=%i\n",
                   priv->msgv->addr, (priv->flags & I2C_M_READ));
 
@@ -1337,6 +1451,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
         }
       else
         {
+          syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
           /* TODO: untested!! */
 
           i2cwarn(" An empty message has been detected, "
@@ -2225,7 +2340,7 @@ static int stm32_i2c_transfer(struct i2c_master_s *dev,
   int ret;
 
   DEBUGASSERT(count);
-  printf("hello%d\n",1);
+  syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
 
   /* Ensure that address or flags don't change meanwhile */
 
@@ -2301,17 +2416,24 @@ static int stm32_i2c_transfer(struct i2c_master_s *dev,
   priv->dcnt   = -1;
   priv->status = 0;
   stm32_i2c_sendstart(priv);
+  // syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
+  // syslog(LOG_DEBUG,"Flag:%d\t OriginAdd:%d\t  DirectAdd:%d\n",
+  //               priv->flags,
+  //               priv->msgv->addr,
+  //               msgs->addr
+  //               );
 
   /* Wait for an ISR, if there was a timeout, fetch latest status to get
    * the BUSY flag.
    */
-
   if (stm32_i2c_sem_waitdone(priv) < 0)
     {
       status = stm32_i2c_getstatus(priv);
       ret = -ETIMEDOUT;
 
       i2cerr("ERROR: Timed out: CR1: 0x%04x status: 0x%08" PRIx32 "\n",
+             stm32_i2c_getreg(priv, STM32_I2C_CR1_OFFSET), status);
+      syslog(LOG_DEBUG,"ERROR: Timed out: CR1: 0x%04x status: 0x%08" PRIx32 "\n",
              stm32_i2c_getreg(priv, STM32_I2C_CR1_OFFSET), status);
 
       /* "Note: When the STOP, START or PEC bit is set, the software must
@@ -2570,6 +2692,425 @@ out:
 }
 #endif /* CONFIG_I2C_RESET */
 
+/*********************模拟I2C*****************************/
+uint32_t scl_gpio;
+uint32_t sda_gpio;
+
+#define I2C_SDA_1()  (stm32_gpiowrite(sda_gpio, 1))
+#define I2C_SDA_0()  (stm32_gpiowrite(sda_gpio, 0))
+#define I2C_SCL_1()  (stm32_gpiowrite(scl_gpio, 1))
+#define I2C_SCL_0()  (stm32_gpiowrite(scl_gpio, 0))
+#define I2C_SDA_READ()  (stm32_gpioread(sda_gpio))
+#define i2c_Delay() (up_udelay(10))
+
+void i2c_Start(void)
+{
+	/* 当SCL高电平时，SDA出现一个下跳沿表示I2C总线启动信号 */
+	I2C_SDA_1();
+	I2C_SCL_1();
+	i2c_Delay();
+	I2C_SDA_0();
+	i2c_Delay();
+	I2C_SCL_0();
+	i2c_Delay();
+}
+
+/*
+*********************************************************************************************************
+*	函 数 名: i2c_Start
+*	功能说明: CPU发起I2C总线停止信号
+*	形    参：无
+*	返 回 值: 无
+*********************************************************************************************************
+*/
+void i2c_Stop(void)
+{
+	/* 当SCL高电平时，SDA出现一个上跳沿表示I2C总线停止信号 */
+	I2C_SDA_0();
+	I2C_SCL_1();
+	i2c_Delay();
+	I2C_SDA_1();
+}
+
+/*
+*********************************************************************************************************
+*	函 数 名: i2c_SendByte
+*	功能说明: CPU向I2C总线设备发送8bit数据
+*	形    参：_ucByte ： 等待发送的字节
+*	返 回 值: 无
+*********************************************************************************************************
+*/
+void i2c_SendByte(uint8_t _ucByte)
+{
+	uint8_t i;
+
+	/* 先发送字节的高位bit7 */
+	for (i = 0; i < 8; i++)
+	{		
+		if (_ucByte & 0x80)
+		{
+			I2C_SDA_1();
+		}
+		else
+		{
+			I2C_SDA_0();
+		}
+		i2c_Delay();
+		I2C_SCL_1();
+		i2c_Delay();	
+		I2C_SCL_0();
+		if (i == 7)
+		{
+			 I2C_SDA_1(); // 释放总线
+		}
+		_ucByte <<= 1;	/* 左移一个bit */
+		i2c_Delay();
+	}
+}
+
+/*
+*********************************************************************************************************
+*	函 数 名: i2c_ReadByte
+*	功能说明: CPU从I2C总线设备读取8bit数据
+*	形    参：无
+*	返 回 值: 读到的数据
+*********************************************************************************************************
+*/
+uint8_t i2c_ReadByte(void)
+{
+	uint8_t i;
+	uint8_t value;
+
+	/* 读到第1个bit为数据的bit7 */
+	value = 0;
+	for (i = 0; i < 8; i++)
+	{
+		value <<= 1;
+		I2C_SCL_1();
+		i2c_Delay();
+		if (I2C_SDA_READ())
+		{
+			value++;
+		}
+		I2C_SCL_0();
+		i2c_Delay();
+	}
+	return value;
+}
+
+/*
+*********************************************************************************************************
+*	函 数 名: i2c_WaitAck
+*	功能说明: CPU产生一个时钟，并读取器件的ACK应答信号
+*	形    参：无
+*	返 回 值: 返回0表示正确应答，1表示无器件响应
+*********************************************************************************************************
+*/
+uint8_t i2c_WaitAck(void)
+{
+	uint8_t re;
+
+	I2C_SDA_1();	/* CPU释放SDA总线 */
+	i2c_Delay();
+	I2C_SCL_1();	/* CPU驱动SCL = 1, 此时器件会返回ACK应答 */
+	i2c_Delay();
+	if (I2C_SDA_READ())	/* CPU读取SDA口线状态 */
+	{
+		re = 1;
+	}
+	else
+	{
+		re = 0;
+	}
+	I2C_SCL_0();
+	i2c_Delay();
+	return re;
+}
+
+/*
+*********************************************************************************************************
+*	函 数 名: i2c_Ack
+*	功能说明: CPU产生一个ACK信号
+*	形    参：无
+*	返 回 值: 无
+*********************************************************************************************************
+*/
+void i2c_Ack(void)
+{
+	I2C_SDA_0();	/* CPU驱动SDA = 0 */
+	i2c_Delay();
+	I2C_SCL_1();	/* CPU产生1个时钟 */
+	i2c_Delay();
+	I2C_SCL_0();
+	i2c_Delay();
+	I2C_SDA_1();	/* CPU释放SDA总线 */
+}
+
+/*
+*********************************************************************************************************
+*	函 数 名: i2c_NAck
+*	功能说明: CPU产生1个NACK信号
+*	形    参：无
+*	返 回 值: 无
+*********************************************************************************************************
+*/
+void i2c_NAck(void)
+{
+	I2C_SDA_1();	/* CPU驱动SDA = 1 */
+	i2c_Delay();
+	I2C_SCL_1();	/* CPU产生1个时钟 */
+	i2c_Delay();
+	I2C_SCL_0();
+	i2c_Delay();	
+}
+
+
+
+#define I2C_DIR_WR	0		/* 写控制bit */
+#define I2C_DIR_RD	1		/* 读控制bit */
+
+/**
+  * @brief   使用IIC读取数据
+  * @param   
+  * 	@arg ClientAddr:从设备地址
+  *		@arg pBuffer:存放由从机读取的数据的缓冲区指针
+  *		@arg NumByteToRead:读取的数据长度
+  * @retval  无
+  */
+uint32_t I2C_ReadBytes(uint8_t ClientAddr,uint8_t* pBuffer, uint16_t NumByteToRead)
+{
+	
+	/* 第1步：发起I2C总线启动信号 */
+	i2c_Start();
+	
+	/* 第2步：发起控制字节，高7bit是地址，bit0是读写控制位，0表示写，1表示读 */
+	i2c_SendByte(ClientAddr | I2C_DIR_RD);	/* 此处是读指令 */
+	
+	/* 第3步：等待ACK */
+	if (i2c_WaitAck() != 0)
+	{
+		goto cmd_fail;	/* 器件无应答 */
+	}
+
+	while(NumByteToRead) 
+  {
+    *pBuffer = i2c_ReadByte();
+    
+    /* 读指针自增 */
+    pBuffer++; 
+      
+    /*计数器自减 */
+    NumByteToRead--;
+       
+    if(NumByteToRead == 0)
+			i2c_NAck();	/* 最后1个字节读完后，CPU产生NACK信号(驱动SDA = 1) */      
+    else
+      i2c_Ack();	/* 中间字节读完后，CPU产生ACK信号(驱动SDA = 0) */  
+  }
+
+	/* 发送I2C总线停止信号 */
+	i2c_Stop();
+	return 0;	/* 执行成功 */
+
+cmd_fail: /* 命令执行失败后，切记发送停止信号，避免影响I2C总线上其他设备 */
+	/* 发送I2C总线停止信号 */
+	i2c_Stop();
+	return 1;
+}
+
+/**
+  * @brief   使用IIC写入数据
+  * @param   
+  * 	@arg ClientAddr:从设备地址
+  *		@arg pBuffer:缓冲区指针
+  *     @arg NumByteToWrite:写的字节数
+  * @retval  无
+  */
+uint32_t I2C_WriteBytes(uint8_t ClientAddr,uint8_t* pBuffer,  uint8_t NumByteToWrite)
+{
+	uint16_t m;	
+
+  /*　第0步：发停止信号，启动内部写操作　*/
+  i2c_Stop();
+  
+  /* 通过检查器件应答的方式，判断内部写操作是否完成, 一般小于 10ms 			
+    CLK频率为200KHz时，查询次数为30次左右
+  */
+  for (m = 0; m < 1000; m++)
+  {				
+    /* 第1步：发起I2C总线启动信号 */
+    i2c_Start();
+    
+    /* 第2步：发起控制字节，高7bit是地址，bit0是读写控制位，0表示写，1表示读 */
+    i2c_SendByte(ClientAddr | I2C_DIR_WR);	/* 此处是写指令 */
+    
+    /* 第3步：发送一个时钟，判断器件是否正确应答 */
+    if (i2c_WaitAck() == 0)
+    {
+      break;
+    }
+  }
+  if (m  == 1000)
+  {
+    goto cmd_fail;	/* EEPROM器件写超时 */
+  }	
+	
+  while(NumByteToWrite--)
+  {
+  /* 第4步：开始写入数据 */
+  i2c_SendByte(*pBuffer);
+
+  /* 第5步：检查ACK */
+  if (i2c_WaitAck() != 0)
+  {
+    goto cmd_fail;	/* 器件无应答 */
+  }
+  
+      pBuffer++;	/* 地址增1 */		
+  }
+	
+	/* 命令执行成功，发送I2C总线停止信号 */
+	i2c_Stop();
+	return 0;
+
+cmd_fail: /* 命令执行失败后，切记发送停止信号，避免影响I2C总线上其他设备 */
+	/* 发送I2C总线停止信号 */
+	i2c_Stop();
+	return 1;
+}
+
+/*********************************************************/
+uint8_t test[3] = {0x8047 >> 8, 0x8047 & 0xff};
+uint8_t version[3] = {0x8140 >> 8, 0x8140 & 0xff};
+uint8_t RecvBuf[8] = {};
+
+static int stm32_i2c_Myreset(struct i2c_master_s *dev)
+{
+  struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)dev;
+  unsigned int clock_count;
+  unsigned int stretch_count;
+
+  uint32_t frequency;
+  int ret;
+
+  DEBUGASSERT(dev);
+
+  /* Our caller must own a ref */
+
+  DEBUGASSERT(priv->refs > 0);
+
+  /* Lock out other clients */
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = -EIO;
+
+  /* Save the current frequency */
+
+  frequency = priv->frequency;
+
+  /* De-init the port */
+
+  stm32_i2c_deinit(priv);
+
+  /* Use GPIO configuration to un-wedge the bus */
+
+  scl_gpio = MKI2C_OUTPUT(priv->config->scl_pin);
+  sda_gpio = MKI2C_OUTPUT(priv->config->sda_pin);
+
+  stm32_configgpio(scl_gpio);
+  stm32_configgpio(sda_gpio);
+
+  /* Let SDA go high */
+
+  stm32_gpiowrite(sda_gpio, 1);
+
+  /* Clock the bus until any slaves currently driving it let it go. */
+
+  clock_count = 0;
+  while (!stm32_gpioread(sda_gpio))
+    {
+      /* Give up if we have tried too hard */
+
+      if (clock_count++ > 10)
+        {
+          goto out;
+        }
+
+      /* Sniff to make sure that clock stretching has finished.
+       *
+       * If the bus never relaxes, the reset has failed.
+       */
+
+      stretch_count = 0;
+      while (!stm32_gpioread(scl_gpio))
+        {
+          /* Give up if we have tried too hard */
+
+          if (stretch_count++ > 10)
+            {
+              goto out;
+            }
+
+          up_udelay(10);
+        }
+
+      /* Drive SCL low */
+
+      stm32_gpiowrite(scl_gpio, 0);
+      up_udelay(10);
+
+      /* Drive SCL high again */
+
+      stm32_gpiowrite(scl_gpio, 1);
+      up_udelay(10);
+    }
+
+  /* Generate a start followed by a stop to reset slave
+   * state machines.
+   */
+
+   I2C_WriteBytes(0xBA,  test, 2);	//IIC写入数据
+   I2C_ReadBytes(0xBA,  RecvBuf, 1);	//IIC写入数据
+   for(int i = 0;i< (sizeof(RecvBuf)/sizeof(RecvBuf[0]));i++)
+   {
+      printf("%d",RecvBuf[i]);
+   }
+   printf("\n");
+  I2C_WriteBytes(0xBA,  version, 2);	//IIC写入数据
+  I2C_ReadBytes(0xBA,  RecvBuf, 8);	//IIC写入数据
+   for(int i = 0;i< (sizeof(RecvBuf)/sizeof(RecvBuf[0]));i++)
+   {
+      printf("%d",RecvBuf[i]);
+   }
+   printf("\n");
+
+  /* Revert the GPIO configuration. */
+
+  stm32_unconfiggpio(sda_gpio);
+  stm32_unconfiggpio(scl_gpio);
+
+  /* Re-init the port */
+
+  stm32_i2c_init(priv);
+
+  /* Restore the frequency */
+
+  stm32_i2c_setclock(priv, frequency);
+  ret = OK;
+
+out:
+
+  /* Release the port for re-use by other clients */
+
+  nxmutex_unlock(&priv->lock);
+  return ret;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -2586,6 +3127,7 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
 {
   struct stm32_i2c_priv_s *priv = NULL;
 
+syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
 #if STM32_PCLK1_FREQUENCY < 4000000
 #   warning STM32_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
 #endif

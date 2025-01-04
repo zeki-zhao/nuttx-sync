@@ -35,6 +35,8 @@
 
 #include "inode/inode.h"
 
+#include <debug.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -69,6 +71,7 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf,
 {
   FAR struct inode *inode;
 
+
   /* Was this file opened for write access? */
 
   if ((filep->f_oflags & O_WROK) == 0)
@@ -85,8 +88,34 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf,
     }
 
   /* Yes, then let the driver perform the write */
-
+  
   return inode->u.i_ops->write(filep, buf, nbytes);
+}
+
+ssize_t file_bwrite(FAR struct file *filep, FAR const void *buf,
+                   size_t nbytes)
+{
+  FAR struct inode *inode;
+
+
+  /* Was this file opened for write access? */
+
+  if ((filep->f_oflags & O_WROK) == 0)
+    {
+      return -EACCES;
+    }
+
+  /* Is a driver registered? Does it support the write method? */
+
+  inode = filep->f_inode;
+  // if (!inode || !inode->u.i_ops || !inode->u.i_ops->write)
+  //   {
+  //     return -EBADF;
+  //   }
+
+  /* Yes, then let the driver perform the write */
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
+  return inode->u.i_bops->write(filep, buf, 0,nbytes);
 }
 
 /****************************************************************************
@@ -136,6 +165,34 @@ ssize_t nx_write(int fd, FAR const void *buf, size_t nbytes)
        */
 
       ret = file_write(filep, buf, nbytes);
+    }
+
+  return ret;
+}
+
+ssize_t nx_bwrite(int fd, FAR const void *buf, size_t nbytes)
+{
+  FAR struct file *filep;
+  ssize_t ret;
+
+  if (buf == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* First, get the file structure.
+   * Note that fs_getfilep() will return the errno on failure.
+   */
+
+  ret = (ssize_t)fs_getfilep(fd, &filep);
+  syslog(7,"in %s:%d,ret:%d\n",__func__,__LINE__,ret);
+  if (ret >= 0)
+    {
+      /* Perform the write operation using the file descriptor as an
+       * index.  Note that file_write() will return the errno on failure.
+       */
+
+      ret = file_bwrite(filep, buf, nbytes);
     }
 
   return ret;
@@ -198,8 +255,28 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
   enter_cancellation_point();
 
   /* Let nx_write() do all of the work */
-
   ret = nx_write(fd, buf, nbytes);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  leave_cancellation_point();
+  return ret;
+}
+
+ssize_t b_write(int fd, FAR const void *buf, size_t nbytes)
+{
+  ssize_t ret;
+
+  /* write() is a cancellation point */
+
+  enter_cancellation_point();
+
+  /* Let nx_write() do all of the work */
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
+  ret = nx_bwrite(fd, buf, nbytes);
   if (ret < 0)
     {
       set_errno(-ret);

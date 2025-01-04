@@ -1040,6 +1040,7 @@ void fb_pollnotify(FAR struct fb_vtable_s *vtable)
 
 int fb_register(int display, int plane)
 {
+  printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
   FAR struct fb_chardev_s *fb;
   struct fb_panelinfo_s panelinfo;
   struct fb_videoinfo_s vinfo;
@@ -1051,7 +1052,7 @@ int fb_register(int display, int plane)
   int ret;
 
   /* Allocate a framebuffer state instance */
-
+  printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
   fb = (FAR struct fb_chardev_s *)kmm_zalloc(sizeof(struct fb_chardev_s));
   if (fb == NULL)
     {
@@ -1066,21 +1067,24 @@ int fb_register(int display, int plane)
 #endif
 
   /* Initialize the frame buffer device. */
-
+  printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
   ret = up_fbinitialize(display);
   if (ret < 0)
     {
+      printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
       gerr("ERROR: up_fbinitialize() failed for display %d: %d\n",
            display, ret);
       goto errout_with_fb;
     }
 
+  printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
   DEBUGASSERT((unsigned)plane <= UINT8_MAX);
   fb->plane  = plane;
 
   fb->vtable = up_fbgetvplane(display, plane);
   if (fb->vtable == NULL)
     {
+      printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
       gerr("ERROR: up_fbgetvplane() failed, vplane=%d\n", plane);
       goto errout_with_fb;
     }
@@ -1089,11 +1093,12 @@ int fb_register(int display, int plane)
   fb->vtable->priv = fb;
 
   /* Initialize the frame buffer instance. */
-
+  printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
   DEBUGASSERT(fb->vtable->getvideoinfo != NULL);
   ret = fb->vtable->getvideoinfo(fb->vtable, &vinfo);
   if (ret < 0)
     {
+      printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
       gerr("ERROR: getvideoinfo() failed: %d\n", ret);
       goto errout_with_fb;
     }
@@ -1102,7 +1107,7 @@ int fb_register(int display, int plane)
   DEBUGASSERT(vinfo.nplanes > 0 && (unsigned)plane < vinfo.nplanes);
 
   /* Get panel info */
-
+  printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
   ret = fb_get_panelinfo(fb, &panelinfo);
 
   if (ret < 0)
@@ -1134,7 +1139,7 @@ int fb_register(int display, int plane)
 #endif
 
   /* Register the framebuffer device */
-
+  printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
   if (nplanes < 2)
     {
       snprintf(devname, 16, "/dev/fb%d", display);
@@ -1145,10 +1150,11 @@ int fb_register(int display, int plane)
     }
 
   nxmutex_init(&fb->lock);
-
+  printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
   ret = register_driver(devname, &g_fb_fops, 0666, (FAR void *)fb);
   if (ret < 0)
     {
+      printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
       gerr("ERROR: register_driver() failed: %d\n", ret);
       goto errout_with_fb;
     }

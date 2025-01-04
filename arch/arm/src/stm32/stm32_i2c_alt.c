@@ -2369,6 +2369,7 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
 {
   struct stm32_i2c_priv_s *priv = NULL;
 
+syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
 #if STM32_PCLK1_FREQUENCY < 4000000
 #   warning STM32_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
 #endif

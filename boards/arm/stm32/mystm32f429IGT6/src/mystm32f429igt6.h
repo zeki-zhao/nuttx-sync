@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_STM32F429I_DISCO_SRC_STM32F429I_DISCO_H
-#define __BOARDS_ARM_STM32_STM32F429I_DISCO_SRC_STM32F429I_DISCO_H
+#ifndef __BOARDS_ARM_STM32_MYSTM32F429IGT6_SRC_STM32F429I_DISCO_H
+#define __BOARDS_ARM_STM32_MYSTM32F429IGT6_SRC_STM32F429I_DISCO_H
 
 /****************************************************************************
  * Included Files
@@ -47,6 +47,26 @@
 #define HAVE_USBDEV     1
 #define HAVE_USBHOST    1
 #define HAVE_USBMONITOR 1
+#define HAVE_SDIO       1
+
+#undef  SDIO_MINOR     /* Any minor number, default 0 */
+#define SDIO_SLOTNO 0  /* Only one slot */
+
+#ifdef HAVE_SDIO
+#  if !defined(CONFIG_NSH_MMCSDSLOTNO)
+#    define CONFIG_NSH_MMCSDSLOTNO SDIO_SLOTNO
+#  elif CONFIG_NSH_MMCSDSLOTNO != 0
+#    warning "Only one MMC/SD slot, slot 0"
+#    undef CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO SDIO_SLOTNO
+#  endif
+
+#  if defined(CONFIG_NSH_MMCSDMINOR)
+#    define SDIO_MINOR CONFIG_NSH_MMCSDMINOR
+#  else
+#    define SDIO_MINOR 0
+#  endif
+#endif
 
 /* Can't support USB host or device features if USB OTG HS is not enabled */
 
@@ -204,6 +224,11 @@
  ****************************************************************************/
 
 int stm32_bringup(void);
+
+// #ifdef CONFIG_STM32_SDIO //!defined(CONFIG_DISABLE_MOUNTPOINT) &&
+int stm32_sdio_initialize(void);
+// #endif
+
 
 /****************************************************************************
  * Name: stm32_spidev_initialize
@@ -395,6 +420,9 @@ int stm32_pwm_setup(void);
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
 #endif
+
+
+
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32_STM32F429I_DISCO_SRC_STM32F429I_DISCO_H */

@@ -282,7 +282,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
   int ret;
 
   /* Verify required pointer arguments */
-
+// syslog(7,"in %s:%d\n",__func__,__LINE__);
   DEBUGASSERT(target && filesystemtype);
 
   /* Find the specified filesystem. Try the block driver filesystems first */
@@ -290,6 +290,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
   if (source != NULL &&
       find_blockdriver(source, mountflags, &drvr_inode) >= 0)
     {
+      // syslog(7,"in %s:%d\n",__func__,__LINE__);
       /* Find the block based file system */
 
 #ifdef BDFS_SUPPORT
@@ -297,6 +298,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
 #endif /* BDFS_SUPPORT */
       if (mops == NULL)
         {
+          // syslog(7,"in %s:%d\n",__func__,__LINE__);
           ferr("ERROR: Failed to find block based file system %s\n",
                filesystemtype);
 
@@ -308,7 +310,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
            (ret = find_mtddriver(source, &drvr_inode)) >= 0)
     {
       /* Find the MTD based file system */
-
+// syslog(7,"in %s:%d\n",__func__,__LINE__);
 #ifdef MDFS_SUPPORT
       mops = mount_findfs(g_mdfsmap, filesystemtype);
 #endif /* MDFS_SUPPORT */
@@ -329,6 +331,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
   else
 #endif /* NODFS_SUPPORT */
     {
+      // syslog(7,"in %s:%d\n",__func__,__LINE__);
       ferr("ERROR: Failed to find block driver %s\n", source);
 
       ret = -ENOTBLK;
@@ -345,7 +348,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
   /* Check if the inode already exists */
 
   SETUP_SEARCH(&desc, target, false);
-
+// syslog(7,"in %s:%d\n",__func__,__LINE__);
   ret = inode_find(&desc);
   if (ret >= 0)
     {
@@ -376,7 +379,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
    * NOTE that the new inode will be created with an initial reference
    * count of zero.
    */
-
+// syslog(7,"in %s:%d\n",__func__,__LINE__);
     {
       ret = inode_reserve(target, 0777, &mountpt_inode);
       if (ret < 0)
@@ -400,9 +403,10 @@ int nx_mount(FAR const char *source, FAR const char *target,
    * system returns a reference to some opaque, fs-dependent structure
    * that encapsulates this binding.
    */
-
+// syslog(7,"in %s:%d\n",__func__,__LINE__);
   if (mops->bind == NULL)
     {
+      // syslog(7,"in %s:%d\n",__func__,__LINE__);
       /* The filesystem does not support the bind operation ??? */
 
       ferr("ERROR: Filesystem does not support bind\n");
@@ -425,6 +429,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
 
 #if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
   ret = mops->bind(drvr_inode, data, &fshandle);
+  // syslog(7,"in %s:%d\n",__func__,__LINE__);
 #else
   ret = mops->bind(NULL, data, &fshandle);
 #endif
@@ -434,7 +439,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
        * the count for the reference we failed to pass and exit with an
        * error.
        */
-
+// syslog(7,"in %s:%d,errcode:%d\n",__func__,__LINE__,ret);
       ferr("ERROR: Bind method failed: %d\n", ret);
 
 #if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
@@ -450,7 +455,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
     }
 
   /* We have it, now populate it with driver specific information. */
-
+// syslog(7,"in %s:%d\n",__func__,__LINE__);
   INODE_SET_MOUNTPT(mountpt_inode);
 
   mountpt_inode->u.i_mops  = mops;
@@ -468,6 +473,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
   if (drvr_inode != NULL)
 #endif
     {
+      // syslog(7,"in %s:%d\n",__func__,__LINE__);
       inode_release(drvr_inode);
     }
 #endif

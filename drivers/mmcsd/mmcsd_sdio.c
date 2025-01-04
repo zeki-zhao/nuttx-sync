@@ -242,7 +242,7 @@ static const struct block_operations g_bops =
   mmcsd_close,    /* close    */
   mmcsd_read,     /* read     */
   mmcsd_write,    /* write    */
-  mmcsd_geometry, /* geometry */
+  mmcsd_geometry, /* geometry */ //TODO:open文件符会执行这个回调
   mmcsd_ioctl     /* ioctl    */
 };
 
@@ -2039,20 +2039,23 @@ static int mmcsd_open(FAR struct inode *inode)
   FAR struct mmcsd_state_s *priv;
   int ret;
 
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
   finfo("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct mmcsd_state_s *)inode->i_private;
 
   /* Just increment the reference count on the driver */
-
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
   DEBUGASSERT(priv->crefs < MAX_CREFS);
 
   ret = mmcsd_lock(priv);
   if (ret < 0)
     {
+      syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
       return ret;
     }
 
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
   priv->crefs++;
   mmcsd_unlock(priv);
   return OK;
@@ -2067,6 +2070,7 @@ static int mmcsd_open(FAR struct inode *inode)
 
 static int mmcsd_close(FAR struct inode *inode)
 {
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
   FAR struct mmcsd_state_s *priv;
   int ret;
 
@@ -2100,6 +2104,7 @@ static int mmcsd_close(FAR struct inode *inode)
 static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
                           blkcnt_t startsector, unsigned int nsectors)
 {
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
   FAR struct mmcsd_state_s *priv;
   size_t sector;
   size_t endsector;
@@ -2138,7 +2143,15 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
           if (nread == 1)
             {
+              syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
               nread = mmcsd_readsingle(priv, buffer, sector);
+              // char *p = buffer;
+              // int tempCnt = 8;
+              // syslog(LOG_DEBUG,"tempread:");
+              // while(tempCnt--)
+              // {
+              //     syslog(LOG_DEBUG,"%d\t",*(p++));
+              // }
             }
           else
             {
@@ -2178,19 +2191,23 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
                            FAR const unsigned char *buffer,
                            blkcnt_t startsector, unsigned int nsectors)
 {
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
   FAR struct mmcsd_state_s *priv;
   size_t sector;
   size_t endsector;
   ssize_t nwrite;
   ssize_t ret = nsectors;
+  syslog(LOG_DEBUG,"in %s:%d,startsector:%d,nsectors:%d\n",__func__,__LINE__,startsector,nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct mmcsd_state_s *)inode->i_private;
   finfo("startsector: %" PRIuOFF " nsectors: %u sectorsize: %d\n",
         startsector, nsectors, priv->blocksize);
+  // syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
 
   if (nsectors > 0)
     {
+      // syslog(LOG_DEBUG,"in %s:%d,nsectors is:%d\n",__func__,__LINE__,nsectors);
       ret = mmcsd_lock(priv);
       if (ret < 0)
         {
@@ -2216,10 +2233,19 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
 
           if (nwrite == 1)
             {
+              // syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
               nwrite = mmcsd_writesingle(priv, buffer, sector);
+                // char *p = buffer;
+                // int tempCnt = 8;
+                // syslog(LOG_DEBUG,"tempinput:");
+                // while(tempCnt--)
+                // {
+                //     syslog(LOG_DEBUG,"%d\t",*(p++));
+                // }
             }
           else
             {
+              // syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
               nwrite = mmcsd_writemultiple(priv, buffer, sector, nwrite);
             }
 
@@ -2238,6 +2264,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
       mmcsd_unlock(priv);
     }
 
+  // syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
   /* On success, return the number of blocks written */
 
   return ret;
@@ -2252,6 +2279,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
 
 static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
 {
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
   FAR struct mmcsd_state_s *priv;
   int ret = -EINVAL;
 
@@ -2314,6 +2342,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
 
 static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 {
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
   FAR struct mmcsd_state_s *priv;
   int ret;
 
@@ -3468,7 +3497,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
   /* For eMMC, Send CMD0 with argument 0xf0f0f0f0 as per JEDEC v4.41
    * for pre-idle. No effect for SD.
    */
-
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
   mmcsd_sendcmdpoll(priv, MMCSD_CMD0, 0xf0f0f0f0);
   nxsig_usleep(MMCSD_IDLE_DELAY);
 
@@ -3505,7 +3534,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
       /* CMD1 did not succeed, card is not MMC. Return to idle
        * to allow the communication to recover before another send.
        */
-
+      syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
       mmcsd_sendcmdpoll(priv, MMCSD_CMD0, 0);
       nxsig_usleep(MMCSD_IDLE_DELAY);
     }
@@ -3584,6 +3613,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
           if (((response & MMCSD_R7VOLTAGE_MASK) == MMCSD_R7VOLTAGE_27) &&
               ((response & MMCSD_R7ECHO_MASK) ==  MMCSD_R7CHECKPATTERN))
             {
+              syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
               finfo("SD V2.x card\n");
               priv->type = MMCSD_CARDTYPE_SDV2;
               sdcapacity = MMCSD_ACMD41_HIGHCAPACITY;
@@ -3678,6 +3708,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 
                       if ((response & MMCSD_R3_HIGHCAPACITY) != 0)
                         {
+                          syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
                           finfo("SD V2.x card with block addressing\n");
                           DEBUGASSERT(priv->type == MMCSD_CARDTYPE_SDV2);
                           priv->type |= MMCSD_CARDTYPE_BLOCK;
@@ -3810,6 +3841,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
   int ret;
 
   finfo("type: %d probed: %d\n", priv->type, priv->probed);
+  syslog(LOG_DEBUG,"in %s:%d type: %d probed: %d\n",__func__,__LINE__,priv->type, priv->probed);
 
   /* If we have reliable card detection events and if we have
    * already probed the card, then we don't need to do anything
@@ -3819,6 +3851,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
 #ifdef CONFIG_MMCSD_HAVE_CARDDETECT
   if (priv->probed && SDIO_PRESENT(priv->dev))
     {
+      syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
       return OK;
     }
 #endif
@@ -3834,22 +3867,25 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
   mmcsd_removed(priv);
 
   /* Now.. is there a card in the slot? */
-
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
   if (SDIO_PRESENT(priv->dev))
     {
       /* Yes.. probe it.  First, what kind of card was inserted? */
 
       finfo("Card present.  Probing....\n");
-
+      syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
       ret = mmcsd_cardidentify(priv);
       if (ret != OK)
         {
+          syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
           ferr("ERROR: Failed to initialize card: %d\n", ret);
         }
       else
         {
           /* Then initialize the driver according to the card type */
+          syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
 
+          syslog(LOG_DEBUG,"in %s:%d type: %d probed: %d\n",__func__,__LINE__,priv->type, priv->probed);
           switch (priv->type)
             {
               /* Bit 1: SD version 1.x */
@@ -3900,6 +3936,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
           if (ret == OK)
             {
               /* Yes...  */
+              syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
 
               finfo("Capacity: %" PRIu32 " Kbytes\n",
                     MMCSD_CAPACITY(priv->nblocks, priv->blockshift));
@@ -3927,6 +3964,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
   else
     {
       /* There is no card in the slot */
+      syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
 
       finfo("No card\n");
 #ifdef CONFIG_MMCSD_HAVE_CARDDETECT
@@ -4014,8 +4052,9 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
   /* Register a callback so that we get informed if media is inserted or
    * removed from the slot (Initially all callbacks are disabled).
    */
-
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
   SDIO_REGISTERCALLBACK(priv->dev, mmcsd_mediachange, (FAR void *)priv);
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
 
   /* Is there a card in the slot now? For an MMC/SD card, there are three
    * possible card detect mechanisms:
@@ -4036,10 +4075,11 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
   if (SDIO_PRESENT(priv->dev))
     {
       /* Yes... probe for a card in the slot */
-
+      syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
       ret = mmcsd_probe(priv);
       if (ret != OK)
         {
+          syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
           finfo("Slot not empty, but initialization failed: %d\n", ret);
 
           /* NOTE: The failure to initialize a card does not mean that
@@ -4058,7 +4098,7 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
        * sdio_slotinitialize will use this return value to set up the card
        * inserted callback event.
        */
-
+      syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
       ret = -ENODEV;
     }
 
@@ -4139,13 +4179,14 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
   priv->dev = dev;
 
   /* Initialize the hardware associated with the slot */
-
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
   ret = mmcsd_hwinitialize(priv);
-
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
   /* Was the slot initialized successfully? */
 
   if (ret != OK)
     {
+      syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
       /* No... But the error ENODEV is returned if hardware
        * initialization succeeded but no card is inserted in the slot.
        * In this case, the no error occurred, but the driver is still
@@ -4157,7 +4198,7 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
           /* No card in the slot (or if there is, we could not recognize
            * it).. Setup to receive the media inserted event
            */
-
+          syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
           SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
 
           finfo("MMC/SD slot is empty\n");
@@ -4177,9 +4218,12 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
 
   /* Inode private data is a reference to the MMCSD state structure */
 
-  ret = register_blockdriver(devname, &g_bops, 0, priv);
+  // ret = register_blockdriver(devname, &g_bops, 0, priv); //TODO:
+  ret = register_blockdriver(devname, &g_bops, 0, priv); //TODO:块设备无法打开？
+  // ret = register_driver(devname, &g_bops, 0666, priv);
   if (ret < 0)
     {
+      syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
       ferr("ERROR: register_blockdriver failed: %d\n", ret);
       goto errout_with_hwinit;
     }

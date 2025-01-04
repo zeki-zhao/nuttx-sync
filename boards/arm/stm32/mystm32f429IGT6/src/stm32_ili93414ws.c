@@ -43,7 +43,7 @@
 
 #include "stm32_rcc.h"
 #include "stm32_spi.h"
-#include "stm32f429i-disco.h"
+#include "mystm32f429igt6.h"
 
 #include <arch/board/board.h>
 

@@ -40,7 +40,7 @@
 #include "arm_internal.h"
 #include "stm32.h"
 #include "stm32_otghs.h"
-#include "stm32f429i-disco.h"
+#include "mystm32f429igt6.h"
 
 #ifdef CONFIG_STM32_OTGHS
 

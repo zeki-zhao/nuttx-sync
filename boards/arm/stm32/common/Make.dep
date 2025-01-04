@@ -8,7 +8,7 @@ stm32_boot.o: board/stm32_boot.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
@@ -55,7 +55,7 @@ stm32_boot.o: board/stm32_boot.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syscall.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/syscall.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/syscall.h \
- board/stm32f429i-disco.h \
+ board/mystm32f429igt6.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_gpio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/chip.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/irq.h \
@@ -80,7 +80,7 @@ stm32_bringup.o: board/stm32_bringup.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
@@ -131,6 +131,7 @@ stm32_bringup.o: board/stm32_bringup.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/video/fb.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/ioctl.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/serial/tioctl.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/simulative_i2c/simulative_i2c.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/common/arm_internal.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syscall.h \
@@ -213,9 +214,8 @@ stm32_bringup.o: board/stm32_bringup.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_lowputc.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_eth.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_eth.h \
- board/stm32f429i-disco.h \
- /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/simulative_i2c/simulative_i2c.h \
- /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/board/board.h
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/board/board.h \
+ board/mystm32f429igt6.h
 stm32_spi.o: board/stm32_spi.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/config.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdint.h \
@@ -228,7 +228,7 @@ stm32_spi.o: board/stm32_spi.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/spi/spi.h \
@@ -353,7 +353,7 @@ stm32_spi.o: board/stm32_spi.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_lowputc.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_eth.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_eth.h \
- board/stm32f429i-disco.h
+ board/mystm32f429igt6.h
 stm32_autoleds.o: board/stm32_autoleds.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/config.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdint.h \
@@ -365,7 +365,7 @@ stm32_autoleds.o: board/stm32_autoleds.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/board.h \
@@ -492,7 +492,7 @@ stm32_autoleds.o: board/stm32_autoleds.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_lowputc.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_eth.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_eth.h \
- board/stm32f429i-disco.h
+ board/mystm32f429igt6.h
 stm32_buttons.o: board/stm32_buttons.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/config.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdint.h \
@@ -536,14 +536,14 @@ stm32_buttons.o: board/stm32_buttons.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/board.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/board/board.h \
- board/stm32f429i-disco.h \
+ board/mystm32f429igt6.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_gpio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/chip.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/irq.h \
@@ -566,9 +566,9 @@ stm32_appinit.o: board/stm32_appinit.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
- board/stm32f429i-disco.h \
+ board/mystm32f429igt6.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/chip.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_gpio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/irq.h \
@@ -597,7 +597,7 @@ stm32_extmem.o: board/stm32_extmem.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
@@ -723,7 +723,7 @@ stm32_extmem.o: board/stm32_extmem.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_lowputc.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_eth.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_eth.h \
- board/stm32f429i-disco.h
+ board/mystm32f429igt6.h
 stm32_lcd.o: board/stm32_lcd.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/config.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
@@ -736,7 +736,7 @@ stm32_lcd.o: board/stm32_lcd.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/arch.h \
@@ -785,7 +785,7 @@ stm32_lcd.o: board/stm32_lcd.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syscall.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/syscall.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/syscall.h \
- board/stm32f429i-disco.h \
+ board/mystm32f429igt6.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_gpio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/chip.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/irq.h \
@@ -842,7 +842,7 @@ stm32_myled.o: board/stm32_myled.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
@@ -936,7 +936,7 @@ stm32_myled.o: board/stm32_myled.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_lowputc.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_eth.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_eth.h \
- board/stm32f429i-disco.h \
+ board/mystm32f429igt6.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/myled/myled.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/board/board.h
 stm32_mytouch.o: board/stm32_mytouch.c \
@@ -982,7 +982,7 @@ stm32_mytouch.o: board/stm32_mytouch.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
@@ -1076,17 +1076,152 @@ stm32_mytouch.o: board/stm32_mytouch.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_lowputc.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_eth.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_eth.h \
- board/stm32f429i-disco.h \
+ board/mystm32f429igt6.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/board/board.h \
- /home/zeki/workspace/NuttX/nuttxspace/nuttx/arch/arm/src/stm32/stm32_i2c.c \
- /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/inttypes.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/input/gt9xx.h
+stm32_sdio.o: board/stm32_sdio.c \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/config.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/compiler.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdint.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/types.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/semaphore.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/queue.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/clock.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/lib/lib.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/kmalloc.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdlib.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/mm.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/malloc.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/userspace.h \
- /home/zeki/workspace/NuttX/nuttxspace/nuttx/arch/arm/src/stm32/stm32_rcc.h \
- /home/zeki/workspace/NuttX/nuttxspace/nuttx/arch/arm/src/stm32/stm32_i2c.h \
- /home/zeki/workspace/NuttX/nuttxspace/nuttx/arch/arm/src/stm32/stm32_waste.h
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/signal.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/pthread.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/unistd.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/arch.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/arch.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/pgalloc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/cache.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/sched.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sched.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/strings.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/string.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stddef.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/alloca.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/addrenv.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/wqueue.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/wdog.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/chip/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/chip.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/stm32f40xxx_irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/armv7-m/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/armv7-m/nvicpri.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/chip/chip.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/sdio.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mmcsd.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/ioctl.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/serial/tioctl.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/common/arm_internal.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syscall.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/syscall.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/syscall.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/chip.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_memorymap.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/chip.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32f40xxx_memorymap.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_pinmap.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32f40xxx_pinmap_legacy.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_gpio.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32f40xxx_gpio.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_adc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_adc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_adc_v1.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/analog/adc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/poll.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/poll.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/spi/spi.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/i2c/i2c_master.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_can.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_can.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/can/can.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/list.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/nuttx.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_comp.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_comp.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_dbgmcu.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_dbgmcu.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_dma.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_dma.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_dma_v2.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_dac.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_dac.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_dac_v1.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/analog/dac.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_exti.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_exti.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_flash.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/progmem.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_flash.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_fmc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_fmc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_fsmc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_fsmc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_gpio.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_i2c.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_i2c.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_i2c_v1.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_ltdc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/video/fb.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/nx/nxglib.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/fixedmath.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/nx/nxtypes.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_opamp.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_pwr.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_pwr.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_rcc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32f40xxx_rcc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_rtc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_rtcc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32f40xxx_alarm.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_sdio.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_sdio.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_spi.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_spi.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_i2s.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/audio/i2s.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/audio/audio.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_tim.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_tim.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_tim_v1v2.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_uart.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/serial/serial.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/termios.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32f40xxx_uart.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_wdg.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_wdg.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_lowputc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/stm32_eth.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/arch/arm/src/chip/hardware/stm32_eth.h \
+ board/mystm32f429igt6.h

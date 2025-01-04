@@ -1004,6 +1004,11 @@ void fb_pollnotify(FAR struct fb_vtable_s *vtable);
 
 int fb_register(int display, int plane);
 
+
+int overlay_area(int fb, FAR struct fb_overlayinfo_s *oinfo); //TODO:将英文接口放到了通用组件中，后续需另建文件
+
+int overlay_color(int fb, FAR struct fb_overlayinfo_s *oinfo);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

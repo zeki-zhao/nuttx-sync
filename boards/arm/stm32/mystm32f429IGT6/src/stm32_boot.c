@@ -30,7 +30,7 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "stm32f429i-disco.h"
+#include "mystm32f429igt6.h"
 #include "stm32_ccm.h"
 
 /****************************************************************************

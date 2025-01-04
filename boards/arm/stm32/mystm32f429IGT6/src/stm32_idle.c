@@ -39,7 +39,7 @@
 #include "stm32_rcc.h"
 #include "stm32_exti.h"
 
-#include "stm32f429i-disco.h"
+#include "mystm32f429igt6.h"
 
 /****************************************************************************
  * Pre-processor Definitions

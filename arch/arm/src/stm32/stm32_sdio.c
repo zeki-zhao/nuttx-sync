@@ -1701,6 +1701,7 @@ static sdio_capset_t stm32_capabilities(struct sdio_dev_s *dev)
 static sdio_statset_t stm32_status(struct sdio_dev_s *dev)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  priv->cdstatus = priv->cdstatus | 0x01;
   return priv->cdstatus;
 }
 
@@ -3037,7 +3038,7 @@ struct sdio_dev_s *sdio_initialize(int slotno)
    * If bus is multiplexed then there is a custom bus configuration utility
    * in the scope of the board support package.
    */
-
+syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
 #ifndef CONFIG_SDIO_MUXBUS
   stm32_configgpio(GPIO_SDIO_D0 | SDIO_PULLUP_ENABLE);
 #ifndef CONFIG_STM32_SDIO_WIDTH_D1_ONLY

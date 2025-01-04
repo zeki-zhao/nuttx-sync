@@ -165,8 +165,6 @@ struct fb_vtable_s
                       struct fb_planeinfo_s *pinfo);
   int (*open)( struct fb_vtable_s *vtable);
   int (*close)( struct fb_vtable_s *vtable);
-  int (*updatearea)( struct fb_vtable_s *vtable,
-                    const struct fb_area_s *area);
   int (*getoverlayinfo)( struct fb_vtable_s *vtable, int overlayno,
                         struct fb_overlayinfo_s *oinfo);
   int (*settransp)( struct fb_vtable_s *vtable,
@@ -249,6 +247,8 @@ int up_fbinitialize(int display);
 void up_fbuninitialize(int display);
 void fb_pollnotify( struct fb_vtable_s *vtable);
 int fb_register(int display, int plane);
+int overlay_area(int fb, struct fb_overlayinfo_s *oinfo);
+int overlay_color(int fb, struct fb_overlayinfo_s *oinfo);
 typedef int16_t b8_t;
 typedef uint16_t ub8_t;
 typedef int32_t b16_t;

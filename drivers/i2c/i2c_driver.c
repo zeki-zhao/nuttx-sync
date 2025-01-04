@@ -228,7 +228,6 @@ static int i2cdrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   int ret;
 
   i2cinfo("cmd=%x arg=%08lx\n", cmd, arg);
-  printf("cmd=%x arg=%08lx\n", cmd, arg);
 
   /* Get our private data structure */
 
@@ -263,13 +262,10 @@ static int i2cdrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           /* Get the reference to the i2c_transfer_s structure */
 
           transfer = (FAR struct i2c_transfer_s *)((uintptr_t)arg);
-          printf("hello 20\n");
           DEBUGASSERT(transfer != NULL);
-          printf("hello 21\n");
           /* Perform the transfer */
 
           ret = I2C_TRANSFER(priv->i2c, transfer->msgv, transfer->msgc);
-          printf("hello 22\n");
         }
         break;
 
@@ -388,7 +384,6 @@ int i2c_register(FAR struct i2c_master_s *i2c, int bus)
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
       nxmutex_init(&priv->lock);
 #endif
-
       /* Create the character device name */
 
       snprintf(devname, DEVNAME_FMTLEN, DEVNAME_FMT, bus);

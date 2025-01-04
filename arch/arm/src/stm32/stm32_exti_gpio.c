@@ -250,6 +250,7 @@ static int stm32_exti1510_isr(int irq, void *context, void *arg)
 int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
                        bool event, xcpt_t func, void *arg)
 {
+  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
   struct gpio_callback_s *shared_cbs;
   uint32_t pin = pinset & GPIO_PIN_MASK;
   uint32_t exti = STM32_EXTI_BIT(pin);
@@ -257,6 +258,8 @@ int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
   xcpt_t   handler;
   int      nshared;
   int      i;
+
+  syslog(LOG_DEBUG,"in %s:%d,pin: %d\n",__func__,__LINE__,pin);
 
   /* Select the interrupt handler for this EXTI pin */
 

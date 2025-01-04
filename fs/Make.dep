@@ -28,7 +28,7 @@ fs_initialize.o: fs_initialize.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/clock.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  rpmsgfs/rpmsgfs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
@@ -85,7 +85,7 @@ fs_files.o: inode/fs_files.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/fcntl.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
@@ -132,7 +132,7 @@ fs_foreachinode.o: inode/fs_foreachinode.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
@@ -191,7 +191,7 @@ fs_inode.o: inode/fs_inode.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
@@ -244,7 +244,7 @@ fs_inodeaddref.o: inode/fs_inodeaddref.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
@@ -338,7 +338,7 @@ fs_inodebasename.o: inode/fs_inodebasename.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
@@ -355,7 +355,7 @@ fs_inodefind.o: inode/fs_inodefind.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
@@ -446,7 +446,7 @@ fs_inodefree.o: inode/fs_inodefree.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
@@ -467,7 +467,7 @@ fs_inodegetpath.o: inode/fs_inodegetpath.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/alloca.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
@@ -519,7 +519,7 @@ fs_inoderelease.o: inode/fs_inoderelease.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
@@ -614,7 +614,7 @@ fs_inoderemove.o: inode/fs_inoderemove.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
@@ -669,7 +669,7 @@ fs_inodereserve.o: inode/fs_inodereserve.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
@@ -686,7 +686,7 @@ fs_inodesearch.o: inode/fs_inodesearch.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
@@ -747,7 +747,7 @@ fs_chstat.o: vfs/fs_chstat.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -808,7 +808,7 @@ fs_close.o: vfs/fs_close.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
@@ -864,7 +864,7 @@ fs_dup.o: vfs/fs_dup.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/fcntl.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
@@ -949,14 +949,14 @@ fs_dup2.o: vfs/fs_dup2.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/lib/lib.h
 fs_fcntl.o: vfs/fs_fcntl.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/config.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/fcntl.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/compiler.h \
@@ -1040,7 +1040,7 @@ fs_epoll.o: vfs/fs_epoll.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/alloca.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/clock.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
@@ -1096,7 +1096,7 @@ fs_fchstat.o: vfs/fs_fchstat.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -1158,7 +1158,7 @@ fs_fstat.o: vfs/fs_fstat.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
@@ -1247,7 +1247,7 @@ fs_fstatfs.o: vfs/fs_fstatfs.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
@@ -1307,7 +1307,7 @@ fs_ioctl.o: vfs/fs_ioctl.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
@@ -1362,7 +1362,7 @@ fs_lseek.o: vfs/fs_lseek.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
@@ -1382,7 +1382,7 @@ fs_mkdir.o: vfs/fs_mkdir.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
@@ -1443,7 +1443,7 @@ fs_open.o: vfs/fs_open.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/alloca.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/cancelpt.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
@@ -1502,7 +1502,7 @@ fs_poll.o: vfs/fs_poll.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/clock.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
@@ -1558,7 +1558,7 @@ fs_pread.o: vfs/fs_pread.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/cancelpt.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -1582,7 +1582,7 @@ fs_pwrite.o: vfs/fs_pwrite.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/cancelpt.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -1645,7 +1645,7 @@ fs_read.o: vfs/fs_read.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
@@ -1663,7 +1663,7 @@ fs_rename.o: vfs/fs_rename.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -1722,7 +1722,7 @@ fs_rmdir.o: vfs/fs_rmdir.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -1788,7 +1788,7 @@ fs_select.o: vfs/fs_select.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/kmalloc.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdlib.h \
@@ -1840,7 +1840,7 @@ fs_sendfile.o: vfs/fs_sendfile.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/kmalloc.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdlib.h \
@@ -1934,7 +1934,7 @@ fs_stat.o: vfs/fs_stat.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
@@ -1993,7 +1993,7 @@ fs_statfs.o: vfs/fs_statfs.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
@@ -2012,7 +2012,7 @@ fs_unlink.o: vfs/fs_unlink.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -2105,11 +2105,14 @@ fs_write.o: vfs/fs_write.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
- /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/lib/lib.h
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/lib/lib.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h
 fs_dir.o: vfs/fs_dir.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/config.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
@@ -2120,7 +2123,7 @@ fs_dir.o: vfs/fs_dir.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
@@ -2210,7 +2213,7 @@ fs_fsync.o: vfs/fs_fsync.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
@@ -2242,7 +2245,7 @@ fs_truncate.o: vfs/fs_truncate.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
@@ -2345,7 +2348,7 @@ fs_symlink.o: vfs/fs_symlink.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
@@ -2368,7 +2371,7 @@ fs_readlink.o: vfs/fs_readlink.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -2417,7 +2420,7 @@ fs_fdopen.o: vfs/fs_fdopen.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
@@ -2477,7 +2480,7 @@ fs_registerdriver.o: driver/fs_registerdriver.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
@@ -2531,7 +2534,7 @@ fs_unregisterdriver.o: driver/fs_unregisterdriver.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
@@ -2587,7 +2590,7 @@ fs_registerblockdriver.o: driver/fs_registerblockdriver.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
@@ -2641,7 +2644,7 @@ fs_unregisterblockdriver.o: driver/fs_unregisterblockdriver.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
@@ -2703,7 +2706,7 @@ fs_findblockdriver.o: driver/fs_findblockdriver.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
@@ -2758,7 +2761,7 @@ fs_openblockdriver.o: driver/fs_openblockdriver.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
@@ -2817,7 +2820,7 @@ fs_closeblockdriver.o: driver/fs_closeblockdriver.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
@@ -2881,7 +2884,7 @@ fs_blockpartition.o: driver/fs_blockpartition.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -2940,7 +2943,7 @@ fs_findmtddriver.o: driver/fs_findmtddriver.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
@@ -2995,7 +2998,7 @@ fs_closemtddriver.o: driver/fs_closemtddriver.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
@@ -3039,6 +3042,69 @@ fs_closemtddriver.o: driver/fs_closemtddriver.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/chip/chip.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/lib/lib.h
+fs_blockproxy.o: driver/fs_blockproxy.c \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/config.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/compiler.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdint.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/types.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/stat.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdlib.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/unistd.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/semaphore.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/queue.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/clock.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/lib/lib.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/kmalloc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/mm.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/malloc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/userspace.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/signal.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/pthread.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/arch.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/arch.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/pgalloc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/cache.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/sched.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sched.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/strings.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/string.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stddef.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/alloca.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/addrenv.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/wqueue.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/wdog.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/chip/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/chip.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/stm32f40xxx_irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/armv7-m/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/armv7-m/nvicpri.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/chip/chip.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/fcntl.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/drivers/drivers.h \
+ driver/driver.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/fs/inode/inode.h
 fs_mmap.o: mmap/fs_mmap.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/config.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
@@ -3057,7 +3123,7 @@ fs_mmap.o: mmap/fs_mmap.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/fcntl.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/kmalloc.h \
@@ -3127,7 +3193,7 @@ fs_munmap.o: mmap/fs_munmap.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/mman.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/kmalloc.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdlib.h \
@@ -3222,7 +3288,7 @@ fs_anonmap.o: mmap/fs_anonmap.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
@@ -3243,7 +3309,7 @@ mq_open.o: mqueue/mq_open.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
@@ -3318,7 +3384,7 @@ mq_close.o: mqueue/mq_close.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/kmalloc.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdlib.h \
@@ -3374,7 +3440,7 @@ mq_unlink.o: mqueue/mq_unlink.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
@@ -3447,7 +3513,7 @@ fs_mount.o: mount/fs_mount.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
@@ -3505,7 +3571,7 @@ fs_umount2.o: mount/fs_umount2.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -3558,7 +3624,7 @@ fs_foreachmountpoint.o: mount/fs_foreachmountpoint.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
@@ -3620,7 +3686,7 @@ fs_procfs_mount.o: mount/fs_procfs_mount.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/stat.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
@@ -3694,7 +3760,7 @@ fs_partition.o: partition/fs_partition.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
@@ -3743,6 +3809,252 @@ fs_partition.o: partition/fs_partition.c \
  partition/partition.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/partition.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mtd/mtd.h
+fs_fat32.o: fat/fs_fat32.c \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/config.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/compiler.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdint.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/types.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/stat.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/statfs.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/mount.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/ioctl.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/serial/tioctl.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdlib.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/unistd.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/string.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stddef.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/alloca.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/fcntl.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/kmalloc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/mm.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/malloc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/userspace.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/signal.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/pthread.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/semaphore.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/queue.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/arch.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/arch.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/pgalloc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/cache.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/sched.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sched.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/strings.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/addrenv.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/wqueue.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/clock.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/wdog.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/chip/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/chip.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/stm32f40xxx_irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/armv7-m/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/armv7-m/nvicpri.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/chip/chip.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fat.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/fs/inode/inode.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/lib/lib.h \
+ fat/fs_fat32.h
+fs_fat32dirent.o: fat/fs_fat32dirent.c \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/config.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/param.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/compiler.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdint.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/types.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdlib.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/string.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stddef.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/alloca.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/ctype.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/semaphore.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/queue.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/clock.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fat.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/fs/inode/inode.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/kmalloc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/mm.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/malloc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/userspace.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/signal.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/pthread.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/unistd.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/arch.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/arch.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/pgalloc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/cache.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/sched.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sched.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/strings.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/addrenv.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/wqueue.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/wdog.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/chip/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/chip.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/stm32f40xxx_irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/armv7-m/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/armv7-m/nvicpri.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/chip/chip.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/lib/lib.h \
+ fat/fs_fat32.h
+fs_fat32attrib.o: fat/fs_fat32attrib.c \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/config.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdint.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/compiler.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/types.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/semaphore.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/queue.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/clock.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fat.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/fs/inode/inode.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/kmalloc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdlib.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/mm.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/malloc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/userspace.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/signal.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/pthread.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/unistd.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/arch.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/arch.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/pgalloc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/cache.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/sched.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sched.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/strings.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/string.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stddef.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/alloca.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/addrenv.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/wqueue.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/wdog.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/chip/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/chip.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/stm32f40xxx_irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/armv7-m/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/armv7-m/nvicpri.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/chip/chip.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/lib/lib.h \
+ fat/fs_fat32.h
+fs_fat32util.o: fat/fs_fat32util.c \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/config.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/compiler.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdint.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/types.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/limits.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/limits.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/inttypes.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stddef.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdlib.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/string.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/alloca.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/assert.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/kmalloc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/mm.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/malloc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/userspace.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/signal.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/pthread.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/unistd.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/semaphore.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/queue.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/arch.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/arch.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/pgalloc.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/cache.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/sched.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sched.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/strings.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/addrenv.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/wqueue.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/clock.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/wdog.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/chip/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/chip.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/stm32/stm32f40xxx_irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/armv7-m/irq.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/armv7-m/nvicpri.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/chip/chip.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/semaphore.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/map.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mm/gran.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/net/net.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fat.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/fs/inode/inode.h \
+ /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/lib/lib.h \
+ fat/fs_fat32.h
 fs_procfs.o: procfs/fs_procfs.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/config.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/types.h \
@@ -3757,7 +4069,7 @@ fs_procfs.o: procfs/fs_procfs.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -3822,7 +4134,7 @@ fs_procfscpuinfo.o: procfs/fs_procfscpuinfo.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/errno.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/debug.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/syslog.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/uio.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/arch.h \
@@ -3878,7 +4190,7 @@ fs_procfscpuload.o: procfs/fs_procfscpuload.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -3940,7 +4252,7 @@ fs_procfscritmon.o: procfs/fs_procfscritmon.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -4001,7 +4313,7 @@ fs_procfsiobinfo.o: procfs/fs_procfsiobinfo.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -4063,7 +4375,7 @@ fs_procfsmeminfo.o: procfs/fs_procfsmeminfo.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -4126,7 +4438,7 @@ fs_procfsproc.o: procfs/fs_procfsproc.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -4193,7 +4505,7 @@ fs_procfstcbinfo.o: procfs/fs_procfstcbinfo.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/sys/stat.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
@@ -4255,7 +4567,7 @@ fs_procfsuptime.o: procfs/fs_procfsuptime.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \
@@ -4314,7 +4626,7 @@ fs_procfsutil.o: procfs/fs_procfsutil.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/types.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/arch/inttypes.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/time.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
@@ -4375,7 +4687,7 @@ fs_procfsversion.o: procfs/fs_procfsversion.c \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/unistd.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdbool.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/stdio.h \
- /usr/lib/gcc/arm-none-eabi/6.3.1/include/stdarg.h \
+ /usr/lib/gcc/arm-none-eabi/9.2.1/include/stdarg.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/fs/fs.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/dirent.h \
  /home/zeki/workspace/NuttX/nuttxspace/Nuttx_Stm32F429/nuttx/include/nuttx/mutex.h \

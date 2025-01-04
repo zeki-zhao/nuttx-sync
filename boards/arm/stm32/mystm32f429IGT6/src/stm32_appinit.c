@@ -30,7 +30,7 @@
 
 #include <debug.h>
 
-#include "stm32f429i-disco.h"
+#include "mystm32f429igt6.h"
 
 #ifdef CONFIG_BOARDCTL
 

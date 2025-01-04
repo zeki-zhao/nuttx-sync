@@ -40,6 +40,7 @@
 
 #include "inode/inode.h"
 
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -254,6 +255,7 @@ void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset)
       fds = afds[i];
       if (fds != NULL)
         {
+          // syslog(LOG_DEBUG,"In %s: %d\n",__func__,__LINE__);
           /* The error event must be set in fds->revents */
 
           fds->revents |= eventset & (fds->events | POLLERR | POLLHUP);
@@ -266,6 +268,7 @@ void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset)
 
           if (fds->revents != 0 && fds->cb != NULL)
             {
+              // syslog(LOG_DEBUG,"In %s: %d\n",__func__,__LINE__);
               finfo("Report events: %08" PRIx32 "\n", fds->revents);
               fds->cb(fds);
             }
@@ -510,6 +513,7 @@ out_with_cancelpt:
     }
   else
     {
+      printf("in %s:%d\n",__func__,__LINE__);
       return count;
     }
 }

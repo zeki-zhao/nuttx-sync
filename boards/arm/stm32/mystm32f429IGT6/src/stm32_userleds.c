@@ -34,7 +34,7 @@
 #include "chip.h"
 #include "arm_internal.h"
 #include "stm32.h"
-#include "stm32f429i-disco.h"
+#include "mystm32f429igt6.h"
 
 #ifndef CONFIG_ARCH_LEDS
 

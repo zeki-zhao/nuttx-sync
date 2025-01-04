@@ -63,9 +63,6 @@
 #  include "stm32_usbhost.h"
 #endif
 
-#include "stm32.h"
-#include "stm32f429i-disco.h"
-
 #ifdef CONFIG_INPUT_BUTTONS_LOWER
 #  include <nuttx/input/buttons.h>
 #endif
@@ -75,6 +72,9 @@
 #endif
 
 #include <nuttx/simulative_i2c/simulative_i2c.h>
+
+#include "stm32.h"
+#include "mystm32f429igt6.h"
 
 /****************************************************************************
  * Public Functions
@@ -96,6 +96,8 @@
 
 int stm32_bringup(void)
 {
+
+  int ret;
 //zeki
 #if defined (CONFIG_MY_LED)
     board_myled_initialize();
@@ -119,7 +121,9 @@ int stm32_bringup(void)
 #if defined(CONFIG_MTD_PARTITION_NAMES)
   const char *partname = CONFIG_STM32F429I_DISCO_FLASH_PART_NAMES;
 #endif
-  int ret;
+
+syslog(LOG_DEBUG,
+      "in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);  
 
 #ifdef HAVE_PROC
   /* mount the proc filesystem */
@@ -313,9 +317,14 @@ int stm32_bringup(void)
 #ifdef CONFIG_VIDEO_FB
   /* Initialize and register the framebuffer driver */
 
+  printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
+
   ret = fb_register(0, 0);
+
+  printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
   if (ret < 0)
     {
+      printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
       syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
     }
 #endif
@@ -414,7 +423,31 @@ int stm32_bringup(void)
 #endif
 
 
+#ifdef HAVE_SDIO
+  /* Initialize the SDIO block driver */
 
-  UNUSED(ret);
+  ret = stm32_sdio_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
+      ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+      return ret;
+    }
+#endif
+#ifdef CONFIG_MMCSD_SPI
+  /* Initialize the MMC/SD SPI driver (SPI2 is used) */
+
+  ret = stm32_mmcsd_initialize(2, CONFIG_NSH_MMCSDMINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n",
+             CONFIG_NSH_MMCSDMINOR, ret);
+    }
+#endif
+
+
+
+
+//   UNUSED(ret);
   return OK;
 }

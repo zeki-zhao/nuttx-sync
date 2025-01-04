@@ -446,6 +446,7 @@ int open(FAR const char *path, int oflags, ...)
 
   if (fd < 0)
     {
+      syslog(7,"in %s:%d\n",__func__,__LINE__);
       set_errno(-fd);
       fd = ERROR;
     }

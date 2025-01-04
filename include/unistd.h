@@ -326,6 +326,7 @@ int     fsync(int fd);
 off_t   lseek(int fd, off_t offset, int whence);
 ssize_t read(int fd, FAR void *buf, size_t nbytes);
 ssize_t write(int fd, FAR const void *buf, size_t nbytes);
+ssize_t b_write(int fd, FAR const void *buf, size_t nbytes);
 ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset);
 ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset);
 int     ftruncate(int fd, off_t length);

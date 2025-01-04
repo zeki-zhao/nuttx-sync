@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <errno.h>
 #include "stm32.h"
-#include "stm32f429i-disco.h"
+#include "mystm32f429igt6.h"
 #include <nuttx/myled/myled.h>
 #include <arch/board/board.h>
 

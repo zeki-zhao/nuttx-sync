@@ -33,7 +33,7 @@
 #include "chip.h"
 #include "arm_internal.h"
 #include "stm32_pwm.h"
-#include "stm32f429i-disco.h"
+#include "mystm32f429igt6.h"
 
 #include <arch/board/board.h>
 
