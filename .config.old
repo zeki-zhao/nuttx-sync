@@ -24,7 +24,7 @@ CONFIG_HOST_LINUX=y
 # Build Configuration
 #
 CONFIG_APPS_DIR="../apps"
-CONFIG_BASE_DEFCONFIG="mystm32f429IGT6:myconfig-dirty-dirty-dirty-dirty-dirty-dirty-dirty"
+CONFIG_BASE_DEFCONFIG="mystm32f429IGT6:myconfig-dirty-dirty-dirty"
 CONFIG_BUILD_FLAT=y
 # CONFIG_BUILD_2PASS is not set
 
@@ -2487,3 +2487,4 @@ CONFIG_SYSTEM_SYSTEM_PRIORITY=100
 # CONFIG_IEEE802154_I8SAK is not set
 # CONFIG_IEEE802154_LIBMAC is not set
 # CONFIG_IEEE802154_LIBUTILS is not set
+CONFIG_BASE_DEFCONFIG="mystm32f429IGT6:myconfig-dirty-dirty-dirty"

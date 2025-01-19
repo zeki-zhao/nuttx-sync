@@ -356,6 +356,10 @@ void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
   char ch;
   int ret;
 
+  // printf("in function %s, line %d\n",__FUNCTION__,__LINE__);
+  // printf("buffer = %s\n",buffer);
+  // printf("buflen = %d\n",buflen);
+
   ginfo("buflen=%" PRId8 "\n", buflen);
   DEBUGASSERT(handle);
 
@@ -404,7 +408,7 @@ void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
           /* Yes... Return an indication that nothing was saved in
            * the buffer.
            */
-
+          // printf("ERROR: Keyboard data overrun\n");
           gerr("ERROR: Keyboard data overrun\n");
           break;
         }

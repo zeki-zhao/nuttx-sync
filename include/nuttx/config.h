@@ -12,7 +12,7 @@
 #define CONFIG_ALLOW_BSD_COMPONENTS 1
 #define CONFIG_HOST_LINUX 1
 #define CONFIG_APPS_DIR "../apps"
-#define CONFIG_BASE_DEFCONFIG "mystm32f429IGT6:myconfig-dirty"
+#define CONFIG_BASE_DEFCONFIG "mystm32f429IGT6:myconfig-dirty-dirty-dirty-dirty-dirty-dirty-dirty"
 #define CONFIG_BUILD_FLAT 1
 #define CONFIG_INTELHEX_BINARY 1
 #define CONFIG_RAW_BINARY 1
@@ -527,7 +527,6 @@
 #define CONFIG_SYSTEM_SYSTEM 1
 #define CONFIG_SYSTEM_SYSTEM_STACKSIZE 2048
 #define CONFIG_SYSTEM_SYSTEM_PRIORITY 100
-#define CONFIG_BASE_DEFCONFIG "mystm32f429IGT6:myconfig-dirty"
 
 /* Sanity Checks *****************************************/
 
