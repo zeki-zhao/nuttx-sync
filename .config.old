@@ -24,7 +24,7 @@ CONFIG_HOST_LINUX=y
 # Build Configuration
 #
 CONFIG_APPS_DIR="../apps"
-CONFIG_BASE_DEFCONFIG="mystm32f429IGT6:myconfig-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty"
+CONFIG_BASE_DEFCONFIG="mystm32f429IGT6:myconfig-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty"
 CONFIG_BUILD_FLAT=y
 # CONFIG_BUILD_2PASS is not set
 
@@ -2191,7 +2191,7 @@ CONFIG_GAMES_SNAKES_TOOLBAR_HEIGHT=16
 #
 # NX Server Options
 #
-CONFIG_GAMES_SNAKES_STACKSIZE=4096
+CONFIG_GAMES_SNAKES_STACKSIZE=12288
 CONFIG_GAMES_SNAKES_CLIENTPRIO=100
 CONFIG_GAMES_SNAKES_SERVERPRIO=120
 CONFIG_GAMES_SNAKES_LISTENERPRIO=80

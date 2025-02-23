@@ -12,7 +12,7 @@
 #define CONFIG_ALLOW_BSD_COMPONENTS 1
 #define CONFIG_HOST_LINUX 1
 #define CONFIG_APPS_DIR "../apps"
-#define CONFIG_BASE_DEFCONFIG "mystm32f429IGT6:myconfig-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty"
+#define CONFIG_BASE_DEFCONFIG "mystm32f429IGT6:myconfig-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty-dirty"
 #define CONFIG_BUILD_FLAT 1
 #define CONFIG_INTELHEX_BINARY 1
 #define CONFIG_RAW_BINARY 1
