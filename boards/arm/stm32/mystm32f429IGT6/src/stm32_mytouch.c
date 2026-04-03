@@ -248,27 +248,4 @@ void board_touch_initialize(void)
     // syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
 }
 
-void stm32_i2c_register(int bus)
-{
-    // struct i2c_master_s *i2c;
-    // int ret;
-    // syslog(LOG_DEBUG,"in stm32_i2c_register\n");
-    // i2c = stm32_i2cbus_initialize(2);
-    // if (i2c == NULL)
-    // {
-    //     syslog(LOG_DEBUG,"in stm32_i2c_register 198\n");
-    //     _err("ERROR: Failed to get I2C%d interface\n", bus);
-    // }
-    // else
-    // {
-    //     ret = i2c_register(i2c, bus);
-    //     if (ret < 0)
-    //     {
-    //         syslog(LOG_DEBUG,"in stm32_i2c_register 206\n");
-    //         _err("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
-    //         stm32_i2cbus_uninitialize(i2c);
-    //     }
-    // }
-}
-
 #endif

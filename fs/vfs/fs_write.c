@@ -114,8 +114,7 @@ ssize_t file_bwrite(FAR struct file *filep, FAR const void *buf,
   //   }
 
   /* Yes, then let the driver perform the write */
-  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
-  return inode->u.i_bops->write(filep, buf, 0,nbytes);
+  return inode->u.i_bops->write(inode, buf, 0,nbytes);
 }
 
 /****************************************************************************

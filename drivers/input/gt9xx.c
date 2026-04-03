@@ -104,7 +104,7 @@ struct gt9xx_dev_s
 static int gt9xx_open(FAR struct file *filep);
 static int gt9xx_close(FAR struct file *filep);
 static ssize_t gt9xx_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
-static ssize_t gt9xx_write(FAR struct file *filep, FAR char *buffer, size_t buflen);
+static ssize_t gt9xx_write(FAR struct file *filep, FAR const char *buffer,size_t buflen);
 static int gt9xx_poll(FAR struct file *filep, FAR struct pollfd *fds,
                       bool setup);
 
@@ -579,10 +579,8 @@ static ssize_t gt9xx_read(FAR struct file *filep, FAR char *buffer,
 }
 
 
-static ssize_t gt9xx_write(FAR struct file *filep, FAR char *buffer,
-                          size_t buflen)
+static ssize_t gt9xx_write(FAR struct file *filep, FAR const char *buffer,size_t buflen)
 {
-    printf("helo,in wirte\n");
     return 0;
 }
 /****************************************************************************

@@ -71,9 +71,6 @@
 #include "stm32_l3gd20.h"
 #endif
 
-#include <nuttx/simulative_i2c/simulative_i2c.h>
-
-#include "stm32.h"
 #include "mystm32f429igt6.h"
 
 /****************************************************************************
@@ -96,15 +93,10 @@
 
 int stm32_bringup(void)
 {
-
   int ret;
-//zeki
+
 #if defined (CONFIG_MY_LED)
     board_myled_initialize();
-#endif
-
-#ifdef CONFIG_STM32_I2C2
-    stm32_i2c_register(2);
 #endif
 
 #if defined (CONFIG_MY_TOUCH)

@@ -1,0 +1,15 @@
+# build output
+build/
+*.o
+*.d
+*.elf
+*.bin
+*.map
+
+# toolchain
+compile_commands.json
+
+# editor
+.vscode/
+.idea/
+.cache/

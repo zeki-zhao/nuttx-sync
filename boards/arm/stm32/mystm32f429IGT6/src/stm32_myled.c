@@ -48,6 +48,7 @@ static bool get_myled_state(int lednum)
     default:
     break;
     }
+    return true;
 }
 
 static void set_myled_param(int lednum, bool ledon)
