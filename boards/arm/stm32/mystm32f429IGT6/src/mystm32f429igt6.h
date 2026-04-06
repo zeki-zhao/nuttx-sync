@@ -47,7 +47,7 @@
 #define HAVE_USBDEV     1
 #define HAVE_USBHOST    1
 #define HAVE_USBMONITOR 1
-#define HAVE_SDIO       0
+// #define HAVE_SDIO       1
 
 #undef  SDIO_MINOR     /* Any minor number, default 0 */
 #define SDIO_SLOTNO 0  /* Only one slot */

@@ -82,8 +82,7 @@ void board_myled_initialize(void)
     stm32_configgpio(BLING_LED_G);
     stm32_configgpio(BLING_LED_B);
 
-     
-     myled_register("/dev/myled" , &myled_lower);
+    myled_register("/dev/myled" , &myled_lower);
 }
 
 #endif
