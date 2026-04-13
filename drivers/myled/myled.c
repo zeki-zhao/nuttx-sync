@@ -100,7 +100,6 @@ int myled_register(FAR const char *path, FAR void *lower)
     DEBUGASSERT(path != NULL);
     DEBUGASSERT(lower != NULL);
 
-    syslog(LOG_DEBUG,"in myled_register\n");
     /* Register the myled character driver */
     ret = register_driver(path, &myled_fops, 0666, lower);
     if (ret < 0){

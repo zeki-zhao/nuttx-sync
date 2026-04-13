@@ -93,7 +93,9 @@
 
 int stm32_bringup(void)
 {
-  int ret;
+    int ret;
+
+    printf("Hello,Zeki\nWelcome to Nuttx of STM32F4IGT6\n");
 
 #if defined (CONFIG_MY_LED)
     board_myled_initialize();
@@ -114,18 +116,15 @@ int stm32_bringup(void)
   const char *partname = CONFIG_STM32F429I_DISCO_FLASH_PART_NAMES;
 #endif
 
-syslog(LOG_DEBUG,
-      "in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);  
-
 #ifdef HAVE_PROC
   /* mount the proc filesystem */
 
-  ret = nx_mount(NULL, CONFIG_NSH_PROC_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0)
+    ret = nx_mount(NULL, CONFIG_NSH_PROC_MOUNTPOINT, "procfs", 0, NULL);
+    if (ret < 0)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to mount the PROC filesystem: %d\n", ret);
-      return ret;
+        syslog(LOG_ERR,
+                "ERROR: Failed to mount the PROC filesystem: %d\n", ret);
+        return ret;
     }
 #endif
 
@@ -309,14 +308,9 @@ syslog(LOG_DEBUG,
 #ifdef CONFIG_VIDEO_FB
   /* Initialize and register the framebuffer driver */
 
-  printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
-
   ret = fb_register(0, 0);
-
-  printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
   if (ret < 0)
     {
-      printf("in %s,%s,%d\n",__FILE__,__FUNCTION__,__LINE__);
       syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
     }
 #endif

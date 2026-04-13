@@ -207,7 +207,6 @@ static int my_gt9xx_set_power(const struct gt9xx_board_s *state,
 
 void board_touch_initialize(void)
 {
-
     struct i2c_master_s *i2c;
     const char devpath[] = "/dev/mytouch";
     int ret;
