@@ -3132,8 +3132,14 @@ void stm32_ltdcuninitialize(void)
 #ifdef CONFIG_STM32_LCD_BACKLIGHT
 void stm32_backlight(bool blon)
 {
-  /* Set default backlight level CONFIG_STM32_LTDC_DEFBACKLIGHT */
-
-  lcderr("ERROR: Not supported\n");
+    /* Set default backlight level CONFIG_STM32_LTDC_DEFBACKLIGHT */
+    if(blon == true){
+        stm32_configgpio(GPIO_LTDC_DISP_ON);
+        stm32_configgpio(GPIO_LTDC_BL_ON);
+    }else{
+        stm32_configgpio(GPIO_LTDC_DISP_OFF);
+        stm32_configgpio(GPIO_LTDC_BL_OFF);
+    }
+    
 }
 #endif

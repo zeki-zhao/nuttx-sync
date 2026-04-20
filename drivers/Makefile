@@ -46,6 +46,7 @@ include input/Make.defs
 include ioexpander/Make.defs
 include lcd/Make.defs
 include leds/Make.defs
+include myled/Make.defs
 include loop/Make.defs
 include misc/Make.defs
 include mmcsd/Make.defs

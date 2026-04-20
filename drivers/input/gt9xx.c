@@ -105,8 +105,8 @@ struct gt9xx_dev_s
 
 static int gt9xx_open(FAR struct file *filep);
 static int gt9xx_close(FAR struct file *filep);
-static ssize_t gt9xx_read(FAR struct file *filep, FAR char *buffer,
-                          size_t buflen);
+static ssize_t gt9xx_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
+static ssize_t gt9xx_write(FAR struct file *filep, FAR const char *buffer,size_t buflen);
 static int gt9xx_poll(FAR struct file *filep, FAR struct pollfd *fds,
                       bool setup);
 
@@ -121,7 +121,7 @@ static const struct file_operations g_gt9xx_fileops =
   gt9xx_open,   /* open */
   gt9xx_close,  /* close */
   gt9xx_read,   /* read */
-  NULL,         /* write */
+  gt9xx_write,  /* write */
   NULL,         /* seek */
   NULL,         /* ioctl */
   NULL,         /* truncate */
@@ -583,6 +583,11 @@ static ssize_t gt9xx_read(FAR struct file *filep, FAR char *buffer,
   return (ret < 0) ? ret : outlen;
 }
 
+
+static ssize_t gt9xx_write(FAR struct file *filep, FAR const char *buffer,size_t buflen)
+{
+    return 0;
+}
 /****************************************************************************
  * Name: gt9xx_open
  *
