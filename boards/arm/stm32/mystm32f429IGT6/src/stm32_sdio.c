@@ -29,10 +29,11 @@
 #include <debug.h>
 #include <errno.h>
 
+#include "stm32.h"
+
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
-#include "stm32.h"
 #include "mystm32f429igt6.h"
 
 #ifdef HAVE_SDIO
@@ -76,59 +77,53 @@ static bool g_sd_inserted;
 
 int stm32_sdio_initialize(void)
 {
-  int ret;
+    int ret;
 
 #ifdef HAVE_NCD
-  /* Configure the card detect GPIO */
+    /* Configure the card detect GPIO */
 
-  stm32_configgpio(GPIO_SDIO_NCD);
+    stm32_configgpio(GPIO_SDIO_NCD);
 
-  /* Register an interrupt handler for the card detect pin */
+    /* Register an interrupt handler for the card detect pin */
 
-  stm32_gpiosetevent(GPIO_SDIO_NCD, true, true, true,
-                     stm32_ncd_interrupt, NULL);
+    stm32_gpiosetevent(GPIO_SDIO_NCD, true, true, true,
+                        stm32_ncd_interrupt, NULL);
 #endif
 
-  /* Mount the SDIO-based MMC/SD block driver */
+    /* Mount the SDIO-based MMC/SD block driver */
 
-  /* First, get an instance of the SDIO interface */
-  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
-  finfo("Initializing SDIO slot %d\n", SDIO_SLOTNO);
+    /* First, get an instance of the SDIO interface */
+    finfo("Initializing SDIO slot %d\n", SDIO_SLOTNO);
 
-  g_sdio_dev = sdio_initialize(SDIO_SLOTNO);
-  if (!g_sdio_dev)
+    g_sdio_dev = sdio_initialize(SDIO_SLOTNO);
+    if (!g_sdio_dev)
     {
-      syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
-      ferr("ERROR: Failed to initialize SDIO slot %d\n", SDIO_SLOTNO);
-      return -ENODEV;
+        syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
+        ferr("ERROR: Failed to initialize SDIO slot %d\n", SDIO_SLOTNO);
+        return -ENODEV;
     }
 
-  /* Now bind the SDIO interface to the MMC/SD driver */
+    /* Now bind the SDIO interface to the MMC/SD driver */
 
-  finfo("Bind SDIO to the MMC/SD driver, minor=%d\n", SDIO_MINOR);
-  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
-  ret = mmcsd_slotinitialize(SDIO_MINOR, g_sdio_dev);
-  if (ret != OK)
+    finfo("Bind SDIO to the MMC/SD driver, minor=%d\n", SDIO_MINOR);
+    ret = mmcsd_slotinitialize(SDIO_MINOR, g_sdio_dev);
+    if (ret != OK)
     {
-      syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
-      ferr("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
-      return ret;
+        ferr("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+        return ret;
     }
-
-  finfo("Successfully bound SDIO to the MMC/SD driver\n");
+    finfo("Successfully bound SDIO to the MMC/SD driver\n");
 
 #ifdef HAVE_NCD
   /* Use SD card detect pin to check if a card is g_sd_inserted */
 
-  g_sd_inserted = !stm32_gpioread(GPIO_SDIO_NCD);
-  finfo("Card detect : %d\n", g_sd_inserted);
+    g_sd_inserted = !stm32_gpioread(GPIO_SDIO_NCD);
+    finfo("Card detect : %d\n", g_sd_inserted);
 
-  sdio_mediachange(g_sdio_dev, g_sd_inserted);
+    sdio_mediachange(g_sdio_dev, g_sd_inserted);
 #else
-  /* Assume that the SD card is inserted.  What choice do we have? */
-  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
-  sdio_mediachange(g_sdio_dev, true);
-  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
+    /* Assume that the SD card is inserted.  What choice do we have? */
+    sdio_mediachange(g_sdio_dev, true);
 #endif
 
   return OK;
