@@ -59,13 +59,13 @@ static int myled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     FAR struct inode *inode    = filep->f_inode;
     FAR struct myled_lower_s *lower = inode->i_private;
     FAR struct myled_param_s param = {0};
-    param.num = arg;
+    param.num = arg; //灯序号
     int ret = 1;
 
     switch (cmd)
     {
         case SLEDIOC_SET:{
-            if(lower->getio(param.num) == 1){
+            if(lower->getio(param.num) == 1){ //切换LED灯状态
                 lower->setio((int)param.num,(bool)0);
             }else{
                 lower->setio((int)param.num,(bool)1);
