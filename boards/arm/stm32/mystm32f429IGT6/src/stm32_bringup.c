@@ -33,13 +33,12 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 
+#include "mystm32f429igt6.h"
+
 #ifdef CONFIG_STM32_SPI4
 #  include <nuttx/mmcsd.h>
 #endif
 
-#ifdef CONFIG_MTD_SST25XX
-#  include <nuttx/mtd/mtd.h>
-#endif
 
 #ifdef CONFIG_VIDEO_FB
 #  include <nuttx/video/fb.h>
@@ -47,16 +46,6 @@
 
 #ifdef CONFIG_USBMONITOR
 #  include <nuttx/usb/usbmonitor.h>
-#endif
-
-#ifndef CONFIG_STM32F429I_DISCO_FLASH_MINOR
-#define CONFIG_STM32F429I_DISCO_FLASH_MINOR 0
-#endif
-
-#ifdef CONFIG_STM32F429I_DISCO_FLASH_CONFIG_PART
-#ifdef CONFIG_PLATFORM_CONFIGDATA
-#  include <nuttx/mtd/configdata.h>
-#endif
 #endif
 
 #ifdef CONFIG_STM32_OTGHS
@@ -67,11 +56,6 @@
 #  include <nuttx/input/buttons.h>
 #endif
 
-#ifdef CONFIG_SENSORS_L3GD20
-#include "stm32_l3gd20.h"
-#endif
-
-#include "mystm32f429igt6.h"
 
 /****************************************************************************
  * Public Functions
@@ -95,7 +79,7 @@ int stm32_bringup(void)
 {
     int ret;
 
-    printf("Hello,Zeki\nWelcome to Nuttx of STM32F4IGT6\n");
+    printf(COLOR_GREEN "Hello,Zeki\nWelcome to Nuttx of STM32F429IGT6" COLOR_RESET);
 
 #if defined (CONFIG_MY_LED)
     board_myled_initialize();
@@ -412,8 +396,8 @@ int stm32_bringup(void)
 #ifdef HAVE_SDIO
   /* Initialize the SDIO block driver */
 
-  ret = stm32_sdio_initialize();
-  if (ret != OK)
+    ret = stm32_sdio_initialize();
+    if (ret != OK)
     {
       syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
       ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);

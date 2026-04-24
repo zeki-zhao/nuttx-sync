@@ -29,9 +29,6 @@
 #include <nuttx/compiler.h>
 #include <stdint.h>
 
-#ifdef CONFIG_STM32F429I_DISCO_ILI9341
-#include <nuttx/lcd/ili9341.h>
-#endif
 
 #include <arch/stm32/chip.h>
 
@@ -43,11 +40,18 @@
 
 /* Configuration ************************************************************/
 
-#define HAVE_PROC       1
-#define HAVE_USBDEV     1
-#define HAVE_USBHOST    1
-#define HAVE_USBMONITOR 1
-// #define HAVE_SDIO       1
+/* Color definitions for console output */
+#define COLOR_RED   "\033[31m"
+#define COLOR_GREEN "\033[32m"
+#define COLOR_YELLOW "\033[33m"
+#define COLOR_RESET "\033[0m\n"
+
+
+#define HAVE_PROC       
+#define HAVE_USBDEV     
+#define HAVE_USBHOST    
+#define HAVE_USBMONITOR 
+#define HAVE_SDIO
 
 #undef  SDIO_MINOR     /* Any minor number, default 0 */
 #define SDIO_SLOTNO 0  /* Only one slot */
