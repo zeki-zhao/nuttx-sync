@@ -80,15 +80,15 @@ CSRCS += stm32_highpri.c
 endif
 
 ifeq ($(CONFIG_MY_LED),y)
-	CSRCS += stm32_myled.c
+CSRCS += stm32_myled.c
 endif
 
 ifeq ($(CONFIG_MY_TOUCH),y)
-	CSRCS += stm32_mytouch.c
+CSRCS += stm32_mytouch.c
 endif
 
 ifeq ($(CONFIG_STM32_SDIO),y)
-	CSRCS += stm32_sdio.c
+CSRCS += stm32_sdio.c
 endif
 
 DEPPATH += --dep-path board

@@ -4706,7 +4706,7 @@ if ARCH_BOARD_STM32F4_DISCOVERY
 source "boards/arm/stm32/stm32f4discovery/Kconfig"
 endif
 if ARCH_BOARD_MYSTM32F429IGT6
-source "boards/arm/stm32/mystm32f429IGT6/Kconfig"
+source "boards/arm/stm32/mystm32f429igt6/Kconfig"
 endif
 if ARCH_BOARD_STM32L_DISCOVERY
 source "boards/arm/stm32/stm32ldiscovery/Kconfig"

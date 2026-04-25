@@ -20,7 +20,10 @@
 
 # Don't build anything if there is no myled support
 
-ifeq ($(CONFIG_MY_LED) ,y)
-CSRCS  += myled.c
-endif
+CSRCS += myled.c
+
+# 告诉“依赖系统扫描哪个目录”
+DEPPATH += --dep-path myled 
+# 告诉“去哪个目录找源码”
+VPATH += :myled
 
