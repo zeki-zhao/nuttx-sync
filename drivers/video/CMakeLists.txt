@@ -34,6 +34,16 @@ if(CONFIG_DRIVERS_VIDEO)
     list(APPEND SRCS v4l2_core.c video_framebuff.c v4l2_cap.c v4l2_m2m.c)
   endif()
 
+  if(CONFIG_VIDEO_FB_SPLASHSCREEN)
+    if(CONFIG_VIDEO_FB_SPLASHSCREEN_NXLOGO_320)
+      list(APPEND SRCS nxlogo320.c)
+    elseif(CONFIG_VIDEO_FB_SPLASHSCREEN_NXLOGO_160)
+      list(APPEND SRCS nxlogo160.c)
+    else()
+      list(APPEND SRCS nxlogo80.c)
+    endif()
+  endif()
+
   # These video drivers depend on I2C support
 
   if(CONFIG_I2C)
