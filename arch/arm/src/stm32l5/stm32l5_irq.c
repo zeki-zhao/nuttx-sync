@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32l5/stm32l5_irq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,8 +28,8 @@
 
 #include <stdint.h>
 #include <assert.h>
-#include <debug.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/irq.h>
@@ -77,30 +79,34 @@ static void stm32l5_dumpnvic(const char *msg, int irq)
   flags = enter_critical_section();
 
   irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
-  irqinfo("  INTCTRL:    %08x VECTAB:  %08x\n",
+  irqinfo("  INTCTRL:    %08" PRIx32 " VECTAB:  %08" PRIx32 "\n",
           getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
-  irqinfo("  IRQ ENABLE: %08x %08x %08x\n",
+  irqinfo("  IRQ ENABLE: %08" PRIx32 " %08" PRIx32 " %08" PRIx32 "\n",
           getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE),
           getreg32(NVIC_IRQ64_95_ENABLE));
-  irqinfo("  SYSH_PRIO:  %08x %08x %08x\n",
+  irqinfo("  SYSH_PRIO:  %08" PRIx32 " %08" PRIx32 " %08" PRIx32 "\n",
           getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
           getreg32(NVIC_SYSH12_15_PRIORITY));
-  irqinfo("  IRQ PRIO:   %08x %08x %08x %08x\n",
+  irqinfo("  IRQ PRIO:   %08" PRIx32 " %08" PRIx32
+          " %08" PRIx32 " %08" PRIx32 "\n",
           getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
           getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
-  irqinfo("              %08x %08x %08x %08x\n",
+  irqinfo("              %08" PRIx32 " %08" PRIx32
+          " %08" PRIx32 " %08" PRIx32 "\n",
           getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
           getreg32(NVIC_IRQ24_27_PRIORITY),
           getreg32(NVIC_IRQ28_31_PRIORITY));
-  irqinfo("              %08x %08x %08x %08x\n",
+  irqinfo("              %08" PRIx32 " %08" PRIx32
+          " %08" PRIx32 " %08" PRIx32 "\n",
           getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
           getreg32(NVIC_IRQ40_43_PRIORITY),
           getreg32(NVIC_IRQ44_47_PRIORITY));
-  irqinfo("              %08x %08x %08x %08x\n",
+  irqinfo("              %08" PRIx32 " %08" PRIx32
+          " %08" PRIx32 " %08" PRIx32 "\n",
           getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
           getreg32(NVIC_IRQ56_59_PRIORITY),
           getreg32(NVIC_IRQ60_63_PRIORITY));
-  irqinfo("              %08x\n",
+  irqinfo("              %08" PRIx32 "\n",
           getreg32(NVIC_IRQ64_67_PRIORITY));
 
   leave_critical_section(flags);
@@ -110,8 +116,7 @@ static void stm32l5_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: stm32l5_nmi, stm32l5_pendsv,
- *       stm32l5_dbgmonitor, stm32l5_pendsv, stm32l5_reserved
+ * Name: stm32l5_nmi, stm32l5_pendsv, stm32l5_pendsv, stm32l5_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -137,14 +142,6 @@ static int stm32l5_pendsv(int irq, void *context, void *arg)
   return 0;
 }
 
-static int stm32l5_dbgmonitor(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Debug Monitor received\n");
-  PANIC();
-  return 0;
-}
-
 static int stm32l5_reserved(int irq, void *context, void *arg)
 {
   up_irq_save();
@@ -163,7 +160,6 @@ static int stm32l5_reserved(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV8M_USEBASEPRI
 static inline void stm32l5_prioritize_syscall(int priority)
 {
   uint32_t regval;
@@ -175,7 +171,6 @@ static inline void stm32l5_prioritize_syscall(int priority)
   regval |= (priority << NVIC_SYSH_PRIORITY_PR11_SHIFT);
   putreg32(regval, NVIC_SYSH8_11_PRIORITY);
 }
-#endif
 
 /****************************************************************************
  * Name: stm32l5_irqinfo
@@ -313,9 +308,8 @@ void up_irqinitialize(void)
   /* up_prioritize_irq(STM32L5_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 
 #endif
-#ifdef CONFIG_ARMV8M_USEBASEPRI
+
   stm32l5_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
-#endif
 
   /* If the MPU is enabled, then attach and enable the Memory Management
    * Fault handler.
@@ -336,7 +330,8 @@ void up_irqinitialize(void)
   irq_attach(STM32L5_IRQ_BUSFAULT, arm_busfault, NULL);
   irq_attach(STM32L5_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(STM32L5_IRQ_PENDSV, stm32l5_pendsv, NULL);
-  irq_attach(STM32L5_IRQ_DBGMONITOR, stm32l5_dbgmonitor, NULL);
+  arm_enable_dbgmonitor();
+  irq_attach(STM32L5_IRQ_DBGMONITOR, arm_dbgmonitor, NULL);
   irq_attach(STM32L5_IRQ_RESERVED, stm32l5_reserved, NULL);
 #endif
 
@@ -346,6 +341,7 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
+  arm_color_intstack();
   up_irq_enable();
 #endif
 }

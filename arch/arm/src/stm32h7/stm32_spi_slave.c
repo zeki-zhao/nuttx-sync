@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_spi_slave.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,7 +33,7 @@
 #include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <string.h>
 
 #include <nuttx/irq.h>
@@ -121,7 +123,7 @@
 #  if SPI123_KERNEL_CLOCK_FREQ > 200000000
 #    error Not supported SPI123 frequency
 #  endif
-#endif  /* SPI123 */
+#endif /* SPI123 */
 
 #if defined(CONFIG_STM32H7_SPI4_SLAVE) || defined(CONFIG_STM32H7_SPI5_SLAVE)
 #  if STM32_RCC_D2CCIP1R_SPI45SRC == RCC_D2CCIP1R_SPI45SEL_APB
@@ -132,7 +134,7 @@
 #  if SPI45_KERNEL_CLOCK_FREQ > 100000000
 #    error Not supported SPI45 frequency
 #  endif
-#endif  /* SPI45 */
+#endif /* SPI45 */
 
 #if defined(CONFIG_STM32H7_SPI6_SLAVE)
 #  if STM32_RCC_D3CCIPR_SPI6SRC == RCC_D3CCIPR_SPI6SEL_PCLK4
@@ -143,7 +145,7 @@
 #  if SPI6_KERNEL_CLOCK_FREQ > 100000000
 #    error Not supported SPI6 frequency
 #  endif
-#endif  /* SPI6 */
+#endif /* SPI6 */
 
 #if defined (CONFIG_STM32H7_SPI_SLAVE_QSIZE)
 #  if CONFIG_STM32H7_SPI_SLAVE_QSIZE > 65535
@@ -315,8 +317,8 @@ static const struct spi_slave_ctrlrops_s g_ctrlr_ops =
   .txch          = DMAMAP_SPI##x##_TX,                  \
   .rxsem         = SEM_INITIALIZER(0),                  \
   .txsem         = SEM_INITIALIZER(0),                  \
-  .outq	         = SPI_SLAVE_OUTQ(x),                   \
-  .inq	         = SPI_SLAVE_INQ(x),
+  .outq          = SPI_SLAVE_OUTQ(x),                   \
+  .inq           = SPI_SLAVE_INQ(x),
 #else
 #define SPI_SLAVE_INIT_DMA(x)
 #endif
@@ -662,11 +664,13 @@ static inline void spi_writebyte(struct stm32_spidev_s *priv,
 #ifdef CONFIG_DEBUG_SPI_INFO
 static void spi_dumpregs(struct stm32_spidev_s *priv)
 {
-  spiinfo("CR1: 0x%08x CFG1: 0x%08x CFG2: 0x%08x\n",
+  spiinfo("CR1: 0x%08" PRIx32 " CFG1: 0x%08" PRIx32
+          " CFG2: 0x%08" PRIx32 "\n",
           spi_getreg(priv, STM32_SPI_CR1_OFFSET),
           spi_getreg(priv, STM32_SPI_CFG1_OFFSET),
           spi_getreg(priv, STM32_SPI_CFG2_OFFSET));
-  spiinfo("IER: 0x%08x SR: 0x%08x I2SCFGR: 0x%08x\n",
+  spiinfo("IER: 0x%08" PRIx32 " SR: 0x%08" PRIx32
+          " I2SCFGR: 0x%08" PRIx32 "\n",
           spi_getreg(priv, STM32_SPI_IER_OFFSET),
           spi_getreg(priv, STM32_SPI_SR_OFFSET),
           spi_getreg(priv, STM32_SPI_I2SCFGR_OFFSET));
@@ -710,6 +714,7 @@ static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
   /* Wake-up the SPI driver */
 
   priv->rxresult = isr | 0x080;  /* OR'ed with 0x80 to assure non-zero */
+  SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_RX_COMPLETE);
 }
 #endif
 
@@ -729,6 +734,7 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
   /* Wake-up the SPI driver */
 
   priv->txresult = isr | 0x080;  /* OR'ed with 0x80 to assure non-zero */
+  SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_TX_COMPLETE);
 }
 #endif
 

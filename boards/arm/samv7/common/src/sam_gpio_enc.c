@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/samv7/common/src/sam_gpio_enc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdio.h>
 
 #include <nuttx/board.h>
@@ -241,14 +243,14 @@ static int sam_gpio_enc_setup(struct qe_lowerhalf_s *lower)
   new = (state_b << 1 | (state_a ^ state_b));
   config->position_base = config->position = new;
 
-  /* Setup interrups for ENC_A and ENC_B pins. */
+  /* Setup interrupts for ENC_A and ENC_B pins. */
 
   ret = board_gpio_enc_irqx(config->enca, config->enca_irq,
                             sam_gpio_enc_interrupt, priv);
   if (ret != OK)
     {
       snerr("ERROR: board_gpio_enc_irqx for ENC_A failed %d\n", ret);
-      return -ERROR;
+      return ERROR;
     }
 
   ret = board_gpio_enc_irqx(config->encb, config->encb_irq,
@@ -256,7 +258,7 @@ static int sam_gpio_enc_setup(struct qe_lowerhalf_s *lower)
   if (ret != OK)
     {
       snerr("ERROR: board_gpio_enc_irqx for ENC_B failed %d\n", ret);
-      return -ERROR;
+      return ERROR;
     }
 
   return OK;
@@ -287,7 +289,7 @@ static int sam_gpio_enc_shutdown(struct qe_lowerhalf_s *lower)
     {
       snerr("ERROR: board_gpio_enc_irqx disable for ENC_A failed %d\n",
             ret);
-      return -ERROR;
+      return ERROR;
     }
 
   ret = board_gpio_enc_irqx(config->encb, config->encb_irq,
@@ -296,7 +298,7 @@ static int sam_gpio_enc_shutdown(struct qe_lowerhalf_s *lower)
     {
       snerr("ERROR: board_gpio_enc_irqx disable for ENC_B failed %d\n",
             ret);
-      return -ERROR;
+      return ERROR;
     }
 
   return OK;
@@ -372,7 +374,7 @@ int sam_gpio_enc_init(gpio_pinset_t enca_cfg, gpio_pinset_t encb_cfg,
   if (ret < 0)
     {
       snerr("ERROR: qe_register failed: %d\n", ret);
-      return -ERROR;
+      return ERROR;
     }
 
   priv->enca = enca_cfg;

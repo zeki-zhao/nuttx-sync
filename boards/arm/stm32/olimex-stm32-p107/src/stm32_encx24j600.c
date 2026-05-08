@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/olimex-stm32-p107/src/stm32_encx24j600.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,7 +29,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/spi/spi.h>
 #include <nuttx/net/encx24j600.h>

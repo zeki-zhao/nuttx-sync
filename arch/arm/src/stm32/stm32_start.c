@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,12 +28,13 @@
 
 #include <stdint.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/init.h>
 
 #include "arch/board/board.h"
 #include "arm_internal.h"
+#include "itm_syslog.h"
 #include "nvic.h"
 #include "mpu.h"
 
@@ -158,7 +161,11 @@ void __start(void)
 
   showprogress('C');
 
-#ifdef CONFIG_SCHED_IRQMONITOR
+#ifdef CONFIG_ARMV7M_STACKCHECK
+  arm_stack_check_init();
+#endif
+
+#ifdef CONFIG_ARCH_PERF_EVENTS
   up_perf_init((void *)STM32_SYSCLK_FREQUENCY);
 #endif
 
@@ -187,6 +194,7 @@ void __start(void)
 #endif
 
   /* Initialize onboard resources */
+
   stm32_boardinitialize();
   showprogress('F');
 
@@ -199,5 +207,7 @@ void __start(void)
 
   /* Shouldn't get here */
 
+#ifndef CONFIG_DISABLE_IDLE_LOOP
   for (; ; );
+#endif
 }

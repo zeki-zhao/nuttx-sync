@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_rcc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,7 +29,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <arch/board/board.h>
 
@@ -40,6 +42,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
+              "Configure BOARD_LOOPSPERMSEC to non-default value.");
 
 /* Allow up to 100 milliseconds for the high speed clock to become ready.
  * that is a very long delay, but if the clock does not become ready we are
@@ -54,9 +59,13 @@
 
 /* Include chip-specific clocking initialization logic */
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX)
+#if defined(CONFIG_STM32H7_STM32H7X0XX)
+#  include "stm32h7x3xx_rcc.c"
+#elif defined(CONFIG_STM32H7_STM32H7X3XX)
 #  include "stm32h7x3xx_rcc.c"
 #elif defined(CONFIG_STM32H7_STM32H7B3XX)
+#  include "stm32h7x3xx_rcc.c"
+#elif defined(CONFIG_STM32H7_STM32H7X5XX)
 #  include "stm32h7x3xx_rcc.c"
 #elif defined(CONFIG_STM32H7_STM32H7X7XX)
 #  include "stm32h7x7xx_rcc.c"
@@ -91,24 +100,25 @@
 
 void stm32_clockconfig(void)
 {
+#ifndef CONFIG_STM32H7_BYPASS_CLOCKCONFIG
   /* Make sure that we are starting in the reset state */
 
   rcc_reset();
 
-#if defined(CONFIG_STM32H7_PWR)
+#  if defined(CONFIG_STM32H7_PWR)
 
   /* Insure the bkp is initialized */
 
   stm32_pwr_initbkp(false);
-#endif
+#  endif
 
-#if defined(CONFIG_STM32H7_CUSTOM_CLOCKCONFIG)
+#  if defined(CONFIG_STM32H7_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
 
   stm32_board_clockconfig();
 
-#else
+#  else
 
   /* Invoke standard, fixed clock configuration based on definitions in
    * board.h
@@ -116,7 +126,8 @@ void stm32_clockconfig(void)
 
   stm32_stdclockconfig();
 
-#endif
+#  endif
+#endif /* !CONFIG_STM32H7_BYPASS_CLOCKCONFIG */
 
   /* Enable peripheral clocking */
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32f0l0g0/nucleo-f072rb/src/stm32_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
@@ -83,7 +85,7 @@ int stm32_bringup(void)
   i2c = stm32_i2cbus_initialize(1);
   if (i2c == NULL)
     {
-      i2cerr("ERROR: Inialize I2C1: %d\n", ret);
+      i2cerr("ERROR: Initialize I2C1: %d\n", ret);
     }
   else
     {

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/modem/alt1250/altcom_hdlr_socket.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -119,7 +121,7 @@ static void altstorage2sockaddr(
       memcpy(&in6addr_to->sin6_addr, &in6addr_from->sin6_addr,
         sizeof(struct in6_addr));
 
-      /* LwIP does not use thease members, so it should be set to 0 */
+      /* LwIP does not use these members, so it should be set to 0 */
 
       in6addr_to->sin6_flowinfo = 0;
       in6addr_to->sin6_scope_id = 0;
@@ -1067,6 +1069,37 @@ int32_t altcom_select_pkt_compose(FAR void **arg, size_t arglen,
   *altcid = APICMDID_SOCK_SELECT;
 
   return size;
+}
+
+int32_t altcom_shutdown_pkt_compose(FAR void **arg, size_t arglen,
+                                    uint8_t altver, FAR uint8_t *pktbuf,
+                                    const size_t pktsz, FAR uint16_t *altcid)
+{
+  FAR int32_t sockfd = *((FAR int32_t *)arg[0]);
+  FAR int32_t how = *((FAR int32_t *)arg[1]);
+  FAR struct apicmd_shutdown_s *out =
+    (FAR struct apicmd_shutdown_s *)pktbuf;
+
+  switch (how)
+    {
+      case SHUT_RD:
+        how = ALTCOM_SHUT_RD;
+        break;
+      case SHUT_WR:
+        how = ALTCOM_SHUT_WR;
+        break;
+      case SHUT_RDWR:
+        how = ALTCOM_SHUT_RDWR;
+        break;
+      default:
+        return -EINVAL;
+    }
+
+  out->sockfd = htonl(sockfd);
+  out->how = htonl(how);
+  *altcid = APICMDID_SOCK_SHUTDOWN;
+
+  return sizeof(struct apicmd_shutdown_s);
 }
 
 int32_t altcom_sockcomm_pkt_parse(FAR struct alt1250_dev_s *dev,

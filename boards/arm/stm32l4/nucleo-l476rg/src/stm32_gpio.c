@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32l4/nucleo-l476rg/src/stm32_gpio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,7 +30,7 @@
 
 #include <stdbool.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/clock.h>
 #include <nuttx/wdog.h>
@@ -145,7 +147,7 @@ static int stm32gpio_interrupt(int irq, void *context, void *arg)
   gpioinfo("Interrupt! callback=%p\n", stm32gpint->callback);
 
   stm32gpint->callback(&stm32gpint->stm32gpio.gpio,
-                       tm32gpint->stm32gpio.id);
+                       stm32gpint->stm32gpio.id);
   return OK;
 }
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_qencoder.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,10 +29,11 @@
 #include <stdint.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/sensors/qencoder.h>
 
 #include <arch/board/board.h>
@@ -206,6 +209,7 @@ struct stm32l4_lowerhalf_s
 #ifdef HAVE_16BIT_TIMERS
   volatile int32_t position; /* The current position offset */
 #endif
+  spinlock_t       lock;     /* Spinlock */
 };
 
 /****************************************************************************
@@ -286,6 +290,7 @@ static struct stm32l4_lowerhalf_s g_tim1lower =
   .ops      = &g_qecallbacks,
   .config   = &g_tim1config,
   .inuse    = false,
+  .lock     = SP_UNLOCKED,
 };
 
 #endif
@@ -309,6 +314,7 @@ static struct stm32l4_lowerhalf_s g_tim2lower =
   .ops      = &g_qecallbacks,
   .config   = &g_tim2config,
   .inuse    = false,
+  .lock     = SP_UNLOCKED,
 };
 
 #endif
@@ -332,6 +338,7 @@ static struct stm32l4_lowerhalf_s g_tim3lower =
   .ops      = &g_qecallbacks,
   .config   = &g_tim3config,
   .inuse    = false,
+  .lock     = SP_UNLOCKED,
 };
 
 #endif
@@ -355,6 +362,7 @@ static struct stm32l4_lowerhalf_s g_tim4lower =
   .ops      = &g_qecallbacks,
   .config   = &g_tim4config,
   .inuse    = false,
+  .lock     = SP_UNLOCKED,
 };
 
 #endif
@@ -378,6 +386,7 @@ static struct stm32l4_lowerhalf_s g_tim5lower =
   .ops      = &g_qecallbacks,
   .config   = &g_tim5config,
   .inuse    = false,
+  .lock     = SP_UNLOCKED,
 };
 
 #endif
@@ -401,6 +410,7 @@ static struct stm32l4_lowerhalf_s g_tim8lower =
   .ops      = &g_qecallbacks,
   .config   = &g_tim8config,
   .inuse    = false,
+  .lock     = SP_UNLOCKED,
 };
 
 #endif
@@ -520,25 +530,27 @@ static void stm32l4_dumpregs(struct stm32l4_lowerhalf_s *priv,
                              const char *msg)
 {
   sninfo("%s:\n", msg);
-  sninfo("  CR1: %04x CR2:  %04x SMCR:  %08x DIER:  %04x\n",
+  sninfo("  CR1: %04x CR2:  %04x SMCR:  %08" PRIx32 " DIER:  %04x\n",
          stm32l4_getreg16(priv, STM32L4_GTIM_CR1_OFFSET),
          stm32l4_getreg16(priv, STM32L4_GTIM_CR2_OFFSET),
          stm32l4_getreg32(priv, STM32L4_GTIM_SMCR_OFFSET),
          stm32l4_getreg16(priv, STM32L4_GTIM_DIER_OFFSET));
-  sninfo("   SR: %04x EGR:  %04x CCMR1: %08x CCMR2: %08x\n",
+  sninfo("   SR: %04x EGR:  %04x CCMR1: %08" PRIx32
+         " CCMR2: %08" PRIx32 "\n",
          stm32l4_getreg16(priv, STM32L4_GTIM_SR_OFFSET),
          stm32l4_getreg16(priv, STM32L4_GTIM_EGR_OFFSET),
          stm32l4_getreg32(priv, STM32L4_GTIM_CCMR1_OFFSET),
          stm32l4_getreg32(priv, STM32L4_GTIM_CCMR2_OFFSET));
-  sninfo(" CCER: %04x CNT:  %08x PSC:   %04x ARR:   %08x\n",
+  sninfo(" CCER: %04x CNT:  %08" PRIx32 " PSC:   %04x"
+         " ARR:   %08" PRIx32 "\n",
          stm32l4_getreg16(priv, STM32L4_GTIM_CCER_OFFSET),
          stm32l4_getreg32(priv, STM32L4_GTIM_CNT_OFFSET),
          stm32l4_getreg16(priv, STM32L4_GTIM_PSC_OFFSET),
          stm32l4_getreg32(priv, STM32L4_GTIM_ARR_OFFSET));
-  sninfo(" CCR1: %08x CCR2: %08x\n",
+  sninfo(" CCR1: %08" PRIx32 " CCR2: %08" PRIx32 "\n",
          stm32l4_getreg32(priv, STM32L4_GTIM_CCR1_OFFSET),
          stm32l4_getreg32(priv, STM32L4_GTIM_CCR2_OFFSET));
-  sninfo(" CCR3: %08x CCR4: %08x\n",
+  sninfo(" CCR3: %08" PRIx32 " CCR4: %08" PRIx32 "\n",
          stm32l4_getreg32(priv, STM32L4_GTIM_CCR3_OFFSET),
          stm32l4_getreg32(priv, STM32L4_GTIM_CCR4_OFFSET));
 #if defined(CONFIG_STM32L4_TIM1_QE) || defined(CONFIG_STM32L4_TIM8_QE)
@@ -991,7 +1003,8 @@ static int stm32l4_shutdown(struct qe_lowerhalf_s *lower)
   putreg32(regval, regaddr);
   leave_critical_section(flags);
 
-  sninfo("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
+  sninfo("regaddr: %08" PRIx32 " resetbit: %08" PRIx32 "\n",
+         regaddr, resetbit);
   stm32l4_dumpregs(priv, "After stop");
 
   /* Put the TI1 GPIO pin back to its default state */
@@ -1024,6 +1037,7 @@ static int stm32l4_position(struct qe_lowerhalf_s *lower,
   struct stm32l4_lowerhalf_s *priv =
                               (struct stm32l4_lowerhalf_s *)lower;
 #ifdef HAVE_16BIT_TIMERS
+  irqstate_t flags;
   int32_t position;
   int32_t verify;
   uint32_t count;
@@ -1032,19 +1046,15 @@ static int stm32l4_position(struct qe_lowerhalf_s *lower,
 
   /* Loop until we are certain that no interrupt occurred between samples */
 
+  flags = spin_lock_irqsave(&priv->lock);
   do
     {
-      /* Don't let another task preempt us until we get the measurement.
-       * The timer interrupt may still be processed
-       */
-
-      sched_lock();
       position = priv->position;
       count    = stm32l4_getreg32(priv, STM32L4_GTIM_CNT_OFFSET);
       verify   = priv->position;
-      sched_unlock();
     }
   while (position != verify);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Return the position measurement */
 
@@ -1079,10 +1089,10 @@ static int stm32l4_reset(struct qe_lowerhalf_s *lower)
    * Interrupts are disabled to make this atomic (if possible)
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   stm32l4_putreg32(priv, STM32L4_GTIM_CNT_OFFSET, 0);
   priv->position = 0;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 #else
   sninfo("Resetting position to zero\n");
   DEBUGASSERT(lower && priv->inuse);

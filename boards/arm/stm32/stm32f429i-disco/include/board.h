@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f429i-disco/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,7 +41,7 @@
 
 /* Clocking *****************************************************************/
 
-/* The STM32F4 Discovery board features a single 8MHz crystal.
+/* The STM32F429I-DISCO board features a single 8MHz crystal.
  *  Space is provided for a 32kHz RTC backup crystal, but it is not stuffed.
  *
  * This is the canonical configuration:
@@ -71,7 +73,7 @@
  * LSE - 32.768 kHz
  */
 
-#define STM32_BOARD_XTAL        25000000ul
+#define STM32_BOARD_XTAL        8000000ul
 
 #define STM32_HSI_FREQUENCY     16000000ul
 #define STM32_LSI_FREQUENCY     32000
@@ -91,12 +93,12 @@
  *         = 48,000,000
  */
 
-#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(15)
-#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(216)
+#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(8)
+#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(336)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
-#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(4)
+#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(7)
 
-#define STM32_SYSCLK_FREQUENCY  180000000ul
+#define STM32_SYSCLK_FREQUENCY  168000000ul
 
 /* AHB clock (HCLK) is SYSCLK (168MHz) */
 
@@ -183,7 +185,7 @@
 
 /* Button definitions *******************************************************/
 
-/* The STM32F4 Discovery supports one button: */
+/* The STM32F429I-DISCO supports one button: */
 
 #define BUTTON_USER        0
 
@@ -195,17 +197,25 @@
 
 /* USART1:
  *
- * The STM32F4 Discovery has no on-board serial devices, but the console is
+ * The STM32F429I-DISCO has no on-board serial devices, but the console is
  * brought out to PA9 (TX) and PA10 (RX) for connection to an external serial
- * device. (See the README.txt file for other options)
+ * device.
  */
 
 #define GPIO_USART1_RX GPIO_USART1_RX_1
 #define GPIO_USART1_TX GPIO_USART1_TX_1
 
+#define GPIO_USART3_RX GPIO_USART3_RX_1
+#define GPIO_USART3_TX GPIO_USART3_TX_1
+
+/* CAN: */
+
+#define GPIO_CAN1_RX GPIO_CAN1_RX_2
+#define GPIO_CAN1_TX GPIO_CAN1_TX_2
+
 /* PWM
  *
- * The STM32F4 Discovery has no real on-board PWM devices, but the board can
+ * The STM32F429I-DISCO has no real on-board PWM devices, but the board can
  * be configured to output a pulse train using TIM4 CH2 on PD13.
  */
 
@@ -237,11 +247,11 @@
 
 /* FMC - SDRAM */
 
-#define GPIO_FMC_SDCKE1 GPIO_FMC_SDCKE1_2
-#define GPIO_FMC_SDNE1  GPIO_FMC_SDNE1_2
+#define GPIO_FMC_SDCKE1 GPIO_FMC_SDCKE1_1
+#define GPIO_FMC_SDNE1  GPIO_FMC_SDNE1_1
 #define GPIO_FMC_SDNWE  GPIO_FMC_SDNWE_1
 
-/* Timer Inputs/Outputs (see the README.txt file for options) */
+/* Timer Inputs/Outputs */
 
 #define GPIO_TIM2_CH1IN  GPIO_TIM2_CH1IN_2
 #define GPIO_TIM2_CH2IN  GPIO_TIM2_CH2IN_1

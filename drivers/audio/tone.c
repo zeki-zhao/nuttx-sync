@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/audio/tone.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,14 +38,13 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <stdlib.h>
 #include <ctype.h>
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
@@ -127,8 +128,8 @@ static const uint16_t g_notes_freq[84] =
 
 /* Global variable used by the tone generator */
 
-static const char *g_tune;
-static const char *g_next;
+static FAR const char *g_tune;
+static FAR const char *g_next;
 static uint8_t g_tempo;
 static uint8_t g_note_mode;
 static uint32_t g_note_length;
@@ -389,7 +390,7 @@ static void next_note(FAR struct tone_upperhalf_s *upper)
       ts.tv_sec = (time_t) sec;
       ts.tv_nsec = (unsigned long)nsec;
 
-      ONESHOT_START(upper->oneshot, oneshot_callback, upper, &ts);
+      ONESHOT_START(upper->oneshot, &ts);
 
       g_silence_length = 0;
       return;
@@ -523,7 +524,7 @@ static void next_note(FAR struct tone_upperhalf_s *upper)
           ts.tv_sec = (time_t) sec;
           ts.tv_nsec = (unsigned long)nsec;
 
-          ONESHOT_START(upper->oneshot, oneshot_callback, upper, &ts);
+          ONESHOT_START(upper->oneshot, &ts);
           return;
 
           /* Change tempo */
@@ -566,7 +567,7 @@ static void next_note(FAR struct tone_upperhalf_s *upper)
               ts.tv_sec = (time_t) sec;
               ts.tv_nsec = (unsigned long)nsec;
 
-              ONESHOT_START(upper->oneshot, oneshot_callback, upper, &ts);
+              ONESHOT_START(upper->oneshot, &ts);
 
               return;
             }
@@ -650,7 +651,7 @@ static void next_note(FAR struct tone_upperhalf_s *upper)
 
   /* And arrange a callback when the note should stop */
 
-  ONESHOT_START(upper->oneshot, oneshot_callback, upper, &ts);
+  ONESHOT_START(upper->oneshot, &ts);
   return;
 
   /* Tune looks bad (unexpected EOF, bad character, etc.) */
@@ -939,10 +940,7 @@ int tone_register(FAR const char *path, FAR struct pwm_lowerhalf_s *tone,
 
   /* Allocate the upper-half data structure */
 
-  upper =
-    (FAR struct tone_upperhalf_s *)kmm_zalloc(
-                              sizeof(struct tone_upperhalf_s));
-
+  upper = kmm_zalloc(sizeof(struct tone_upperhalf_s));
   if (!upper)
     {
       auderr("ERROR: Allocation failed\n");
@@ -959,6 +957,9 @@ int tone_register(FAR const char *path, FAR struct pwm_lowerhalf_s *tone,
 #ifdef CONFIG_PWM_MULTICHAN
   upper->channel = (uint8_t)channel;
 #endif
+
+  upper->oneshot->callback = oneshot_callback;
+  upper->oneshot->arg = upper;
 
   /* Register the PWM device */
 

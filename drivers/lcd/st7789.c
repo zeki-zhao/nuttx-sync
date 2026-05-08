@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/lcd/st7789.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,7 +32,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
@@ -45,9 +47,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_SPI_CMDDATA has to be set */
+/* CONFIG_SPI_CMDDATA has to be set for 4 wire interface */
 
-#ifndef CONFIG_SPI_CMDDATA
+#if !defined(CONFIG_LCD_ST7789_3WIRE) && !defined(CONFIG_SPI_CMDDATA)
 #  error "CONFIG_SPI_CMDDATA option has to be set for SPI communication"
 #endif
 
@@ -101,6 +103,18 @@
 #  endif
 #elif !defined(CONFIG_LCD_RPORTRAIT)
 #  define CONFIG_LCD_RPORTRAIT 1
+#endif
+
+/* Define prefixes for 3 wire communication if used */
+
+#ifdef CONFIG_LCD_ST7789_3WIRE
+#  define LCD_ST7789_SPI_BITS 9
+#  define LCD_ST7789_DATA_PREFIX (1 << 8)
+#  define LCD_ST7789_CMD_PREFIX  (0 << 8)
+#else
+#  define LCD_ST7789_SPI_BITS 8
+#  define LCD_ST7789_DATA_PREFIX (0)
+#  define LCD_ST7789_CMD_PREFIX  (0)
 #endif
 
 /* Display Resolution */
@@ -183,6 +197,18 @@ struct st7789_dev_s
 
   uint16_t runbuffer[ST7789_LUT_SIZE];
 };
+
+  /* 3 wire interface for ST7789 requires the driver to send information
+   * about command/data transfer as 9th bit of SPI transfer. This would
+   * require non standard SPI interface that is not supported so a little
+   * workaround is used here (inspire by SSD1351 driver). We split our
+   * buffer into rows and send those rows separately with added 9th bit.
+   * The price for this is a small overhead in SPI communication.
+   */
+
+#ifdef CONFIG_LCD_ST7789_3WIRE
+uint16_t rowbuff[ST7789_XRES * ST7789_BYTESPP];
+#endif
 
 /****************************************************************************
  * Private Function Protototypes
@@ -289,6 +315,11 @@ static void st7789_select(FAR struct spi_dev_s *spi, int bits)
   SPI_SETMODE(spi, CONFIG_LCD_ST7789_SPIMODE);
   SPI_SETBITS(spi, bits);
   SPI_SETFREQUENCY(spi, CONFIG_LCD_ST7789_FREQUENCY);
+#ifdef CONFIG_SPI_DELAY_CONTROL
+  SPI_SETDELAY(spi, CONFIG_LCD_ST7789_START_DELAY,
+               CONFIG_LCD_ST7789_STOP_DELAY, CONFIG_LCD_ST7789_CS_DELAY,
+               CONFIG_LCD_ST7789_IFDELAY);
+#endif
 }
 
 /****************************************************************************
@@ -325,11 +356,23 @@ static void st7789_deselect(FAR struct spi_dev_s *spi)
 
 static inline void st7789_sendcmd(FAR struct st7789_dev_s *dev, uint8_t cmd)
 {
-  st7789_select(dev->spi, 8);
+#ifdef CONFIG_LCD_ST7789_3WIRE
+  uint16_t txbuf;
+
+  /* Add command prefix (9th bit should be 0 ) */
+
+  txbuf = LCD_ST7789_CMD_PREFIX | cmd;
+
+  st7789_select(dev->spi, LCD_ST7789_SPI_BITS);
+  SPI_SEND(dev->spi, txbuf);
+  st7789_deselect(dev->spi);
+#else
+  st7789_select(dev->spi, LCD_ST7789_SPI_BITS);
   SPI_CMDDATA(dev->spi, SPIDEV_DISPLAY(0), true);
   SPI_SEND(dev->spi, cmd);
   SPI_CMDDATA(dev->spi, SPIDEV_DISPLAY(0), false);
   st7789_deselect(dev->spi);
+#endif
 }
 
 /****************************************************************************
@@ -380,26 +423,26 @@ static void st7789_setorientation(FAR struct st7789_dev_s *dev,
   if (orientation != LCD_PORTRAIT)
     {
       st7789_sendcmd(dev, ST7789_MADCTL);
-      st7789_select(dev->spi, 8);
+      st7789_select(dev->spi, LCD_ST7789_SPI_BITS);
     }
 
   if (orientation == LCD_RLANDSCAPE)
     {
       /* RLANDSCAPE : MY=1 MV=1 */
 
-      SPI_SEND(dev->spi, 0xa0);
+      SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | 0xa0);
     }
   else if (orientation == LCD_LANDSCAPE)
     {
       /* LANDSCAPE : MX=1 MV=1 */
 
-      SPI_SEND(dev->spi, 0x70);
+      SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | 0x70);
     }
   else if (orientation == LCD_RPORTRAIT)
     {
       /* RPORTRAIT : MX=1 MY=1 */
 
-      SPI_SEND(dev->spi, 0xc0);
+      SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | 0xc0);
     }
 
   st7789_deselect(dev->spi);
@@ -412,7 +455,7 @@ static void st7789_setorientation(FAR struct st7789_dev_s *dev)
   uint8_t madctl = 0x00;
 
   st7789_sendcmd(dev, ST7789_MADCTL);
-  st7789_select(dev->spi, 8);
+  st7789_select(dev->spi, LCD_ST7789_SPI_BITS);
 
 #if !defined(CONFIG_LCD_PORTRAIT)
 
@@ -434,7 +477,11 @@ static void st7789_setorientation(FAR struct st7789_dev_s *dev)
 
 #endif
 
-  /* Mirror X/Y for current setting */
+  /* Mirror X/Y/V for current setting */
+
+#ifdef CONFIG_LCD_ST7789_MIRRORV
+  madctl ^= 0x20;
+#endif
 
 #ifdef CONFIG_LCD_ST7789_MIRRORX
   madctl ^= 0x40;
@@ -444,8 +491,45 @@ static void st7789_setorientation(FAR struct st7789_dev_s *dev)
   madctl ^= 0x80;
 #endif
 
-  SPI_SEND(dev->spi, madctl);
+#ifdef CONFIG_LCD_ST7789_BGR
+  madctl |= 0x08;
+#endif
 
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | madctl);
+
+  st7789_deselect(dev->spi);
+}
+#endif
+
+#ifdef CONFIG_LCD_ST7789_DATA_ENDIAN_LITTLE
+static void st7789_ramctl(FAR struct st7789_dev_s *dev)
+{
+  /* ============ ==== ==== ====== ====== ======== ===== ====== ======
+   *  Parameters   D7   D6   D5     D4     D3       D2    D1     D0
+   * ============ ==== ==== ====== ====== ======== ===== ====== ======
+   *  1st (LSB)    0    0    0      RM     0        0     DM1    DM0
+   *  2nd (MSB)    1    1    EPF1   EPF0   ENDIAN   RIM   MDT1   MDT0
+   * ============ ==== ==== ====== ====== ======== ===== ====== ======
+   */
+
+  uint16_t ramctl = 0x0;
+
+  st7789_sendcmd(dev, ST7789_RAMCTRL);
+  st7789_select(dev->spi, LCD_ST7789_SPI_BITS * 2);
+
+  /* Fill the reserved bits */
+
+  ramctl |= 0xc000;
+
+  /* Set EPF */
+
+  ramctl |= 0x3000;
+
+  /* Set RGB data endian */
+
+  ramctl |= 0x800;
+
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | ramctl);
   st7789_deselect(dev->spi);
 }
 #endif
@@ -465,34 +549,38 @@ static void st7789_setarea(FAR struct st7789_dev_s *dev,
   /* Set row address */
 
   st7789_sendcmd(dev, ST7789_RASET);
-  st7789_select(dev->spi, 8);
+  st7789_select(dev->spi, LCD_ST7789_SPI_BITS);
 #ifdef CONFIG_LCD_DYN_ORIENTATION
-  SPI_SEND(dev->spi, (y0 + g_lcddev.yoff) >> 8);
-  SPI_SEND(dev->spi, (y0 + g_lcddev.yoff) & 0xff);
-  SPI_SEND(dev->spi, (y1 + g_lcddev.yoff) >> 8);
-  SPI_SEND(dev->spi, (y1 + g_lcddev.yoff) & 0xff);
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | ((y0 + g_lcddev.yoff) >> 8));
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | ((y0 + g_lcddev.yoff) & 0xff));
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | ((y1 + g_lcddev.yoff) >> 8));
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | ((y1 + g_lcddev.yoff) & 0xff));
 #else
-  SPI_SEND(dev->spi, (y0 + ST7789_YOFFSET) >> 8);
-  SPI_SEND(dev->spi, (y0 + ST7789_YOFFSET) & 0xff);
-  SPI_SEND(dev->spi, (y1 + ST7789_YOFFSET) >> 8);
-  SPI_SEND(dev->spi, (y1 + ST7789_YOFFSET) & 0xff);
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | ((y0 + ST7789_YOFFSET) >> 8));
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX |
+                     ((y0 + ST7789_YOFFSET) & 0xff));
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | ((y1 + ST7789_YOFFSET) >> 8));
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX |
+                     ((y1 + ST7789_YOFFSET) & 0xff));
 #endif
   st7789_deselect(dev->spi);
 
   /* Set column address */
 
   st7789_sendcmd(dev, ST7789_CASET);
-  st7789_select(dev->spi, 8);
+  st7789_select(dev->spi, LCD_ST7789_SPI_BITS);
 #ifdef CONFIG_LCD_DYN_ORIENTATION
-  SPI_SEND(dev->spi, (x0 + g_lcddev.xoff) >> 8);
-  SPI_SEND(dev->spi, (x0 + g_lcddev.xoff) & 0xff);
-  SPI_SEND(dev->spi, (x1 + g_lcddev.xoff) >> 8);
-  SPI_SEND(dev->spi, (x1 + g_lcddev.xoff) & 0xff);
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | ((x0 + g_lcddev.xoff) >> 8));
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | ((x0 + g_lcddev.xoff) & 0xff));
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | ((x1 + g_lcddev.xoff) >> 8));
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | ((x1 + g_lcddev.xoff) & 0xff));
 #else
-  SPI_SEND(dev->spi, (x0 + ST7789_XOFFSET) >> 8);
-  SPI_SEND(dev->spi, (x0 + ST7789_XOFFSET) & 0xff);
-  SPI_SEND(dev->spi, (x1 + ST7789_XOFFSET) >> 8);
-  SPI_SEND(dev->spi, (x1 + ST7789_XOFFSET) & 0xff);
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | ((x0 + ST7789_XOFFSET) >> 8));
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX |
+                     ((x0 + ST7789_XOFFSET) & 0xff));
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | ((x1 + ST7789_XOFFSET) >> 8));
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX |
+                     ((x1 + ST7789_XOFFSET) & 0xff));
 #endif
   st7789_deselect(dev->spi);
 }
@@ -513,8 +601,8 @@ static void st7789_bpp(FAR struct st7789_dev_s *dev, int bpp)
 
   depth = bpp >> 2 | 1;
   st7789_sendcmd(dev, ST7789_COLMOD);
-  st7789_select(dev->spi, 8);
-  SPI_SEND(dev->spi, depth);
+  st7789_select(dev->spi, LCD_ST7789_SPI_BITS);
+  SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | depth);
   st7789_deselect(dev->spi);
 
   /* Cache the new BPP */
@@ -536,16 +624,55 @@ static void st7789_wrram(FAR struct st7789_dev_s *dev,
                          size_t count)
 {
   size_t i;
+#ifdef CONFIG_LCD_ST7789_3WIRE
+  size_t j;
+  size_t rowsiz;
+#endif
 
   st7789_sendcmd(dev, ST7789_RAMWR);
 
-  st7789_select(dev->spi, ST7789_BYTESPP * 8);
+#ifdef CONFIG_LCD_ST7789_3WIRE
+  rowsiz = ST7789_XRES * ST7789_BYTESPP;
+
+  if (count == 1 && size > rowsiz)
+    {
+      /* We cannot send the entire buffer at once, split it to
+       * separate rows.
+       */
+
+      count = size / rowsiz;
+      size = rowsiz;
+    }
+
+  st7789_select(dev->spi, LCD_ST7789_SPI_BITS);
+
+  /* For each row */
+
+  for (i = 0; i < count; i++)
+    {
+      /* Copy data to rowbuff and add 9th bit */
+
+      for (j = 0; j < size; j += 2)
+        {
+          /* Take care of correct byte order. */
+
+          rowbuff[j] = LCD_ST7789_DATA_PREFIX |
+                       (uint16_t)buff[j + 1 + (i * (size + skip))];
+          rowbuff[j + 1] = LCD_ST7789_DATA_PREFIX |
+                           (uint16_t)buff[j + (i * (size + skip))];
+        }
+
+      SPI_SNDBLOCK(dev->spi, rowbuff, size);
+    }
+#else
+  st7789_select(dev->spi, ST7789_BYTESPP * LCD_ST7789_SPI_BITS);
 
   for (i = 0; i < count; i++)
     {
       SPI_SNDBLOCK(dev->spi, buff + (i * (size + skip)),
                    size / ST7789_BYTESPP);
     }
+#endif
 
   st7789_deselect(dev->spi);
 }
@@ -585,12 +712,22 @@ static void st7789_fill(FAR struct st7789_dev_s *dev, uint16_t color)
   st7789_setarea(dev, 0, 0, ST7789_XRES - 1, ST7789_YRES - 1);
 
   st7789_sendcmd(dev, ST7789_RAMWR);
-  st7789_select(dev->spi, ST7789_BYTESPP *8);
+#ifdef CONFIG_LCD_ST7789_3WIRE
+  st7789_select(dev->spi, LCD_ST7789_SPI_BITS);
+
+  for (i = 0; i < ST7789_XRES * ST7789_YRES; i++)
+    {
+      SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | (color & 0xff00) >> 8);
+      SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | (color & 0xff));
+    }
+#else
+  st7789_select(dev->spi, ST7789_BYTESPP * LCD_ST7789_SPI_BITS);
 
   for (i = 0; i < ST7789_XRES * ST7789_YRES; i++)
     {
       SPI_SEND(dev->spi, color);
     }
+#endif
 
   st7789_deselect(dev->spi);
 }
@@ -640,7 +777,7 @@ static int st7789_putrun(FAR struct lcd_dev_s *dev,
  *   buffer    - The buffer containing the area to be written to the LCD
  *   stride    - Length of a line in bytes. This parameter may be necessary
  *               to allow the LCD driver to calculate the offset for partial
- *               writes when the buffer needs to be splited for row-by-row
+ *               writes when the buffer needs to be split for row-by-row
  *               writing.
  *
  ****************************************************************************/
@@ -899,8 +1036,11 @@ FAR struct lcd_dev_s *st7789_lcdinitialize(FAR struct spi_dev_s *spi)
 #else
   st7789_setorientation(priv);
 #endif
+#ifdef CONFIG_LCD_ST7789_DATA_ENDIAN_LITTLE
+  st7789_ramctl(priv);
+#endif
   st7789_display(priv, true);
-  st7789_fill(priv, 0xffff);
+  st7789_fill(priv, CONFIG_LCD_ST7789_DEFAULT_COLOR);
 
   return &priv->dev;
 }

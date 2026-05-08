@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/olimex-stm32-p407/src/stm32_cs4344.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,7 +28,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -127,7 +129,7 @@ int stm32_cs4344_initialize(int minor)
         }
 
       /* No we can embed the CS4344/I2S conglomerate into a PCM decoder
-       * instance so that we will have a PCM front end for the the CS4344
+       * instance so that we will have a PCM front end for the CS4344
        * driver.
        */
 
@@ -141,7 +143,7 @@ int stm32_cs4344_initialize(int minor)
 
       /* Create a device name */
 
-      snprintf(devname, 12, "pcm%d",  minor);
+      snprintf(devname, sizeof(devname), "pcm%d",  minor);
 
       /* Finally, we can register the PCM/CS4344/I2S audio device.
        *

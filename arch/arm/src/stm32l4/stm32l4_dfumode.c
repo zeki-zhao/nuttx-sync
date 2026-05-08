@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_dfumode.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/signal.h>
 #include "stm32l4_rcc.h"

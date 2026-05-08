@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f3discovery/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,9 +33,6 @@
 #  include <stdint.h>
 #endif
 
-#include "stm32_rcc.h"
-#include "stm32.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -54,7 +53,7 @@
 #define STM32_LSE_FREQUENCY     32768            /* X2 on board */
 
 /* PLL source is HSE/1,
- * PLL multipler is 9:
+ * PLL multiplier is 9:
  * PLL frequency is 8MHz (XTAL) x 9 = 72MHz
  */
 
@@ -186,7 +185,7 @@
  *   LED_ASSERTION        An assertion failed      LD9 ON while handling
  *                                                 the assertion
  *   LED_PANIC            The system has crashed   LD10 Blinking at 2Hz
- *   LED_IDLE             STM32 is is sleep mode   (Optional, not used)
+ *   LED_IDLE             STM32 is in sleep mode   (Optional, not used)
  */
 
 #define LED_STARTED       0

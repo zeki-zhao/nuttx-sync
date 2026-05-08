@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_ltdc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,8 +36,8 @@
 #include <sys/param.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
@@ -204,7 +206,7 @@
 #  error Undefined or unrecognized base resolution
 #endif
 
-/* LTDC only supports 8 bit per pixel overal */
+/* LTDC only supports 8 bit per pixel overall */
 
 #define STM32_LTDC_LX_BYPP(n)       ((n) / 8)
 
@@ -662,7 +664,7 @@ struct stm32_interrupt_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Overal LTDC helper */
+/* Overall LTDC helper */
 
 static void stm32_ltdc_enable(bool enable);
 static void stm32_ltdc_gpioconfig(void);
@@ -1249,7 +1251,7 @@ static void stm32_ltdc_gpioconfig(void)
 
   for (i = 0; i < STM32_LTDC_NPINCONFIGS; i++)
     {
-      reginfo("set gpio%d = %08x\n", i, g_ltdcpins[i]);
+      reginfo("set gpio%d = %08" PRIx32 "\n", i, g_ltdcpins[i]);
       stm32_configgpio(g_ltdcpins[i]);
     }
 }
@@ -1273,43 +1275,46 @@ static void stm32_ltdc_periphconfig(void)
 
   /* Configure APB2 LTDC clock external */
 
-  reginfo("configured RCC_APB2ENR=%08x\n", getreg32(STM32_RCC_APB2ENR));
+  reginfo("configured RCC_APB2ENR=%08" PRIx32 "\n",
+          getreg32(STM32_RCC_APB2ENR));
 
   /* Configure the SAI PLL external to provide the LCD_CLK */
 
-  reginfo("configured RCC_PLLSAI=%08x\n", getreg32(STM32_RCC_PLLSAICFGR));
+  reginfo("configured RCC_PLLSAI=%08" PRIx32 "\n",
+          getreg32(STM32_RCC_PLLSAICFGR));
 
   /* Configure dedicated clock external */
 
-  reginfo("configured RCC_DCKCFGR=%08x\n", getreg32(STM32_RCC_DCKCFGR));
+  reginfo("configured RCC_DCKCFGR=%08" PRIx32 "\n",
+          getreg32(STM32_RCC_DCKCFGR));
 
   /* Configure LTDC_SSCR */
 
   regval = (STM32_LTDC_SSCR_VSH | STM32_LTDC_SSCR_HSW);
-  reginfo("set LTDC_SSCR=%08x\n", regval);
+  reginfo("set LTDC_SSCR=%08" PRIx32 "\n", regval);
   putreg32(regval, STM32_LTDC_SSCR);
-  reginfo("configured LTDC_SSCR=%08x\n", getreg32(STM32_LTDC_SSCR));
+  reginfo("configured LTDC_SSCR=%08" PRIx32 "\n", getreg32(STM32_LTDC_SSCR));
 
   /* Configure LTDC_BPCR */
 
   regval = (STM32_LTDC_BPCR_AVBP | STM32_LTDC_BPCR_AHBP);
-  reginfo("set LTDC_BPCR=%08x\n", regval);
+  reginfo("set LTDC_BPCR=%08" PRIx32 "\n", regval);
   putreg32(regval, STM32_LTDC_BPCR);
-  reginfo("configured LTDC_BPCR=%08x\n", getreg32(STM32_LTDC_BPCR));
+  reginfo("configured LTDC_BPCR=%08" PRIx32 "\n", getreg32(STM32_LTDC_BPCR));
 
   /* Configure LTDC_AWCR */
 
   regval = (STM32_LTDC_AWCR_AAH | STM32_LTDC_AWCR_AAW);
-  reginfo("set LTDC_AWCR=%08x\n", regval);
+  reginfo("set LTDC_AWCR=%08" PRIx32 "\n", regval);
   putreg32(regval, STM32_LTDC_AWCR);
-  reginfo("configured LTDC_AWCR=%08x\n", getreg32(STM32_LTDC_AWCR));
+  reginfo("configured LTDC_AWCR=%08" PRIx32 "\n", getreg32(STM32_LTDC_AWCR));
 
   /* Configure LTDC_TWCR */
 
   regval = (STM32_LTDC_TWCR_TOTALH | STM32_LTDC_TWCR_TOTALW);
-  reginfo("set LTDC_TWCR=%08x\n", regval);
+  reginfo("set LTDC_TWCR=%08" PRIx32 "\n", regval);
   putreg32(regval, STM32_LTDC_TWCR);
-  reginfo("configured LTDC_TWCR=%08x\n", getreg32(STM32_LTDC_TWCR));
+  reginfo("configured LTDC_TWCR=%08" PRIx32 "\n", getreg32(STM32_LTDC_TWCR));
 
   /* Configure LTDC_GCR */
 
@@ -1319,9 +1324,9 @@ static void stm32_ltdc_periphconfig(void)
   regval |= (STM32_LTDC_GCR_PCPOL | STM32_LTDC_GCR_DEPOL |
              STM32_LTDC_GCR_VSPOL | STM32_LTDC_GCR_HSPOL);
 
-  reginfo("set LTDC_GCR=%08x\n", regval);
+  reginfo("set LTDC_GCR=%08" PRIx32 "\n", regval);
   putreg32(regval, STM32_LTDC_GCR);
-  reginfo("configured LTDC_GCR=%08x\n", getreg32(STM32_LTDC_GCR));
+  reginfo("configured LTDC_GCR=%08" PRIx32 "\n", getreg32(STM32_LTDC_GCR));
 }
 
 /****************************************************************************
@@ -1340,7 +1345,7 @@ static void stm32_ltdc_ldefaultcolor(struct stm32_ltdc_s *layer,
                                      uint32_t rgb)
 {
   DEBUGASSERT(layer->layerno < LTDC_NLAYERS);
-  reginfo("set LTDC_L%dDCCR=%08x\n", layer->layerno + 1, rgb);
+  reginfo("set LTDC_L%dDCCR=%08" PRIx32 "\n", layer->layerno + 1, rgb);
 
   putreg32(rgb, stm32_dccr_layer_t[layer->layerno]);
 
@@ -1348,7 +1353,7 @@ static void stm32_ltdc_ldefaultcolor(struct stm32_ltdc_s *layer,
 
   stm32_ltdc_reload(LTDC_SRCR_IMR, false);
 
-  reginfo("configured LTDC_L%dDCCR=%08x\n", layer->layerno + 1,
+  reginfo("configured LTDC_L%dDCCR=%08" PRIx32 "\n", layer->layerno + 1,
           getreg32(STM32_LTDC_BCCR));
 }
 
@@ -1365,9 +1370,9 @@ static void stm32_ltdc_ldefaultcolor(struct stm32_ltdc_s *layer,
 
 static void stm32_ltdc_bgcolor(uint32_t rgb)
 {
-  reginfo("set LTDC_BCCR=%08x\n", rgb);
+  reginfo("set LTDC_BCCR=%08" PRIx32 "\n", rgb);
   putreg32(rgb, STM32_LTDC_BCCR);
-  reginfo("configured LTDC_BCCR=%08x\n", getreg32(STM32_LTDC_BCCR));
+  reginfo("configured LTDC_BCCR=%08" PRIx32 "\n", getreg32(STM32_LTDC_BCCR));
 }
 
 /****************************************************************************
@@ -1403,9 +1408,10 @@ static void stm32_ltdc_dither(bool enable, uint8_t red,
   regval &= ~(LTDC_GCR_DBW_MASK | LTDC_GCR_DGW_MASK | LTDC_GCR_DRW_MASK);
   regval |= (LTDC_GCR_DRW(red) | LTDC_GCR_DGW(green) | LTDC_GCR_DBW(blue));
 
-  reginfo("set LTDC_GCR=%08x\n", regval);
+  reginfo("set LTDC_GCR=%08" PRIx32 "\n", regval);
   putreg32(regval, STM32_LTDC_GCR);
-  reginfo("configured LTDC_GCR=%08x\n", getreg32(STM32_LTDC_GCR));
+  reginfo("configured LTDC_GCR=%08" PRIx32 "\n",
+          getreg32(STM32_LTDC_GCR));
 }
 
 /****************************************************************************
@@ -1422,7 +1428,8 @@ static void stm32_ltdc_linepos(void)
 
   reginfo("set LTDC_LIPCR=%08x\n", STM32_LTDC_LIPCR_LIPOS);
   putreg32(STM32_LTDC_LIPCR_LIPOS, STM32_LTDC_LIPCR);
-  reginfo("configured LTDC_LIPCR=%08x\n", getreg32(STM32_LTDC_LIPCR));
+  reginfo("configured LTDC_LIPCR=%08" PRIx32 "\n",
+          getreg32(STM32_LTDC_LIPCR));
 }
 
 /****************************************************************************
@@ -1444,9 +1451,9 @@ static void stm32_ltdc_irqctrl(uint32_t setirqs, uint32_t clrirqs)
   regval = getreg32(STM32_LTDC_IER);
   regval &= ~clrirqs;
   regval |= setirqs;
-  reginfo("set LTDC_IER=%08x\n", regval);
+  reginfo("set LTDC_IER=%08" PRIx32 "\n", regval);
   putreg32(regval, STM32_LTDC_IER);
-  reginfo("configured LTDC_IER=%08x\n", getreg32(STM32_LTDC_IER));
+  reginfo("configured LTDC_IER=%08" PRIx32 "\n", getreg32(STM32_LTDC_IER));
 }
 
 /****************************************************************************
@@ -1463,7 +1470,7 @@ static int stm32_ltdcirq(int irq, void *context, void *arg)
   struct stm32_interrupt_s *priv = &g_interrupt;
   uint32_t regval = getreg32(STM32_LTDC_ISR);
 
-  reginfo("irq = %d, regval = %08x\n", irq, regval);
+  reginfo("irq = %d, regval = %08" PRIx32 "\n", irq, regval);
 
   if (regval & LTDC_ISR_RRIF)
     {
@@ -1577,7 +1584,7 @@ static int stm32_ltdc_reload(uint8_t value, bool waitvblank)
 
   reginfo("set LTDC_SRCR=%08x\n", value);
   putreg32(value, STM32_LTDC_SRCR);
-  reginfo("configured LTDC_SRCR=%08x\n", getreg32(STM32_LTDC_SRCR));
+  reginfo("configured LTDC_SRCR=%08" PRIx32 "\n", getreg32(STM32_LTDC_SRCR));
 
   if (value == LTDC_SRCR_VBR && waitvblank)
     {
@@ -1669,7 +1676,7 @@ static void stm32_ltdc_enable(bool enable)
   uint32_t    regval;
 
   regval = getreg32(STM32_LTDC_GCR);
-  reginfo("get LTDC_GCR=%08x\n", regval);
+  reginfo("get LTDC_GCR=%08" PRIx32 "\n", regval);
 
   if (enable == true)
     {
@@ -1680,9 +1687,9 @@ static void stm32_ltdc_enable(bool enable)
       regval &= ~LTDC_GCR_LTDCEN;
     }
 
-  reginfo("set LTDC_GCR=%08x\n", regval);
+  reginfo("set LTDC_GCR=%08" PRIx32 "\n", regval);
   putreg32(regval, STM32_LTDC_GCR);
-  reginfo("configured LTDC_GCR=%08x\n", getreg32(STM32_LTDC_GCR));
+  reginfo("configured LTDC_GCR=%08" PRIx32 "\n", getreg32(STM32_LTDC_GCR));
 }
 
 /****************************************************************************
@@ -1705,7 +1712,7 @@ static void stm32_ltdc_lpixelformat(struct stm32_ltdc_s *layer)
 
   /* Configure PFCR register */
 
-  reginfo("set LTDC_L%dPFCR=%08x\n", overlay + 1,
+  reginfo("set LTDC_L%dPFCR=%08" PRIx32 "\n", overlay + 1,
           stm32_fmt_layer_t[overlay]);
   putreg32(stm32_fmt_layer_t[overlay], stm32_pfcr_layer_t[overlay]);
 
@@ -1757,14 +1764,14 @@ static void stm32_ltdc_lframebuffer(struct stm32_ltdc_s *layer)
 
   /* Configure LxWHPCR / LxWVPCR register */
 
-  reginfo("set LTDC_L%dWHPCR=%08x\n", layerno + 1, whpcr);
+  reginfo("set LTDC_L%dWHPCR=%08" PRIx32 "\n", layerno + 1, whpcr);
   putreg32(whpcr, stm32_whpcr_layer_t[layerno]);
-  reginfo("set LTDC_L%dWVPCR=%08x\n", layerno + 1, wvpcr);
+  reginfo("set LTDC_L%dWVPCR=%08" PRIx32 "\n", layerno + 1, wvpcr);
   putreg32(wvpcr, stm32_wvpcr_layer_t[layerno]);
 
   /* Configure LxCFBAR register */
 
-  reginfo("set LTDC_L%dCFBAR=%08x\n", layerno + 1,
+  reginfo("set LTDC_L%dCFBAR=%08" PRIx32 "\n", layerno + 1,
           stm32_fbmem_layer_t[layerno]);
   putreg32(stm32_fbmem_layer_t[layerno], stm32_cfbar_layer_t[layerno]);
 
@@ -1776,12 +1783,12 @@ static void stm32_ltdc_lframebuffer(struct stm32_ltdc_s *layer)
           LTDC_LXCFBLR_CFBLL(stm32_width_layer_t[layerno] *
           STM32_LTDC_LX_BYPP(stm32_bpp_layer_t[layerno]) + 3);
 
-  reginfo("set LTDC_L%dCFBLR=%08x\n", layerno + 1, cfblr);
+  reginfo("set LTDC_L%dCFBLR=%08" PRIx32 "\n", layerno + 1, cfblr);
   putreg32(cfblr, stm32_cfblr_layer_t[layerno]);
 
   /* Configure LxCFBLNR register */
 
-  reginfo("set LTDC_L%dCFBLNR=%08x\n", layerno + 1,
+  reginfo("set LTDC_L%dCFBLNR=%08" PRIx32 "\n", layerno + 1,
           stm32_height_layer_t[layerno]);
   putreg32(stm32_height_layer_t[layerno], stm32_cfblnr_layer_t[layerno]);
 
@@ -1822,7 +1829,7 @@ static void stm32_ltdc_lenable(struct stm32_ltdc_s *layer, bool enable)
 
   /* Enable/Disable layer */
 
-  reginfo("set LTDC_L%dCR=%08x\n", layer->layerno + 1, regval);
+  reginfo("set LTDC_L%dCR=%08" PRIx32 "\n", layer->layerno + 1, regval);
   putreg32(regval, stm32_cr_layer_t[layer->layerno]);
 
   /* Reload shadow register */
@@ -1870,7 +1877,7 @@ static void stm32_ltdc_ltransp(struct stm32_ltdc_s *layer,
   bf2 = LTDC_BF2_CONST_ALPHA;
 #endif
 
-  reginfo("set LTDC_L%dBFCR=%08x\n", layer->layerno + 1,
+  reginfo("set LTDC_L%dBFCR=%08" PRIx32 "\n", layer->layerno + 1,
           (LTDC_LXBFCR_BF1(bf1) | LTDC_LXBFCR_BF2(bf2)));
 
   /* Set blendmode */
@@ -1908,7 +1915,7 @@ static void stm32_ltdc_lchromakey(struct stm32_ltdc_s *layer,
   uint32_t rgb;
   DEBUGASSERT(layer->layerno < LTDC_NLAYERS);
 
-  reginfo("%08x\n", getreg32(stm32_cr_layer_t[layer->layerno]));
+  reginfo("%08" PRIx32 "\n", getreg32(stm32_cr_layer_t[layer->layerno]));
 
   /* Set chromakey */
 
@@ -1921,7 +1928,7 @@ static void stm32_ltdc_lchromakey(struct stm32_ltdc_s *layer,
   rgb = ARGB8888(chroma);
 #endif
 
-  reginfo("set LTDC_L%dCKCR=%08x\n", layer->layerno + 1, rgb);
+  reginfo("set LTDC_L%dCKCR=%08" PRIx32 "\n", layer->layerno + 1, rgb);
   putreg32(rgb, stm32_ckcr_layer_t[layer->layerno]);
 
   /* Reload shadow register */
@@ -1962,7 +1969,7 @@ static void stm32_ltdc_lchromakeyenable(struct stm32_ltdc_s *layer,
       regval &= ~LTDC_LXCR_COLKEN;
     }
 
-  reginfo("set LTDC_L%dCR=%08x\n", layer->layerno + 1, regval);
+  reginfo("set LTDC_L%dCR=%08" PRIx32 "\n", layer->layerno + 1, regval);
   putreg32(regval, stm32_cr_layer_t[layer->layerno]);
 
   /* Reload shadow register */
@@ -1989,7 +1996,8 @@ static void stm32_ltdc_lclutenable(struct stm32_ltdc_s *layer,
   uint32_t    regval;
 
   regval = getreg32(stm32_cr_layer_t[layer->oinfo.overlay]);
-  reginfo("get LTDC_L%dCR=%08x\n", layer->oinfo.overlay + 1, regval);
+  reginfo("get LTDC_L%dCR=%08" PRIx32 "\n",
+          layer->oinfo.overlay + 1, regval);
 
   /* Disable the clut support during update the color table */
 
@@ -2002,7 +2010,7 @@ static void stm32_ltdc_lclutenable(struct stm32_ltdc_s *layer,
       regval &= ~LTDC_LXCR_CLUTEN;
     }
 
-  reginfo("set LTDC_L%dCR=%08x\n", layer->oinfo.overlay, regval);
+  reginfo("set LTDC_L%dCR=%08" PRIx32 "\n", layer->oinfo.overlay, regval);
   putreg32(regval, stm32_cr_layer_t[layer->oinfo.overlay]);
 
   /* Reload shadow register */
@@ -2048,7 +2056,7 @@ static void stm32_ltdc_lputclut(struct stm32_ltdc_s *layer,
                (uint32_t)LTDC_CLUT_GREEN(cmap->green[n]) |
                (uint32_t)LTDC_CLUT_BLUE(cmap->blue[n]);
 
-      reginfo("set LTDC_L%dCLUTWR = %08x, first = %d, len = %d\n",
+      reginfo("set LTDC_L%dCLUTWR = %08" PRIx32 ", first = %d, len = %d\n",
               layer->oinfo.overlay + 1, regval, cmap->first, cmap->len);
       putreg32(regval, stm32_clutwr_layer_t[layer->oinfo.overlay]);
     }
@@ -2967,7 +2975,6 @@ int stm32_ltdcinitialize(void)
 {
   int ret = OK;
 
-  syslog(LOG_INFO,"in stm32_ltdcinitialize\n");
   lcdinfo("Initialize LTDC driver\n");
 
   if (g_initialized == true)
@@ -2979,21 +2986,21 @@ int stm32_ltdcinitialize(void)
 
   stm32_ltdc_enable(false);
 
-  // lcdinfo("Configuring the LCD controller\n");
+  lcdinfo("Configuring the LCD controller\n");
 
   /* Configure LCD periphery */
 
-  // lcdinfo("Configure lcd periphery\n");
+  lcdinfo("Configure lcd periphery\n");
   stm32_ltdc_periphconfig();
 
   /* Configure interrupts */
 
-  // lcdinfo("Configure interrupts\n");
+  lcdinfo("Configure interrupts\n");
   stm32_ltdc_irqconfig();
 
   /* Configure global ltdc register */
 
-  // lcdinfo("Configure global register\n");
+  lcdinfo("Configure global register\n");
   stm32_ltdc_globalconfig();
 
 #ifdef CONFIG_STM32_DMA2D
@@ -3028,7 +3035,6 @@ int stm32_ltdcinitialize(void)
   lcdinfo("Initialize ltdc layer\n");
   stm32_ltdc_linit(LTDC_LAYER_L1);
 #ifdef CONFIG_STM32_LTDC_L2
-  syslog(LOG_INFO,"in CONFIG_STM32_LTDC_L2\n");
   stm32_ltdc_linit(LTDC_LAYER_L2);
 #endif
 
@@ -3037,10 +3043,9 @@ int stm32_ltdcinitialize(void)
 #endif
   /* Enable the backlight */
 
-// #ifdef CONFIG_STM32_LCD_BACKLIGHT
-  // syslog(LOG_INFO,"in CONFIG_STM32_LCD_BACKLIGHT\n");
+#ifdef CONFIG_STM32_LCD_BACKLIGHT
   stm32_backlight(true);
-// #endif
+#endif
 
   /* Reload shadow register */
 
@@ -3124,12 +3129,17 @@ void stm32_ltdcuninitialize(void)
  *
  ****************************************************************************/
 
-// #ifdef CONFIG_STM32_LCD_BACKLIGHT
+#ifdef CONFIG_STM32_LCD_BACKLIGHT
 void stm32_backlight(bool blon)
 {
-  /* Set default backlight level CONFIG_STM32_LTDC_DEFBACKLIGHT */
-    stm32_configgpio(GPIO_LTDC_DISP);
-    stm32_configgpio(GPIO_LTDC_BL);
-  // lcderr("ERROR: Not supported\n");
+    /* Set default backlight level CONFIG_STM32_LTDC_DEFBACKLIGHT */
+    if(blon == true){
+        stm32_configgpio(GPIO_LTDC_DISP_ON);
+        stm32_configgpio(GPIO_LTDC_BL_ON);
+    }else{
+        stm32_configgpio(GPIO_LTDC_DISP_OFF);
+        stm32_configgpio(GPIO_LTDC_BL_OFF);
+    }
+    
 }
-// #endif
+#endif

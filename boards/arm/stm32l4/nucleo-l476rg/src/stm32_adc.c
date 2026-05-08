@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32l4/nucleo-l476rg/src/stm32_adc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/board.h>
 #include <nuttx/analog/adc.h>
@@ -33,7 +35,7 @@
 
 #include "chip.h"
 #include "arm_internal.h"
-#include "stm32l4_pwm.h"
+#include "stm32l4_adc.h"
 #include "nucleo-l476rg.h"
 
 #ifdef CONFIG_STM32L4_ADC1
@@ -56,7 +58,6 @@
 
 /* Identifying number of each ADC channel. */
 
-#ifdef CONFIG_INPUT_AJOYSTICK
 #ifdef CONFIG_ADC_DMA
 /* The Itead analog joystick gets inputs on ADC_IN1 and ADC_IN2 */
 
@@ -92,7 +93,6 @@ static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  =
 };
 
 #endif /* CONFIG_ADC_DMA */
-#endif /* CONFIG_INPUT_AJOYSTICK */
 
 /****************************************************************************
  * Private Functions

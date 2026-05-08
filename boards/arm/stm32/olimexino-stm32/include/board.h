@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/olimexino-stm32/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,9 +32,6 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
-#include "stm32_rcc.h"
-#include "stm32_sdio.h"
-#include "stm32.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -54,7 +53,7 @@
 #define STM32_LSE_FREQUENCY     32768
 
 /* PLL source is HSE/1,
- * PLL multipler is 9:
+ * PLL multiplier is 9:
  * PLL frequency is 8MHz (XTAL) x 9 = 72MHz
  */
 
@@ -152,7 +151,7 @@
 #define LED_SIGNAL           5 /* In a signal handler      N/C    ON     */
 #define LED_ASSERTION        6 /* An assertion failed      N/C    ON     */
 #define LED_PANIC            7 /* The system has crashed   N/C  Blinking */
-#define LED_IDLE             8 /* MCU is is sleep mode    OFF    N/C    */
+#define LED_IDLE             8 /* MCU is in sleep mode    OFF    N/C    */
 
 /* Thus if the Green is statically on, NuttX has successfully booted and is,
  * apparently, running normally.  If the YellowLED is flashing at

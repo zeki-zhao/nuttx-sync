@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32wl5/nucleo-wl55jc/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -207,7 +209,7 @@
 #define LED_SIGNAL        6  /* In a signal handler      GLOW  N/C  N/C */
 #define LED_ASSERTION     7  /* An assertion failed      GLOW  N/C  N/C */
 #define LED_PANIC         8  /* The system has crashed   ON    ON   ON  */
-#undef  LED_IDLE             /* MCU is is sleep mode        Not used    */
+#undef  LED_IDLE             /* MCU is in sleep mode        Not used    */
 
 /****************************************************************************
  * Public Data

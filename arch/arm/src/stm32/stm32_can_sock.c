@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_can_sock.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,17 +33,15 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <arch/board/board.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include <nuttx/wqueue.h>
-#include <nuttx/can.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/can.h>
-#include <netpacket/can.h>
 
 #include "arm_internal.h"
 #include "chip.h"
@@ -762,6 +762,8 @@ static int stm32can_ifup(struct net_driver_s *dev)
 
   priv->dev.d_buf = (uint8_t *)priv->txdesc;
 
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -792,6 +794,8 @@ static int stm32can_ifdown(struct net_driver_s *dev)
   /* Reset CAN */
 
   stm32can_reset(priv);
+
+  netdev_carrier_off(dev);
 
   return OK;
 }
@@ -883,7 +887,7 @@ static int stm32can_transmit(struct stm32_can_s *priv)
   regval &= ~CAN_TIR_EXID_MASK;
   if (frame->can_id & CAN_EFF_FLAG)
     {
-      DEBUGASSERT(frame->can_id < (1 << 29));
+      DEBUGASSERT((frame->can_id ^ CAN_EFF_FLAG) < (1 << 29));
       regval |= (frame->can_id << CAN_TIR_EXID_SHIFT) | CAN_TIR_IDE;
     }
   else
@@ -2484,4 +2488,3 @@ void arm_netinitialize(void)
 #endif
 }
 #endif
-

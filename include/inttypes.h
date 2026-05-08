@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/inttypes.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -336,6 +338,36 @@
 #define SCNxOFF     SCNx32
 #endif
 
+/* time_t */
+
+#ifdef CONFIG_SYSTEM_TIME64
+#define PRIdTM      PRId64
+#define PRIiTM      PRIi64
+#define PRIoTM      PRIo64
+#define PRIuTM      PRIu64
+#define PRIxTM      PRIx64
+#define PRIXTM      PRIX64
+
+#define SCNdTM      SCNd64
+#define SCNiTM      SCNi64
+#define SCNoTM      SCNo64
+#define SCNuTM      SCNu64
+#define SCNxTM      SCNx64
+#else
+#define PRIdTM      PRId32
+#define PRIiTM      PRIi32
+#define PRIoTM      PRIo32
+#define PRIuTM      PRIu32
+#define PRIxTM      PRIx32
+#define PRIXTM      PRIX32
+
+#define SCNdTM      SCNd32
+#define SCNiTM      SCNi32
+#define SCNoTM      SCNo32
+#define SCNuTM      SCNu32
+#define SCNxTM      SCNx32
+#endif
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
@@ -348,7 +380,13 @@
  *   function.
  */
 
-typedef void *imaxdiv_t; /* Dummy type since imaxdiv is not yet supported */
+struct imaxdiv_s
+{
+  intmax_t quot;
+  intmax_t rem;
+};
+
+typedef struct imaxdiv_s imaxdiv_t;
 
 /****************************************************************************
  * Public Function Prototypes

@@ -32,9 +32,66 @@
 
 #include "sim_internal.h"
 
+#ifdef __APPLE__
+#  include <dispatch/dispatch.h>
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static uint64_t g_start;
+#ifdef __APPLE__
+static dispatch_source_t g_timer;
+
+static void host_timer_handler(void *context)
+{
+  raise(SIGALRM);
+}
+#else
+static timer_t g_timer;
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: host_inittimer
+ ****************************************************************************/
+
+int host_inittimer(void)
+{
+  struct timespec tp;
+
+  clock_gettime(CLOCK_MONOTONIC, &tp);
+
+  g_start = 1000000000ull * tp.tv_sec + tp.tv_nsec;
+
+#ifdef __APPLE__
+  g_timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                   dispatch_get_global_queue(
+                                     DISPATCH_QUEUE_PRIORITY_HIGH, 0));
+  if (g_timer == NULL)
+    {
+      return -1;
+    }
+
+  dispatch_source_set_event_handler_f(g_timer, host_timer_handler);
+  dispatch_resume(g_timer);
+  return 0;
+#else
+  struct sigevent sigev =
+    {
+      0
+    };
+
+  sigev.sigev_notify = SIGEV_SIGNAL;
+  sigev.sigev_signo  = SIGALRM;
+
+  return timer_create(CLOCK_MONOTONIC, &sigev, &g_timer);
+#endif
+}
 
 /****************************************************************************
  * Name: host_gettime
@@ -42,24 +99,13 @@
 
 uint64_t host_gettime(bool rtc)
 {
-  static uint64_t start;
   struct timespec tp;
   uint64_t current;
 
   clock_gettime(rtc ? CLOCK_REALTIME : CLOCK_MONOTONIC, &tp);
   current = 1000000000ull * tp.tv_sec + tp.tv_nsec;
 
-  if (rtc)
-    {
-      return current;
-    }
-
-  if (start == 0)
-    {
-      start = current;
-    }
-
-  return current - start;
+  return rtc ? current : current - g_start;
 }
 
 /****************************************************************************
@@ -102,14 +148,27 @@ void host_sleepuntil(uint64_t nsec)
 
 int host_settimer(uint64_t nsec)
 {
-  struct itimerval it;
+  /* Convert to microseconds and set minimum timer to 1 microsecond. */
 
-  it.it_interval.tv_sec  = 0;
-  it.it_interval.tv_usec = 0;
-  it.it_value.tv_sec     = nsec / 1000000000;
-  it.it_value.tv_usec    = (nsec + 1000) / 1000;
+  nsec += g_start;
 
-  return setitimer(ITIMER_REAL, &it, NULL);
+#ifdef __APPLE__
+  dispatch_time_t start;
+
+  start = dispatch_walltime(NULL, nsec - host_gettime(true));
+  dispatch_source_set_timer(g_timer, start, DISPATCH_TIME_FOREVER, 1000);
+  return 0;
+#else
+  struct itimerspec tspec =
+    {
+      0
+    };
+
+  tspec.it_value.tv_sec  = nsec / 1000000000;
+  tspec.it_value.tv_nsec = nsec % 1000000000;
+
+  return timer_settime(g_timer, TIMER_ABSTIME, &tspec, NULL);
+#endif
 }
 
 /****************************************************************************

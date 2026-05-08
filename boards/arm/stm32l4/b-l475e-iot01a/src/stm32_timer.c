@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32l4/b-l475e-iot01a/src/stm32_timer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,7 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/timers/timer.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "stm32l4_tim.h"
 #include "b-l475e-iot01a.h"

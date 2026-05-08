@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_i2s.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -53,7 +55,7 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
@@ -190,7 +192,7 @@
 /* Debug ********************************************************************/
 
 /* Check if SSC debug is enabled (non-standard.. no support in
- * include/debug.h
+ * include/nuttx/debug.h
  */
 
 #ifndef CONFIG_DEBUG_I2S_INFO
@@ -467,7 +469,7 @@ static const struct i2s_ops_s g_i2sops =
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 
@@ -533,7 +535,7 @@ static inline uint16_t i2s_getreg(struct stm32_i2s_s *priv,
 #ifdef CONFIG_STM32_I2S_REGDEBUG
   if (i2s_checkreg(priv, false, regval, regaddr))
     {
-      i2sinfo("%08x->%04x\n", regaddr, regval);
+      i2sinfo("%08" PRIx32 "->%04x\n", regaddr, regval);
     }
 #endif
 
@@ -564,7 +566,7 @@ static inline void i2s_putreg(struct stm32_i2s_s *priv, uint8_t offset,
 #ifdef CONFIG_STM32_I2S_REGDEBUG
   if (i2s_checkreg(priv, true, regval, regaddr))
     {
-      i2sinfo("%08x<-%04x\n", regaddr, regval);
+      i2sinfo("%08" PRIx32 "<-%04x\n", regaddr, regval);
     }
 #endif
 
@@ -2533,7 +2535,7 @@ struct i2s_dev_s *stm32_i2sbus_initialize(int port)
    * chip select structures.
    */
 
-  priv = (struct stm32_i2s_s *)kmm_zalloc(sizeof(struct stm32_i2s_s));
+  priv = kmm_zalloc(sizeof(struct stm32_i2s_s));
   if (!priv)
     {
       i2serr("ERROR: Failed to allocate a chip select structure\n");

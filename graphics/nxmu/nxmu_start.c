@@ -1,6 +1,8 @@
 /****************************************************************************
  * graphics/nxmu/nxmu_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,7 +33,7 @@
 #include <sched.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/board.h>
 #include <nuttx/signal.h>
@@ -40,6 +42,10 @@
 #include <nuttx/nx/nxmu.h>
 
 #include "nxmu.h"
+
+#ifdef CONFIG_VNCSERVER
+#  include <nuttx/video/vnc.h>
+#endif
 
 /****************************************************************************
  * Private Data
@@ -108,6 +114,22 @@ static int nx_server(int argc, char *argv[])
   dev->setpower(dev, ((3 * CONFIG_LCD_MAXPOWER + 3) / 4));
 
 #else /* CONFIG_NX_LCDDRIVER */
+#  ifdef CONFIG_VNCSERVER
+  /* Initialize the VNC server */
+  int display;
+
+  /* Get display parameters from the command line */
+
+  display = atoi(argv[1]);
+
+  ret = vnc_fb_register(display);
+  if (ret < 0)
+    {
+       gerr("ERROR: vnc_fb_register() failed: %d\n", ret);
+    }
+
+#  else /* CONFIG_VNCSERVER */
+
   /* Initialize the frame buffer device. */
 
   int display;
@@ -118,33 +140,29 @@ static int nx_server(int argc, char *argv[])
   display = atoi(argv[1]);
   plane   = atoi(argv[2]);
 
-   
   ret = up_fbinitialize(display);
-   
   if (ret < 0)
     {
       gerr("ERROR: up_fbinitialize failed: %d\n", ret);
       return EXIT_FAILURE;
     }
 
-   
   dev = up_fbgetvplane(display, plane);
-   
   if (!dev)
     {
       gerr("ERROR: up_fbgetvplane failed, vplane=%d\n", plane);
       return EXIT_FAILURE;
     }
 
+#  endif /* CONFIG_VNCSERVER */
 #endif /* CONFIG_NX_LCDDRIVER */
 
   /* Then start the server (nx_run does not normally return) */
-   
+
   ret = nx_run(dev);
   ginfo("nx_run returned: %d\n", ret);
   UNUSED(ret);
 
-   
   return EXIT_FAILURE;
 }
 
@@ -178,17 +196,13 @@ static int nx_server(int argc, char *argv[])
 
 int nxmu_start(int display, int plane)
 {
-
-   
   DEBUGASSERT((unsigned)display < CONFIG_NX_NDISPLAYS &&
               (unsigned)plane   < CONFIG_NX_NPLANES);
 
-  // display =1;
   /* Do nothing is the server has already been started */
-   
+
   if (!g_nxserver_started[display])
     {
-       
       FAR char display_str[8];
       FAR char plane_str[8];
       int server;
@@ -209,7 +223,6 @@ int nxmu_start(int display, int plane)
                               CONFIG_NXSTART_SERVERSTACK, nx_server, argv);
       if (server < 0)
         {
-           
           gerr("ERROR: Failed to create nx_server kernel thread: %d\n",
                server);
           return server;
@@ -221,10 +234,8 @@ int nxmu_start(int display, int plane)
        * this operation cannot be done from the IDLE thread!
        */
 
-      nxsig_usleep(50 * 1000);
+      nxsched_usleep(50 * 1000);
     }
-   
-  printf("in %d line :%s  \n",__LINE__,__FUNCTION__);
 
   return OK;
 }

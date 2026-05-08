@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32butterfly2/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,8 +32,6 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
-
-#include "stm32_rcc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -134,7 +134,7 @@
 #define LED_SIGNAL        6  /* In a signal handler      N/C  N/C  N/C  GLOW  */
 #define LED_ASSERTION     7  /* An assertion failed      N/C  N/C  N/C  GLOW  */
 #define LED_PANIC         8  /* The system has crashed   N/C  N/C  N/C  FLASH */
-#undef  LED_IDLE             /* MCU is is sleep mode         Not used         */
+#undef  LED_IDLE             /* MCU is in sleep mode         Not used         */
 
 /* After booting, LED1-3 are not longer used by the system and can be used
  * for other purposes by the application (Of course, all LEDs are available

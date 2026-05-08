@@ -1,6 +1,8 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_configure.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,7 +28,7 @@
 
 #include <stddef.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "nxglib.h"
 #include "nxbe.h"
@@ -71,18 +73,18 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
   int i;
 
   /* Get the video controller configuration */
-   
+
   ret = dev->getvideoinfo(dev, &be->vinfo);
   if (ret < 0)
     {
       gerr("ERROR: Failed to get vinfo\n");
       return ret;
     }
-   
+
   /* Set the initial background color */
 
   nxgl_colorcopy(be->bgcolor, g_bgcolor);
- 
+
   /* Check the number of color planes */
 
 #ifdef CONFIG_DEBUG_GRAPHICS
@@ -95,7 +97,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
 #endif
 
   /* Then get information about each color plane */
- 
+
   for (i = 0; i < be->vinfo.nplanes; i++)
     {
       ret = dev->getplaneinfo(dev, i, &be->plane[i].pinfo);
@@ -288,10 +290,9 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
         {
           gerr("ERROR: Unsupported pinfo[%d] BPP: %d\n",
                i, be->plane[i].pinfo.bpp);
-                
           return -ENOSYS;
         }
     }
- 
+
   return OK;
 }

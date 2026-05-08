@@ -153,4 +153,18 @@ config BQ769X0_USE_INTERNAL_TS
 	default n
 endif
 
+config GOLDFISH_BATTERY
+	bool "Goldfish Battery charger support"
+	default n
+	depends on BATTERY_GAUGE
+	---help---
+		The GOLDFISH_BATTERY are battery charger for emulate batteries.
+
+config BATTERY_FAKE_GAUGE
+	bool "Battery fake gauge support"
+	default n
+	depends on BATTERY_GAUGE
+	---help---
+		The BATTERY FAKE are battery charger for emulate gauge.
+
 endmenu

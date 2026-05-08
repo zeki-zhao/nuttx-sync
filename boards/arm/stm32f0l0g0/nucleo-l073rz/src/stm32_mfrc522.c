@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32f0l0g0/nucleo-l073rz/src/stm32_mfrc522.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/spi/spi.h>
 #include <nuttx/contactless/mfrc522.h>

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/stm32f0l0g0/stm32l0_irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -88,7 +90,7 @@
 #define STM32_IRQ_LCD         (STM32_IRQ_EXTINT + 30) /* 30: LCD global interrupt */
 #define STM32_IRQ_USB         (STM32_IRQ_EXTINT + 31) /* 31: USB global interrupt */
 
-#define STM32_IRQ_NEXTINT     (32)
+#define STM32_IRQ_NEXTINTS    (32)
 
 /****************************************************************************
  * Public Types

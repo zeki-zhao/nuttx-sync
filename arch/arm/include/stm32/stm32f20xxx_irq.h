@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/stm32/stm32f20xxx_irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -137,8 +139,8 @@
 #define STM32_IRQ_HASH        (STM32_IRQ_FIRST + 80) /* 80: Hash and Rng global interrupt */
 #define STM32_IRQ_RNG         (STM32_IRQ_FIRST + 80) /* 80: Hash and Rng global interrupt */
 
-#define STM32_IRQ_NEXTINT     (81)
-#define NR_IRQS               (STM32_IRQ_FIRST + 81)
+#define STM32_IRQ_NEXTINTS    (81)
+#define NR_IRQS               (STM32_IRQ_FIRST + STM32_IRQ_NEXTINTS)
 
 /****************************************************************************
  * Public Types

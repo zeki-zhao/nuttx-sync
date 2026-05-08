@@ -88,7 +88,7 @@ Power Management
    Manage power state transition and query. The supplied argument
    indicates the specific PM operation to perform, which map to
    corresponding internal ``pm_<operation>`` functions
-   (see :doc:`/components/power`).
+   (see :doc:`/components/drivers/special/power/pm/index`).
    
    With this interface you can interact with PM handling arch/board logic
    (typically done in IDLE loop) or you can directly manage state transitions
@@ -110,6 +110,16 @@ Board information
      which to receive the board unique ID.
  
    :dependencies: Board logic must provide the :c:func:`board_uniqueid` interface.
+
+.. c:macro:: BOARDIOC_MACADDR
+
+   Get the network driver MAC address.
+
+   :Argument: A pointer to an instance of :c:struct:`boardioc_macaddr_s`.
+
+   :configuration: CONFIG_BOARDCTL_MACADDR
+
+   :dependencies: Board logic must provide the :c:func:`board_macaddr` interface.
    
 Filesystems
 -----------

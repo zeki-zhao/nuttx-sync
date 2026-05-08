@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_dfumode.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/signal.h>
 
@@ -59,7 +61,7 @@ void stm32_dfumode(void)
 {
 #ifdef CONFIG_DEBUG_WARN
   _warn("Entering DFU mode...\n");
-  nxsig_sleep(1);
+  nxsched_sleep(1);
 #endif
 
   asm("ldr r0, =0x40023844\n\t"    /* RCC_APB2ENR */

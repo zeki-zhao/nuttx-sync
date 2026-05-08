@@ -1,6 +1,8 @@
 /******************************************************************************
  * drivers/wireless/spirit/lib/spirit_spi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,7 +27,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/clock.h>
 #include <nuttx/spi/spi.h>
@@ -671,7 +673,7 @@ int spirit_waitstatus(FAR struct spirit_library_s *spirit,
   /* This is probably not an error.  In a busy radio environment, there
    * are many race conditions.  Most typically, just when the driver is
    * setting up to perform a transmission, the hardware commits to a
-   * reception.  The symptom is that the the above loop times out out
+   * reception.  The symptom is that the above loop times out out
    * waiting to go into the TX state (because it is in the RX state).
    *
    * Complaining with too much debug output just aggravates the problem.

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32h7/nucleo-h743zi2/src/stm32_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,7 +43,15 @@
 #include "stm32_fdcan_sock.h"
 #endif
 
+#ifdef CONFIG_SYSTEMTICK_HOOK
+#include <semaphore.h>
+#endif
+
 #include "nucleo-h743zi2.h"
+
+#ifdef CONFIG_INPUT_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -99,7 +109,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_RAMMTD
   /* Create a RAM MTD device if configured */
 
-  ramstart = (uint8_t *)kmm_malloc(128 * 1024);
+  ramstart = kmm_malloc(128 * 1024);
   if (ramstart == NULL)
     {
       syslog(LOG_ERR, "ERROR: Allocation for RAM MTD failed\n");
@@ -150,6 +160,16 @@ int stm32_bringup(void)
         }
     }
 #endif
+
+#if defined(CONFIG_INPUT_BUTTONS_LOWER)
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif /* CONFIG_INPUT_BUTTONS */
 
 #ifdef HAVE_USBHOST
   /* Initialize USB host operation.  stm32_usbhost_initialize()
@@ -258,3 +278,13 @@ int stm32_bringup(void)
 
   return OK;
 }
+
+#ifdef CONFIG_SYSTEMTICK_HOOK
+
+sem_t g_waitsem;
+
+void board_timerhook(void)
+{
+  (void)sem_post(&g_waitsem);
+}
+#endif

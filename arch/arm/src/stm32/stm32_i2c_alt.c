@@ -1,17 +1,14 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_i2c_alt.c
- * STM32 I2C Hardware Layer - Device Driver
  *
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Author: Uros Platise <uros.platise@isotel.eu>
- *
- * With extensions, modifications by:
- *
- *   Copyright (C) 2011-2014, 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- *   Copyright (C) 2014 Patrizio Simona. All rights reserved.
- *   Author: Patrizio Simona <psimona@ethz.ch>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016-2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2014 Patrizio Simona. All rights reserved.
+ * SPDX-FileCopyrightText: 2011-2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Uros Platise. All rights reserved.
+ * SPDX-FileContributor: Uros Platise <uros.platise@isotel.eu>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Patrizio Simona <psimona@ethz.ch>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -89,7 +86,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
@@ -120,6 +117,14 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#if STM32_PCLK1_FREQUENCY < 4000000
+#  warning STM32_I2C: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
+#endif
+
+#if STM32_PCLK1_FREQUENCY < 2000000
+#  error STM32_I2C: Peripheral clock must be at least 2 MHz to support 100 kHz operation.
+#endif
 
 /* Configuration ************************************************************/
 
@@ -824,8 +829,8 @@ static void stm32_i2c_traceevent(struct stm32_i2c_priv_s *priv,
 
       /* Initialize the new trace entry */
 
-      trace->event  = event;
-      trace->parm   = parm;
+      trace->event = event;
+      trace->parm  = parm;
 
       /* Bump up the trace index (unless we are out of trace entries) */
 
@@ -852,7 +857,8 @@ static void stm32_i2c_tracedump(struct stm32_i2c_priv_s *priv)
     {
       trace = &priv->trace[i];
       syslog(LOG_DEBUG,
-             "%2d. STATUS: %08x COUNT: %4d EVENT: %4d PARM: %08x TIME: %d\n",
+             "%2d. STATUS: %08" PRIx32 " COUNT: %4d EVENT: %4d PARM:"
+             " %08" PRIx32 " TIME: %d\n",
              i + 1, trace->status, trace->count,  trace->event, trace->parm,
              trace->time - priv->start_time);
     }
@@ -2346,7 +2352,7 @@ static int stm32_i2c_reset(struct i2c_master_s *dev)
 
 out:
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
   return ret;
@@ -2368,16 +2374,6 @@ out:
 struct i2c_master_s *stm32_i2cbus_initialize(int port)
 {
   struct stm32_i2c_priv_s *priv = NULL;
-
-syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
-#if STM32_PCLK1_FREQUENCY < 4000000
-#   warning STM32_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
-#endif
-
-#if STM32_PCLK1_FREQUENCY < 2000000
-#   warning STM32_I2C_INIT: Peripheral clock must be at least 2 MHz to support 100 kHz operation.
-  return NULL;
-#endif
 
   /* Get I2C private structure */
 

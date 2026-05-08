@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/renesas/rx65n/rx65n-rsk2mb/src/rx65n_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,12 +26,10 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/config.h>
-
 #include <sys/types.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/kthread.h>
 #include <nuttx/board.h>

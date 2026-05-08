@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_appinit.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+
 #include <nuttx/board.h>
 
 #include "esp32c3-devkit.h"
@@ -73,7 +76,7 @@ int board_app_initialize(uintptr_t arg)
 #else
   /* Perform board-specific initialization */
 
-  return esp32c3_bringup();
+  return esp_bringup();
 #endif
 }
 

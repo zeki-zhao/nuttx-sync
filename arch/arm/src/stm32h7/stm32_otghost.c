@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_otghost.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,7 +36,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -524,7 +526,7 @@ static struct usbhost_connection_s g_usbconn =
 #ifdef CONFIG_STM32H7_USBHOST_REGDEBUG
 static void stm32_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  uinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  uinfo("%08" PRIx32 "%s%08" PRIx32 "\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -1960,7 +1962,7 @@ static ssize_t stm32_in_transfer(struct stm32_usbhost_s *priv, int chidx,
                    * Small delays could require more resolution than is
                    * provided by the system timer.  For example, if the
                    * system timer resolution is 10MS, then
-                   * nxsig_usleep(1000) will actually request a delay 20MS
+                   * nxsched_usleep(1000) will actually request a delay 20MS
                    * (due to both quantization and rounding).
                    *
                    * REVISIT: So which is better?  To ignore tiny delays and
@@ -1970,7 +1972,7 @@ static ssize_t stm32_in_transfer(struct stm32_usbhost_s *priv, int chidx,
 
                   if (delay > CONFIG_USEC_PER_TICK)
                     {
-                      nxsig_usleep(delay - CONFIG_USEC_PER_TICK);
+                      nxsched_usleep(delay - CONFIG_USEC_PER_TICK);
                     }
                 }
             }
@@ -2275,7 +2277,7 @@ static ssize_t stm32_out_transfer(struct stm32_usbhost_s *priv,
            * transfer using the same buffer pointer and length.
            */
 
-          nxsig_usleep(20 * 1000);
+          nxsched_usleep(20 * 1000);
         }
       else
         {
@@ -2783,7 +2785,7 @@ static inline void stm32_gint_hcoutisr(struct stm32_usbhost_s *priv,
 
   else if ((pending & OTG_HCINT_STALL) != 0)
     {
-      /* Clear the pending the STALL response receiv (STALL) interrupt */
+      /* Clear the pending STALL response receive (STALL) interrupt */
 
       stm32_putreg(STM32_OTG_HCINT(chidx), OTG_HCINT_STALL);
 
@@ -3958,7 +3960,7 @@ static int stm32_rh_enumerate(struct stm32_usbhost_s *priv,
    * 100ms.
    */
 
-  nxsig_usleep(100 * 1000);
+  nxsched_usleep(100 * 1000);
 
   /* Reset the host port */
 
@@ -4272,7 +4274,7 @@ static int stm32_alloc(struct usbhost_driver_s *drvr,
 
   /* There is no special memory requirement for the STM32. */
 
-  alloc = (uint8_t *)kmm_malloc(CONFIG_STM32H7_OTG_DESCSIZE);
+  alloc = kmm_malloc(CONFIG_STM32H7_OTG_DESCSIZE);
   if (!alloc)
     {
       return -ENOMEM;
@@ -4356,7 +4358,7 @@ static int stm32_ioalloc(struct usbhost_driver_s *drvr,
 
   /* There is no special memory requirement */
 
-  alloc = (uint8_t *)kmm_malloc(buflen);
+  alloc = kmm_malloc(buflen);
   if (!alloc)
     {
       return -ENOMEM;

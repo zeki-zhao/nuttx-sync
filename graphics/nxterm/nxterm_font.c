@@ -1,6 +1,8 @@
 /****************************************************************************
  * graphics/nxterm/nxterm_font.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,7 +29,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/kmalloc.h>
 
@@ -129,7 +131,7 @@ static void nxterm_fillspace(FAR struct nxterm_state_s *priv,
  *
  * Description:
  *   This is part of the nxterm_putc logic.  It creates and positions a
- *   the character and renders (or re-uses) a glyph for font.
+ *   the character and renders (or reuses) a glyph for font.
  *
  ****************************************************************************/
 
@@ -140,7 +142,7 @@ FAR const struct nxterm_bitmap_s *
   FAR const struct nxfonts_glyph_s *glyph;
 
   /* Is there space for another character on the display? */
-  priv->nchars = (priv->nchars)%(priv->maxchars);
+
   if (priv->nchars < priv->maxchars)
     {
       /* Yes, setup the bitmap information */

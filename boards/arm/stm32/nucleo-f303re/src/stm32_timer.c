@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/nucleo-f303re/src/stm32_timer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,7 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/timers/timer.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "stm32_tim.h"
 #include "nucleo-f303re.h"

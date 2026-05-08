@@ -28,7 +28,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <sys/types.h>
 
 #include <nuttx/arch.h>
@@ -39,7 +39,7 @@
 
 #include "hardware/esp32_soc.h"
 
-#include "esp32_clockconfig.h"
+#include "esp_clk.h"
 #include "esp32_tim.h"
 
 /****************************************************************************
@@ -490,7 +490,7 @@ static void esp32_timer_setcallback(struct timer_lowerhalf_s *lower,
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
-  assert(ret == OK);
+  ASSERT(ret == OK);
 }
 
 /****************************************************************************

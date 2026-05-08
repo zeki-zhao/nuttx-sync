@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32l15xx_flash.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,7 +40,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 
 #include "stm32_flash.h"

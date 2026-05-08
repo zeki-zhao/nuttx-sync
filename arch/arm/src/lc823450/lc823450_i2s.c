@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_i2s.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,7 +29,7 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <inttypes.h>
 
 #include <nuttx/sched.h>
@@ -289,7 +291,7 @@ static void _setup_audio_pll(uint32_t freq)
 
   /* TODO: Wait */
 
-  nxsig_usleep(50 * 1000);
+  nxsched_usleep(50 * 1000);
 
   /* Switch to the PLL */
 
@@ -1010,7 +1012,7 @@ struct i2s_dev_s *lc823450_i2sdev_initialize(void)
    * chip select structures.
    */
 
-  priv = (struct lc823450_i2s_s *)kmm_zalloc(sizeof(struct lc823450_i2s_s));
+  priv = kmm_zalloc(sizeof(struct lc823450_i2s_s));
   if (!priv)
     {
       i2serr("ERROR: Failed to allocate a chip select structure\n");
@@ -1050,7 +1052,7 @@ struct i2s_dev_s *lc823450_i2sdev_initialize(void)
   /* Set the new affinity which assigns to CPU0 */
 
   nxsched_set_affinity(nxsched_gettid(), sizeof(cpuset1), &cpuset1);
-  nxsig_usleep(10 * 1000);
+  nxsched_usleep(10 * 1000);
 #endif
 
   irq_attach(LC823450_IRQ_AUDIOBUF0, _i2s_isr, NULL);
@@ -1063,7 +1065,7 @@ struct i2s_dev_s *lc823450_i2sdev_initialize(void)
   /* Restore the original affinity */
 
   nxsched_set_affinity(nxsched_gettid(), sizeof(cpuset0), &cpuset0);
-  nxsig_usleep(10 * 1000);
+  nxsched_usleep(10 * 1000);
 #endif
 
   /* Success exit */

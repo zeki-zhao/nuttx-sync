@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_i2c.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -61,7 +63,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
@@ -92,6 +94,14 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#if STM32_PCLK1_FREQUENCY < 4000000
+#  warning "STM32_I2C: Periph clk must be at least 4MHz to support 400kHz."
+#endif
+
+#if STM32_PCLK1_FREQUENCY < 2000000
+#  error "STM32_I2C: Periph clk must be at least 2MHz to support 100kHz."
+#endif
 
 /* Configuration ************************************************************/
 
@@ -315,8 +325,6 @@ static int stm32_i2c_transfer(struct i2c_master_s *dev,
 #ifdef CONFIG_I2C_RESET
 static int stm32_i2c_reset(struct i2c_master_s *dev);
 #endif
-
-static int stm32_i2c_Myreset(struct i2c_master_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -543,15 +551,14 @@ static inline int stm32_i2c_sem_waitdone(struct stm32_i2c_priv_s *priv)
   irqstate_t flags;
   uint32_t regval;
   int ret;
-printf("hello%d\n",100);
+
   flags = enter_critical_section();
-printf("hello%d\n",101);
+
   /* Enable I2C interrupts */
 
   regval  = stm32_i2c_getreg(priv, STM32_I2C_CR2_OFFSET);
   regval |= (I2C_CR2_ITERREN | I2C_CR2_ITEVFEN);
   stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, regval);
-  printf("hello%d\n",102);
 
   /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts
    * are currently disabled but will be temporarily re-enabled below when
@@ -590,11 +597,10 @@ printf("hello%d\n",101);
   priv->intstate = INTSTATE_IDLE;
 
   /* Disable I2C interrupts */
-printf("hello%d\n",103);
+
   regval  = stm32_i2c_getreg(priv, STM32_I2C_CR2_OFFSET);
   regval &= ~I2C_CR2_ALLINTS;
   stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, regval);
-  printf("hello%d\n",104);
 
   leave_critical_section(flags);
   return ret;
@@ -798,8 +804,8 @@ static void stm32_i2c_traceevent(struct stm32_i2c_priv_s *priv,
 
       /* Initialize the new trace entry */
 
-      trace->event  = event;
-      trace->parm   = parm;
+      trace->event = event;
+      trace->parm  = parm;
 
       /* Bump up the trace index (unless we are out of trace entries) */
 
@@ -826,7 +832,8 @@ static void stm32_i2c_tracedump(struct stm32_i2c_priv_s *priv)
     {
       trace = &priv->trace[i];
       syslog(LOG_DEBUG,
-         "%2d. STATUS: %08x COUNT: %3d EVENT: %s(%2d) PARM: %08x TIME: %d\n",
+         "%2d. STATUS: %08" PRIx32 " COUNT: %3d EVENT: %s(%2d) PARM:"
+             " %08" PRIx32 " TIME: %d\n",
              i + 1, trace->status, trace->count, g_trace_names[trace->event],
              trace->event, trace->parm, trace->time - priv->start_time);
     }
@@ -1508,9 +1515,11 @@ static int stm32_i2c_transfer(struct i2c_master_s *dev,
   uint32_t ahbenr;
 #endif
   int ret;
+
   DEBUGASSERT(count > 0);
 
   /* Ensure that address or flags don't change meanwhile */
+
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
@@ -1527,14 +1536,13 @@ static int stm32_i2c_transfer(struct i2c_master_s *dev,
    * then we cannot do this at the top of the loop, unfortunately.  The STOP
    * will not complete normally if the FSMC is enabled.
    */
-  stm32_i2c_sem_waitstop(priv);
 
+  stm32_i2c_sem_waitstop(priv);
 #endif
 
   /* Clear any pending error interrupts */
 
   stm32_i2c_putreg(priv, STM32_I2C_SR1_OFFSET, 0);
-  printf("hello%d\n",1);
 
   /* "Note: When the STOP, START or PEC bit is set, the software must
    *  not perform any write access to I2C_CR1 before this bit is
@@ -1544,7 +1552,6 @@ static int stm32_i2c_transfer(struct i2c_master_s *dev,
    */
 
   stm32_i2c_clrstart(priv);
-  printf("hello%d\n",1);
 
   /* Old transfers are done */
 
@@ -1561,7 +1568,7 @@ static int stm32_i2c_transfer(struct i2c_master_s *dev,
   /* Reset I2C trace logic */
 
   stm32_i2c_tracereset(priv);
-  printf("hello%d\n",1);
+
   /* Set I2C clock frequency (on change it toggles I2C_CR1_PE !)
    * REVISIT: Note that the frequency is set only on the first message.
    * This could be extended to support different transfer frequencies for
@@ -1569,21 +1576,20 @@ static int stm32_i2c_transfer(struct i2c_master_s *dev,
    */
 
   stm32_i2c_setclock(priv, msgs->frequency);
-  printf("hello%d\n",2);
+
   /* Trigger start condition, then the process moves into the ISR.  I2C
    * interrupts will be enabled within stm32_i2c_waitdone().
    */
 
   priv->status = 0;
   stm32_i2c_sendstart(priv);
-  printf("hello%d\n",3);
+
   /* Wait for an ISR, if there was a timeout, fetch latest status to get
    * the BUSY flag.
    */
 
   if (stm32_i2c_sem_waitdone(priv) < 0)
     {
-      printf("hello%d\n",4);
       status = stm32_i2c_getstatus(priv);
       ret = -ETIMEDOUT;
 
@@ -1604,7 +1610,6 @@ static int stm32_i2c_transfer(struct i2c_master_s *dev,
     }
   else
     {
-      printf("hello%d\n",5);
       /* clear SR2 (BUSY flag) as we've done successfully */
 
       status = priv->status & 0xffff;
@@ -1614,7 +1619,6 @@ static int stm32_i2c_transfer(struct i2c_master_s *dev,
 
   if ((status & I2C_SR1_ERRORMASK) != 0)
     {
-      printf("hello%d\n",6);
       /* I2C_SR1_ERRORMASK is the 'OR' of the following individual bits: */
 
       if (status & I2C_SR1_BERR)
@@ -1677,7 +1681,6 @@ static int stm32_i2c_transfer(struct i2c_master_s *dev,
 
   else if ((status & (I2C_SR2_BUSY << 16)) != 0)
     {
-      printf("hello%d\n",7);
       /* I2C Bus is for some reason busy */
 
       ret = -EBUSY;
@@ -1706,8 +1709,6 @@ static int stm32_i2c_transfer(struct i2c_master_s *dev,
 
   priv->dcnt = 0;
   priv->ptr = NULL;
-
-  printf("hello%d\n",8);
 
   nxmutex_unlock(&priv->lock);
   return ret;
@@ -1844,12 +1845,13 @@ static int stm32_i2c_reset(struct i2c_master_s *dev)
 
 out:
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
   return ret;
 }
 #endif /* CONFIG_I2C_RESET */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1865,17 +1867,9 @@ out:
 struct i2c_master_s *stm32_i2cbus_initialize(int port)
 {
   struct stm32_i2c_priv_s *priv = NULL;
-  syslog(LOG_DEBUG,"In %s:%d\n",__FILE__,__LINE__);
-#if STM32_PCLK1_FREQUENCY < 4000000
-#   warning STM32_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
-#endif
-
-#if STM32_PCLK1_FREQUENCY < 2000000
-#   warning STM32_I2C_INIT: Peripheral clock must be at least 2 MHz to support 100 kHz operation.
-  return NULL;
-#endif
 
   /* Get I2C private structure */
+
   switch (port)
     {
 #ifdef CONFIG_STM32_I2C1

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/input/button_upper.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,7 +39,7 @@
 #include <poll.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
@@ -59,13 +61,18 @@ struct btn_upperhalf_s
 
   FAR const struct btn_lowerhalf_s *bu_lower;
 
-  btn_buttonset_t bu_sample;  /* Last sampled button states */
+  btn_buttonset_t bu_sample; /* Last sampled button states */
+  bool bu_enabled;
 
   /* The following is a singly linked list of open references to the
    * button device.
    */
 
   FAR struct btn_open_s *bu_open;
+
+#if CONFIG_INPUT_BUTTONS_DEBOUNCE_DELAY
+  struct wdog_s bu_wdog;
+#endif
 };
 
 /* This structure describes the state of one open button driver instance */
@@ -78,9 +85,11 @@ struct btn_open_s
 
   /* Button event notification information */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   pid_t bo_pid;
   struct btn_notify_s bo_notify;
   struct sigwork_s bo_work;
+#endif
 
   /* Poll event information */
 
@@ -106,7 +115,7 @@ static void    btn_interrupt(FAR const struct btn_lowerhalf_s *lower,
 
 /* Sampling */
 
-static void    btn_sample(FAR struct btn_upperhalf_s *priv);
+static void    btn_sample(wdparm_t arg);
 
 /* Character driver methods */
 
@@ -186,6 +195,16 @@ static void btn_enable(FAR struct btn_upperhalf_s *priv)
   DEBUGASSERT(lower->bl_enable);
   if (press != 0 || release != 0)
     {
+      /* Update last sampled button states when enabling interrupts for
+       * the first time.
+       */
+
+      if (!priv->bu_enabled)
+        {
+          priv->bu_enabled = true;
+          priv->bu_sample = lower->bl_buttons(lower);
+        }
+
       /* Enable interrupts with the new button set */
 
       lower->bl_enable(lower, press, release,
@@ -193,6 +212,8 @@ static void btn_enable(FAR struct btn_upperhalf_s *priv)
     }
   else
     {
+      priv->bu_enabled = false;
+
       /* Disable further interrupts */
 
       lower->bl_enable(lower, 0, 0, NULL, NULL);
@@ -214,15 +235,21 @@ static void btn_interrupt(FAR const struct btn_lowerhalf_s *lower,
 
   /* Process the next sample */
 
-  btn_sample(priv);
+#if CONFIG_INPUT_BUTTONS_DEBOUNCE_DELAY
+  wd_start(&priv->bu_wdog, MSEC2TICK(CONFIG_INPUT_BUTTONS_DEBOUNCE_DELAY),
+           btn_sample, (wdparm_t)priv);
+#else
+  btn_sample((wdparm_t)priv);
+#endif
 }
 
 /****************************************************************************
  * Name: btn_sample
  ****************************************************************************/
 
-static void btn_sample(FAR struct btn_upperhalf_s *priv)
+static void btn_sample(wdparm_t arg)
 {
+  FAR struct btn_upperhalf_s *priv;
   FAR const struct btn_lowerhalf_s *lower;
   FAR struct btn_open_s *opriv;
   btn_buttonset_t sample;
@@ -230,6 +257,7 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
   btn_buttonset_t press;
   btn_buttonset_t release;
 
+  priv = (FAR struct btn_upperhalf_s *)arg;
   DEBUGASSERT(priv && priv->bu_lower);
   lower = priv->bu_lower;
 
@@ -271,6 +299,7 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
 
       /* Have any signal events occurred? */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
       if ((press & opriv->bo_notify.bn_press)     != 0 ||
           (release & opriv->bo_notify.bn_release) != 0)
         {
@@ -280,6 +309,7 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
           nxsig_notification(opriv->bo_pid, &opriv->bo_notify.bn_event,
                              SI_QUEUE, &opriv->bo_work);
         }
+#endif
     }
 
   priv->bu_sample = sample;
@@ -298,14 +328,13 @@ static int btn_open(FAR struct file *filep)
   btn_buttonset_t supported;
   irqstate_t flags;
 
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv = (FAR struct btn_upperhalf_s *)inode->i_private;
+  priv = inode->i_private;
 
   /* Allocate a new open structure */
 
-  opriv = (FAR struct btn_open_s *)kmm_zalloc(sizeof(struct btn_open_s));
+  opriv = kmm_zalloc(sizeof(struct btn_open_s));
   if (!opriv)
     {
       ierr("ERROR: Failed to allocate open structure\n");
@@ -322,6 +351,7 @@ static int btn_open(FAR struct file *filep)
   supported = lower->bl_supported(lower);
   opriv->bo_pollevents.bp_press   = supported;
   opriv->bo_pollevents.bp_release = supported;
+  opriv->bo_pending = true;
 
   /* Attach the open structure to the device */
 
@@ -353,15 +383,19 @@ static int btn_close(FAR struct file *filep)
   FAR struct btn_open_s *prev;
   irqstate_t flags;
 
-  DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
+  DEBUGASSERT(filep->f_priv);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct btn_upperhalf_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Get exclusive access to the driver structure */
 
   flags = enter_critical_section();
+
+#if CONFIG_INPUT_BUTTONS_DEBOUNCE_DELAY
+  wd_cancel(&priv->bu_wdog);
+#endif
 
   /* Find the open structure in the list of open structures for the device */
 
@@ -417,11 +451,10 @@ static ssize_t btn_read(FAR struct file *filep, FAR char *buffer,
   FAR const struct btn_lowerhalf_s *lower;
   irqstate_t flags;
 
-  DEBUGASSERT(filep && filep->f_inode);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct btn_upperhalf_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Make sure that the buffer is sufficiently large to hold at least one
    * complete sample.
@@ -463,10 +496,9 @@ static ssize_t btn_write(FAR struct file *filep, FAR const char *buffer,
   irqstate_t flags;
   int ret;
 
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct btn_upperhalf_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Make sure that the buffer is sufficiently large to hold at least one
    * complete sample.
@@ -514,11 +546,11 @@ static int btn_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   irqstate_t flags;
   int ret = OK;
 
-  DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
+  DEBUGASSERT(filep->f_priv);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct btn_upperhalf_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Get exclusive access to the driver structure */
 
@@ -618,7 +650,7 @@ static int btn_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 
     default:
-      ierr("ERROR: Unrecognized command: %d\n", cmd);
+      iinfo("ERROR: Unrecognized command: %d\n", cmd);
       ret = -ENOTTY;
       break;
     }
@@ -641,11 +673,11 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int ret = OK;
   int i;
 
-  DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
+  DEBUGASSERT(filep->f_priv);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct btn_upperhalf_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Get exclusive access to the driver structure */
 
@@ -684,8 +716,8 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
       if (i >= CONFIG_INPUT_BUTTONS_NPOLLWAITERS)
         {
           ierr("ERROR: Too many poll waiters\n");
-          fds->priv    = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
     }
@@ -767,9 +799,6 @@ int btn_register(FAR const char *devname,
   /* Initialize the new button driver instance */
 
   priv->bu_lower = lower;
-
-  DEBUGASSERT(lower->bl_buttons);
-  priv->bu_sample = lower->bl_buttons(lower);
 
   /* And register the button driver */
 

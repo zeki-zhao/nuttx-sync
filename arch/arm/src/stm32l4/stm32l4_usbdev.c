@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_usbdev.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,7 +34,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -229,7 +231,7 @@
 #endif
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* The various states of a control pipe */
@@ -666,7 +668,7 @@ static uint16_t stm32l4_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  uinfo("%08x->%04x\n", addr, val);
+  uinfo("%08" PRIx32 "->%04x\n", addr, val);
   return val;
 }
 #endif
@@ -680,7 +682,7 @@ static void stm32l4_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  uinfo("%08x<-%04x\n", addr, val);
+  uinfo("%08" PRIx32 "<-%04x\n", addr, val);
 
   /* Write the value */
 
@@ -708,26 +710,26 @@ static void stm32l4_dumpep(int epno)
   /* Endpoint register */
 
   addr = STM32L4_USB_EPR(epno);
-  uinfo("EPR%d:   [%08x] %04x\n", epno, addr, getreg16(addr));
+  uinfo("EPR%d:   [%08" PRIx32 "] %04x\n", epno, addr, getreg16(addr));
 
   /* Endpoint descriptor */
 
   addr = STM32L4_USB_BTABLE_ADDR(epno, 0);
-  uinfo("DESC:   %08x\n", addr);
+  uinfo("DESC:   %08" PRIx32 "\n", addr);
 
   /* Endpoint buffer descriptor */
 
   addr = STM32L4_USB_ADDR_TX(epno);
-  uinfo("  TX ADDR:  [%08x] %04x\n",  addr, getreg16(addr));
+  uinfo("  TX ADDR:  [%08" PRIx32 "] %04x\n",  addr, getreg16(addr));
 
   addr = STM32L4_USB_COUNT_TX(epno);
-  uinfo("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
+  uinfo("     COUNT: [%08" PRIx32 "] %04x\n",  addr, getreg16(addr));
 
   addr = STM32L4_USB_ADDR_RX(epno);
-  uinfo("  RX ADDR:  [%08x] %04x\n",  addr, getreg16(addr));
+  uinfo("  RX ADDR:  [%08" PRIx32 "] %04x\n",  addr, getreg16(addr));
 
   addr = STM32L4_USB_COUNT_RX(epno);
-  uinfo("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
+  uinfo("     COUNT: [%08" PRIx32 "] %04x\n",  addr, getreg16(addr));
 }
 #endif
 
@@ -742,7 +744,8 @@ static void stm32l4_checksetup(void)
   uint32_t apb1rstr = getreg32(STM32L4_RCC_APB1RSTR1);
   uint32_t apb1enr  = getreg32(STM32L4_RCC_APB1ENR1);
 
-  uinfo("CFGR: %08x APB1RSTR1: %08x APB1ENR1: %08x\n", cfgr, apb1rstr,
+  uinfo("CFGR: %08" PRIx32 " APB1RSTR1: %08" PRIx32
+        " APB1ENR1: %08" PRIx32 "\n", cfgr, apb1rstr,
         apb1enr);
 
   if ((apb1rstr & RCC_APB1RSTR1_USBFSRST) != 0 ||
@@ -1335,7 +1338,7 @@ static int stm32l4_wrrequest(struct stm32l4_usbdev_s *priv,
     }
 
   epno = USB_EPNO(privep->ep.eplog);
-  uinfo("epno=%d req=%p: len=%d xfrd=%d nullpkt=%d\n",
+  uinfo("epno=%d req=%p: len=%zu xfrd=%zu nullpkt=%d\n",
         epno, privreq, privreq->req.len, privreq->req.xfrd,
         privep->txnullpkt);
   UNUSED(epno);
@@ -1483,7 +1486,8 @@ static int stm32l4_rdrequest(struct stm32l4_usbdev_s *priv,
       return -ENOENT;
     }
 
-  uinfo("EP%d: len=%d xfrd=%d\n", epno, privreq->req.len, privreq->req.xfrd);
+  uinfo("EP%d: len=%zu xfrd=%zu\n",
+        epno, privreq->req.len, privreq->req.xfrd);
 
   /* Ignore any attempt to receive a zero length packet */
 
@@ -2956,7 +2960,7 @@ static struct usbdev_req_s *stm32l4_epallocreq(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, USB_EPNO(ep->eplog));
 
-  privreq = (struct stm32l4_req_s *)kmm_malloc(sizeof(struct stm32l4_req_s));
+  privreq = kmm_malloc(sizeof(struct stm32l4_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(STM32L4_TRACEERR_ALLOCFAIL), 0);

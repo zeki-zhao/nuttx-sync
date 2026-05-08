@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_i2c_v1.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,7 +46,6 @@
     defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F412)
 #  define STM32_I2C_FLTR_OFFSET   0x0024  /* FLTR Register (16-bit) */
 #endif
-
 
 /* Register Addresses *******************************************************/
 
@@ -198,10 +199,5 @@
 #  define I2C_FLTR_DNF_SHIFT    0         /* Bits 0-3: Digital noise filter */
 #  define I2C_FLTR_DNF_MASK     (0xf << I2C_FLTR_DNF_SHIFT)
 #endif
-
-
-#define  I2C_EVENT_MASTER_MODE_SELECT ((uint32_t)0x00030001)//(I2C_SR1_SB|I2C_SR2_MSL|I2C_SR2_BUSY)
-#define  I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED ((uint32_t)0x00070082)//(I2C_SR2_BUSY|I2C_SR2_MSL|I2C_SR1_ADDR|I2C_SR1_TXE|I2C_SR2_TRA)
-#define  I2C_EVENT_MASTER_BYTE_TRANSMITTED ((uint32_t)0x00070084)//(I2C_SR1_BTF|I2C_SR2_BUSY|I2C_SR2_MSL|I2C_SR1_ADDR|I2C_SR1_TXE|I2C_SR2_TRA)
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_I2C_V1_H */

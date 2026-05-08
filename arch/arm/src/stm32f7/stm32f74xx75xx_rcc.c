@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32f74xx75xx_rcc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,6 +29,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
+              "Configure BOARD_LOOPSPERMSEC to non-default value.");
 
 /* Allow up to 100 milliseconds for the high speed clock to become ready.
  * that is a very long delay, but if the clock does not become ready we are
@@ -226,7 +231,7 @@ static inline void rcc_enableahb1(void)
 
   regval |= RCC_AHB1ENR_OTGHSEN;
 #endif
-#endif  /* CONFIG_STM32F7_OTGFSHS */
+#endif /* CONFIG_STM32F7_OTGFSHS */
 
   putreg32(regval, STM32_RCC_AHB1ENR);   /* Enable peripherals */
 }
@@ -789,7 +794,7 @@ static void stm32_stdclockconfig(void)
       /* Over-drive is needed if
        *  - Voltage output scale 1 mode is selected and SYSCLK frequency is
        *    over 180 MHz.
-       *  - Voltage output scale 2 mode is selected and SYSCLK frequence is
+       *  - Voltage output scale 2 mode is selected and SYSCLK frequency is
        *    over 168 MHz.
        */
 

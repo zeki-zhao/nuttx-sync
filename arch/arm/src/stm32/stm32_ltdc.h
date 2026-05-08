@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_ltdc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -94,7 +96,7 @@ struct fb_vtable_s *stm32_ltdcgetvplane(int vplane);
  *
  ****************************************************************************/
 
-// #ifdef CONFIG_STM32_LCD_BACKLIGHT
+#ifdef CONFIG_STM32_LCD_BACKLIGHT
 void stm32_backlight(bool blon);
-// #endif
+#endif
 #endif /* __ARCH_ARM_SRC_STM32_STM32_LTDC_H */

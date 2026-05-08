@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/input/gt9xx.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,7 +37,8 @@
 #include <poll.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <fcntl.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -65,6 +68,15 @@
 #define GTP_REG_VERSION    0x8140  /* Product ID */
 #define GTP_READ_COOR_ADDR 0x814e  /* Touch Panel Status */
 #define GTP_POINT1         0x8150  /* Touch Point 1 */
+#define GTP_POINT_SIZE     8       /* Each touch point occupies 8 bytes */
+#ifndef CONFIG_INPUT_GT9XX_MAX_TOUCH
+#  define CONFIG_INPUT_GT9XX_MAX_TOUCH 1
+#endif
+#define GTP_MAX_TOUCH      CONFIG_INPUT_GT9XX_MAX_TOUCH
+
+#ifndef MIN
+#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#endif
 
 /****************************************************************************
  * Private Types
@@ -76,25 +88,32 @@ struct gt9xx_dev_s
 {
   /* I2C bus and address for device */
 
-  struct i2c_master_s *i2c;
+  FAR struct i2c_master_s *i2c;
   uint8_t addr;
 
   /* Callback for Board-Specific Operations */
 
-  const struct gt9xx_board_s *board;
+  FAR const struct gt9xx_board_s *board;
 
   /* Device State */
 
   mutex_t devlock;  /* Mutex to prevent concurrent reads */
   uint8_t cref;     /* Reference Counter for device */
   bool int_pending; /* True if a Touch Interrupt is pending processing */
+#ifndef CONFIG_INPUT_GT9XX_MULTITOUCH
   uint16_t x;       /* X Coordinate of Last Touch Point */
   uint16_t y;       /* Y Coordinate of Last Touch Point */
   uint8_t flags;    /* Touch Up or Touch Down for Last Touch Point */
+#else
+  uint16_t last_x[GTP_MAX_TOUCH]; /* Per-point tracking for multi-touch */
+  uint16_t last_y[GTP_MAX_TOUCH];
+  uint8_t last_flags[GTP_MAX_TOUCH];
+  int prev_npoints;               /* Number of points from last read */
+#endif
 
   /* Poll Waiters for device */
 
-  struct pollfd *fds[CONFIG_INPUT_GT9XX_NPOLLWAITERS];
+  FAR struct pollfd *fds[CONFIG_INPUT_GT9XX_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -113,22 +132,24 @@ static int gt9xx_poll(FAR struct file *filep, FAR struct pollfd *fds,
  ****************************************************************************/
 
 /* File Operations for Touch Panel */
+
 static const struct file_operations g_gt9xx_fileops =
 {
-  .open     = gt9xx_open,   /* open */
-  .close    = gt9xx_close,  /* close */
-  .read     = gt9xx_read,   /* read */
-  .write    = gt9xx_write,  /* write */ //TODO:write一定要有，且不能为null
-  .seek     = NULL,         /* seek */
-  .ioctl    = NULL,         /* ioctl */
-  .truncate = NULL,         /* truncate */
-  .mmap     = NULL,         /* mmap */
-  .poll     = gt9xx_poll    /* poll */
+  gt9xx_open,   /* open */
+  gt9xx_close,  /* close */
+  gt9xx_read,   /* read */
+  gt9xx_write,  /* write */
+  NULL,         /* seek */
+  NULL,         /* ioctl */
+  NULL,         /* truncate */
+  NULL,         /* mmap */
+  gt9xx_poll,   /* poll */
+  NULL,         /* readv */
+  NULL          /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , .unlink = NULL        /* unlink */
+  , NULL        /* unlink */
 #endif
 };
-
 
 /****************************************************************************
  * Private Functions
@@ -167,6 +188,7 @@ static int gt9xx_i2c_read(FAR struct gt9xx_dev_s *dev,
   };
 
   /* Compose the I2C Messages */
+
   struct i2c_msg_s msgv[2] =
   {
     {
@@ -191,7 +213,7 @@ static int gt9xx_i2c_read(FAR struct gt9xx_dev_s *dev,
 
   const int msgv_len = sizeof(msgv) / sizeof(msgv[0]);
 
-  iinfo("reg=0x%x, buflen=%ld\n", reg, buflen);
+  iinfo("reg=0x%x, buflen=%zu\n", reg, buflen);
   DEBUGASSERT(dev && dev->i2c && buf);
 
   /* Execute the I2C Transfer */
@@ -381,17 +403,17 @@ static int gt9xx_read_touch_data(FAR struct gt9xx_dev_s *dev,
   uint8_t status[1];
   uint8_t status_code;
   uint8_t touched_points;
-  uint8_t touch[6];
+  uint8_t touch[GTP_POINT_SIZE];
   uint16_t x;
   uint16_t y;
   uint8_t flags;
   int ret;
+  int i;
 
   /* Erase the Touch Sample and Touch Point */
 
   iinfo("\n");
   DEBUGASSERT(dev && sample);
-  memset(sample, 0, sizeof(*sample));
 
   /* Read the Touch Panel Status */
 
@@ -411,29 +433,39 @@ static int gt9xx_read_touch_data(FAR struct gt9xx_dev_s *dev,
 
   if (status_code != 0 && touched_points >= 1)
     {
-      /* Read the First Touch Point (6 bytes) */
+      int n = MIN(touched_points, GTP_MAX_TOUCH);
+      sample->npoints = n;
 
-      ret = gt9xx_i2c_read(dev, GTP_POINT1, touch, sizeof(touch));
-      if (ret < 0)
+      for (i = 0; i < n; i++)
         {
-          ierr("Read Touch Point failed: %d\n", ret);
-          return ret;
+          /* Read each touch point at GTP_POINT1 + i * 6 */
+
+          ret = gt9xx_i2c_read(dev, GTP_POINT1 + i * GTP_POINT_SIZE,
+                               touch, sizeof(touch));
+          if (ret < 0)
+            {
+              ierr("Read Touch Point %d failed: %d\n", i, ret);
+              return ret;
+            }
+
+          /* Decode the Touch Coordinates */
+
+          x = touch[0] + (touch[1] << 8);
+          y = touch[2] + (touch[3] << 8);
+
+          /* Return the Touch Coordinates as Touch Down */
+
+          flags = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID;
+          sample->point[i].id = i;
+          sample->point[i].x = x;
+          sample->point[i].y = y;
+          sample->point[i].flags = flags;
+          iinfo("touch %d down x=%d, y=%d\n", i, x, y);
         }
-
-      /* Decode the Touch Coordinates */
-
-      x = touch[0] + (touch[1] << 8);
-      y = touch[2] + (touch[3] << 8);
-
-      /* Return the Touch Coordinates as Touch Down */
-
-      flags = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID;
-      sample->npoints = 1;
-      sample->point[0].id = 0;
-      sample->point[0].x = x;
-      sample->point[0].y = y;
-      sample->point[0].flags = flags;
-      iinfo("touch down x=%d, y=%d\n", x, y);
+    }
+  else
+    {
+      sample->npoints = 0;
     }
 
   /* Set the Touch Panel Status to 0 */
@@ -470,27 +502,34 @@ static ssize_t gt9xx_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode *inode;
   FAR struct gt9xx_dev_s *priv;
-  struct touch_sample_s sample;
-  const size_t outlen = sizeof(sample);
+  struct
+  {
+    int npoints;
+    struct touch_point_s point[GTP_MAX_TOUCH];
+  } sample_storage;
+  struct touch_sample_s *sample = (struct touch_sample_s *)&sample_storage;
+  const size_t outlen = sizeof(sample_storage);
   irqstate_t flags;
   int ret;
 
   /* Returned Touch Sample will have 0 or 1 Touch Points */
-  iinfo("buflen=%ld\n", buflen);
-  if (buflen < outlen)
+
+  iinfo("buflen=%zu\n", buflen);
+  if (buflen < sizeof(struct touch_sample_s))
     {
-      ierr("Buffer should be at least %ld bytes, got %ld bytes\n",
+      ierr("Buffer should be at least %zu bytes, got %zu bytes\n",
            outlen, buflen);
       return -EINVAL;
     }
+
   /* Get the Touch Panel Device */
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv = inode->i_private;
 
   /* Begin Mutex: Lock to prevent concurrent reads */
+
   ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
@@ -499,83 +538,142 @@ static ssize_t gt9xx_read(FAR struct file *filep, FAR char *buffer,
 
   ret = -EINVAL;
 
-  /* If waiting for Touch Up, return the Last Touch Point as Touch Up */
+  /* If non-blocking and no interrupt pending, don't touch I2C */
 
-  if (priv->flags & TOUCH_DOWN)
+  if ((filep->f_oflags & O_NONBLOCK) && !priv->int_pending)
     {
-      /* Begin Critical Section */
+      ret = -EAGAIN;
+      goto errout;
+    }
 
-      flags = enter_critical_section();
+  /* Read touch data from hardware */
 
-      /* Mark the Last Touch Point as Touch Up */
+  memset(sample, 0, outlen);
+  ret = gt9xx_read_touch_data(priv, sample);
+  if (ret < 0)
+    {
+      goto errout;
+    }
 
-      priv->flags = TOUCH_UP | TOUCH_ID_VALID | TOUCH_POS_VALID;
+  if (sample->npoints >= 1)
+    {
+#ifdef CONFIG_INPUT_GT9XX_MULTITOUCH
+      /* Check if all touch points are duplicates of the last read */
+      int i;
+      bool all_dup = true;
+      for (i = 0; i < sample->npoints; i++)
+        {
+          if (!(priv->last_flags[i] & TOUCH_DOWN) ||
+              priv->last_x[i] != sample->point[i].x ||
+              priv->last_y[i] != sample->point[i].y)
+            {
+              all_dup = false;
+              break;
+            }
+        }
 
-      /* End Critical Section */
+      if (all_dup && priv->prev_npoints > 0)
+        {
+          memset(sample, 0, outlen);
+          sample->npoints = 0;
+        }
+      else
+        {
+          /* New or changed touch data — update per-point cache */
+          for (i = 0; i < sample->npoints; i++)
+            {
+              priv->last_x[i] = sample->point[i].x;
+              priv->last_y[i] = sample->point[i].y;
+              priv->last_flags[i] = TOUCH_DOWN | TOUCH_ID_VALID |
+                                    TOUCH_POS_VALID;
+            }
+          priv->prev_npoints = sample->npoints;
+        }
+#else
+      /* Filter single-point duplicates (same position, touch still active) */
 
-      leave_critical_section(flags);
+      if (sample->npoints == 1 && (priv->flags & TOUCH_DOWN) &&
+          priv->x == sample->point[0].x &&
+          priv->y == sample->point[0].y)
+        {
+          memset(sample, 0, outlen);
+          sample->npoints = 0;
+          iinfo("skip duplicate x=%d, y=%d\n", priv->x, priv->y);
+        }
+      else
+        {
+          /* New touch data — save first point state */
 
-      /* Return the Last Touch Point, changed to Touch Up */
-
-      memset(&sample, 0, sizeof(sample));
-      sample.npoints = 1;
-      sample.point[0].id = 0;
-      sample.point[0].x = priv->x;
-      sample.point[0].y = priv->y;
-      sample.point[0].flags = priv->flags;
-      memcpy(buffer, &sample, sizeof(sample));
-      ret = OK;
-      iinfo("touch up x=%d, y=%d\n", priv->x, priv->y);
-      // printf("touch up x=%d, y=%d\n", priv->x, priv->y);
+          priv->x = sample->point[0].x;
+          priv->y = sample->point[0].y;
+          priv->flags = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID;
+        }
+#endif
     }
   else
     {
-      /* Otherwise read the Touch Point over I2C */
+#ifdef CONFIG_INPUT_GT9XX_MULTITOUCH
+      /* Hardware reports no touches — generate TOUCH_UP for all
+       * previously tracked points.
+       */
 
-      ret = gt9xx_read_touch_data(priv, &sample);
-
-      /* Skip duplicates */
-
-      if (sample.npoints >= 1 &&
-          priv->x == sample.point[0].x &&
-          priv->y == sample.point[0].y)
+      if (priv->prev_npoints > 0)
         {
-          memset(&sample, 0, sizeof(sample));
-          sample.npoints = 0;
-          iinfo("skip duplicate x=%d, y=%d\n", priv->x, priv->y);
+          int i;
+          memset(sample, 0, outlen);
+          sample->npoints = priv->prev_npoints;
+          for (i = 0; i < priv->prev_npoints; i++)
+            {
+              if (priv->last_flags[i] & TOUCH_DOWN)
+                {
+                  sample->point[i].id = i;
+                  sample->point[i].x = priv->last_x[i];
+                  sample->point[i].y = priv->last_y[i];
+                  sample->point[i].flags = TOUCH_UP | TOUCH_ID_VALID |
+                                           TOUCH_POS_VALID;
+                }
+
+              priv->last_flags[i] = 0;
+            }
+
+          priv->prev_npoints = 0;
+        }
+#else
+      /* Hardware reports no touches */
+
+      if (priv->flags & TOUCH_DOWN)
+        {
+          /* Touch was active — generate TOUCH_UP for the last known point */
+
+          memset(sample, 0, outlen);
+          sample->npoints = 1;
+          sample->point[0].id = 0;
+          sample->point[0].x = priv->x;
+          sample->point[0].y = priv->y;
+          sample->point[0].flags = TOUCH_UP | TOUCH_ID_VALID |
+                                   TOUCH_POS_VALID;
+          iinfo("touch up x=%d, y=%d\n", priv->x, priv->y);
         }
 
-      /* Return the Touch Point */
-        
-      memcpy(buffer, &sample, sizeof(sample));
-
-      /* Begin Critical Section */
-      flags = enter_critical_section();
-
-      /* Clear the Interrupt Pending Flag */
-
-      priv->int_pending = false;
-
-      /* Remember the Last Touch Point */
-
-      if (sample.npoints >= 1)
-        {
-          priv->x = sample.point[0].x;
-          priv->y = sample.point[0].y;
-          priv->flags = sample.point[0].flags;
-        }
-
-        // printf("touch down x=%d, y=%d\n", priv->x, priv->y);
-
-      /* End Critical Section */
-
-      leave_critical_section(flags);
+      priv->flags = 0;
+#endif
     }
+
+  /* Copy results to user buffer */
+
+  memcpy(buffer, sample, MIN(outlen, buflen));
+
+  /* Clear the Interrupt Pending Flag */
+
+  flags = enter_critical_section();
+  priv->int_pending = false;
+  leave_critical_section(flags);
 
   /* End Mutex: Unlock to allow next read */
 
+errout:
   nxmutex_unlock(&priv->devlock);
-  return (ret < 0) ? ret : outlen;
+  return (ret < 0) ? ret : MIN(outlen, buflen);
 }
 
 
@@ -601,21 +699,18 @@ static ssize_t gt9xx_write(FAR struct file *filep, FAR const char *buffer,size_t
 
 static int gt9xx_open(FAR struct file *filep)
 {
-    // printf("in %s:%d\n",__func__,__LINE__);
-    // return 0;
   FAR struct inode *inode;
   FAR struct gt9xx_dev_s *priv;
   unsigned int use_count;
   int ret;
-  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
+
   /* Get the Touch Panel Device */
 
   iinfo("\n");
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv = inode->i_private;
-  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
+
   /* Begin Mutex: Lock to prevent concurrent update to Reference Count */
 
   ret = nxmutex_lock(&priv->devlock);
@@ -642,15 +737,15 @@ static int gt9xx_open(FAR struct file *filep)
 
       /* Let Touch Panel power up before probing */
 
-      nxsig_usleep(100 * 1000);
+      nxsched_usleep(100 * 1000);
 
       /* Check that Touch Panel exists on I2C */
-        syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
+
       ret = gt9xx_probe_device(priv);
       if (ret < 0)
         {
           /* No such device, power off the Touch Panel */
-          syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
+
           priv->board->set_power(priv->board, false);
           goto out_lock;
         }
@@ -697,9 +792,8 @@ static int gt9xx_close(FAR struct file *filep)
   /* Get the Touch Panel Device */
 
   iinfo("\n");
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv = inode->i_private;
 
   /* Begin Mutex: Lock to prevent concurrent update to Reference Count */
@@ -763,20 +857,18 @@ static int gt9xx_poll(FAR struct file *filep, FAR struct pollfd *fds,
   bool pending;
   int ret = 0;
   int i;
-//   printf("hello,in %s:%d,setup is:%d\n",__func__,__LINE__,setup);
 
   /* Get the Touch Panel Device */
 
   iinfo("setup=%d\n", setup);
-  DEBUGASSERT(filep && fds);
+  DEBUGASSERT(fds);
   inode = filep->f_inode;
-  DEBUGASSERT(inode && inode->i_private);
-  priv = (FAR struct gt9xx_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv = inode->i_private;
 
   /* Begin Mutex: Lock to prevent concurrent update to Poll Waiters */
 
   ret = nxmutex_lock(&priv->devlock);
-//   printf("in %s:%d,ret:%d\n",__func__,__LINE__,ret);
   if (ret < 0)
     {
       ierr("Lock Mutex failed: %d\n", ret);
@@ -789,7 +881,6 @@ static int gt9xx_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if ((fds->events & POLLIN) == 0)
         {
-            // printf("in %s:%d\n",__func__,__LINE__);
           ret = -EDEADLK;
           goto out;
         }
@@ -799,12 +890,10 @@ static int gt9xx_poll(FAR struct file *filep, FAR struct pollfd *fds,
       for (i = 0; i < CONFIG_INPUT_GT9XX_NPOLLWAITERS; i++)
         {
           /* Found an available slot */
-        //   printf("in %s:%d\n",__func__,__LINE__);
 
           if (!priv->fds[i])
             {
               /* Bind the poll structure and this slot */
-            //   printf("in %s:%d,fd:%d,events:%d\n",__func__,__LINE__,fds->fd,fds->events);
 
               priv->fds[i] = fds;
               fds->priv = &priv->fds[i];
@@ -821,24 +910,18 @@ static int gt9xx_poll(FAR struct file *filep, FAR struct pollfd *fds,
         }
       else
         {
-          /* If Interrupt Pending is set, notify the Poll Waiters */ 
-          //TODO:这里使用poll_notify的原因是当应用层监听到后的程序中没有失能中断标志的话可以继续进入执行程序？是的
-            
+          /* If Interrupt Pending is set, notify the Poll Waiters */
+
           pending = priv->int_pending;
-        //   printf("probe if pending set, pending:%d\n",pending);
           if (pending)
             {
-                // printf("In %s : %d\n",__func__,__LINE__);
-                poll_notify(priv->fds,
-                            CONFIG_INPUT_GT9XX_NPOLLWAITERS,
-                            POLLIN);
+              poll_notify(&fds, 1, POLLIN);
             }
         }
     }
   else if (fds->priv)
     {
       /* If Poll Teardown: Remove the poll setup */
-    //   printf("in %s:%d\n",__func__,__LINE__);
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
       DEBUGASSERT(slot != NULL);
@@ -874,8 +957,6 @@ static int gt9xx_isr_handler(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct gt9xx_dev_s *priv = (FAR struct gt9xx_dev_s *)arg;
   irqstate_t flags;
-
-//   printf("In %s: %d\n",__func__,__LINE__);
 
   DEBUGASSERT(priv);
 
@@ -930,8 +1011,6 @@ int gt9xx_register(FAR const char *devpath,
   iinfo("devpath=%s, i2c_devaddr=%d\n", devpath, i2c_devaddr);
   DEBUGASSERT(devpath != NULL && i2c_dev != NULL && board_config != NULL);
 
-  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
-
   /* Allocate the Touch Panel Device Structure */
 
   priv = kmm_zalloc(sizeof(struct gt9xx_dev_s));
@@ -948,19 +1027,14 @@ int gt9xx_register(FAR const char *devpath,
   priv->board = board_config;
   nxmutex_init(&priv->devlock);
 
-  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
-
   /* Register the Touch Input Driver */
 
-  ret = register_driver(devpath, &g_gt9xx_fileops, 0666, priv);//register_driver(devpath, &g_gt9xx_fileops, 0666, priv);
-
-  syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
+  ret = register_driver(devpath, &g_gt9xx_fileops, 0666, priv);
   if (ret < 0)
     {
       nxmutex_destroy(&priv->devlock);
       kmm_free(priv);
       ierr("GT9XX Registration failed: %d\n", ret);
-      syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
       return ret;
     }
 
@@ -974,6 +1048,6 @@ int gt9xx_register(FAR const char *devpath,
   DEBUGASSERT(priv->board->irq_enable);
   priv->board->irq_enable(priv->board, false);
 
-  iinfo("GT9XX Touch Panel registered\n");  
+  iinfo("GT9XX Touch Panel registered\n");
   return OK;
 }

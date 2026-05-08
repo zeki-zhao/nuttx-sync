@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/stm32_dhtxx.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,7 +29,7 @@
 
 #include <unistd.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdio.h>
 
 #include <nuttx/board.h>
@@ -143,7 +145,7 @@ int board_dhtxx_initialize(int devno)
       return -ENODEV;
     }
 
-  snprintf(devpath, 12, "/dev/hum%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/hum%d", devno);
   ret = dhtxx_register(devpath, &g_dhtxx_config);
   if (ret < 0)
     {

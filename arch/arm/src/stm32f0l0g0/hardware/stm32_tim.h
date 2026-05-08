@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32_tim.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -22,11 +24,29 @@
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_TIM_H
 
 /****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+#include "chip.h"
+
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F0L0G0_STM32F0) || defined(CONFIG_STM32F0L0G0_STM32L0)
-#error "Timer definitions should be validated for target before use"
+/* Timer Capabilities *******************************************************/
+
+/* TIM2 is 16-bit on STM32L0, but 32-bit on STM32F0, STM32G0 and STM32C0 */
+
+#if defined(CONFIG_ARCH_CHIP_STM32L0)
+#  define HAVE_TIM2_16BIT  1
+#  undef  HAVE_TIM2_32BIT
+#elif defined(CONFIG_ARCH_CHIP_STM32G0) || defined(CONFIG_STM32F0L0G0_STM32F09X)
+#  define HAVE_TIM2_32BIT  1
+#  undef  HAVE_TIM2_16BIT
+#else
+#  define HAVE_TIM2_32BIT  1
+#  undef  HAVE_TIM2_16BIT
 #endif
 
 /* TODO Missing TIM2 definitions available on STM32G0x1 */
@@ -291,7 +311,7 @@
 #define ATIM_CR2_OIS3               (1 << 12) /* Bit 12: Output Idle state 3 (OC3 output) */
 #define ATIM_CR2_OIS3N              (1 << 13) /* Bit 13: Output Idle state 3 (OC3N output) */
 #define ATIM_CR2_OIS4               (1 << 14) /* Bit 14: Output Idle state 4 (OC4 output) */
-#define ATIM_CR2_OIS5               (1 << 16) /* Bit 16: OOutput Idle state 5 (OC5 output) */
+#define ATIM_CR2_OIS5               (1 << 16) /* Bit 16: Output Idle state 5 (OC5 output) */
 #define ATIM_CR2_OIS6               (1 << 18) /* Bit 18: Output Idle state 6 (OC6 output) */
 #define ATIM_CR2_MMS2_SHIFT         (20)      /* Bits 20-23: Master Mode Selection 2 */
 #define ATIM_CR2_MMS2_MASK          (15 << ATIM_CR2_MMS2_SHIFT)

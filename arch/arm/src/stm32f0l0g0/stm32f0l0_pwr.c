@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/stm32f0l0_pwr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -230,7 +232,7 @@ int stm32_pwr_enablewkup(enum stm32_pwr_wupin_e wupin, bool wupon)
         return -EINVAL;
     }
 
-  /* Set/clear the the wakeup pin enable bit in the CSR.  This must be done
+  /* Set/clear the wakeup pin enable bit in the CSR.  This must be done
    * within a critical section because the CSR is shared with other functions
    * that may be running concurrently on another thread.
    */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mtd/is25xp.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,7 +32,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <inttypes.h>
 
 #include <nuttx/kmalloc.h>
@@ -457,7 +459,7 @@ static void is25xp_waitwritecomplete(struct is25xp_dev_s *priv)
       if ((status & IS25_SR_WIP) != 0)
         {
           is25xp_unlock(priv->dev);
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
           is25xp_lock(priv->dev);
         }
     }
@@ -1098,7 +1100,7 @@ FAR struct mtd_dev_s *is25xp_initialize(FAR struct spi_dev_s *dev,
    * The current implementation handles several FLASH part per SPI bus.
    */
 
-  priv = (FAR struct is25xp_dev_s *)kmm_zalloc(sizeof(struct is25xp_dev_s));
+  priv = kmm_zalloc(sizeof(struct is25xp_dev_s));
   if (priv)
     {
       /* Initialize the allocated structure. (unsupported methods were

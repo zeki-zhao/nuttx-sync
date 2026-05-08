@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_otghsdev.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,7 +35,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -833,7 +835,7 @@ static uint32_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  uinfo("%08x->%08x\n", addr, val);
+  uinfo("%08" PRIx32 "->%08" PRIx32 "\n", addr, val);
   return val;
 }
 #endif
@@ -851,7 +853,7 @@ static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  uinfo("%08x<-%08x\n", addr, val);
+  uinfo("%08" PRIx32 "<-%08" PRIx32 "\n", addr, val);
 
   /* Write the value */
 
@@ -1214,7 +1216,7 @@ static void stm32_epin_request(struct stm32_usbdev_s *priv,
       return;
     }
 
-  uinfo("EP%d req=%p: len=%d xfrd=%d zlp=%d\n",
+  uinfo("EP%d req=%p: len=%zu xfrd=%zu zlp=%d\n",
         privep->epphy, privreq, privreq->req.len,
         privreq->req.xfrd, privep->zlp);
 
@@ -1497,7 +1499,7 @@ static void stm32_epout_complete(struct stm32_usbdev_s *priv,
       return;
     }
 
-  uinfo("EP%d: len=%d xfrd=%d\n",
+  uinfo("EP%d: len=%zu xfrd=%zu\n",
         privep->epphy, privreq->req.len, privreq->req.xfrd);
 
   /* Return the completed read request to the class driver and mark the state
@@ -1629,7 +1631,7 @@ static inline void stm32_epout_receive(struct stm32_ep_s *privep,
       return;
     }
 
-  uinfo("EP%d: len=%d xfrd=%d\n",
+  uinfo("EP%d: len=%zu xfrd=%zu\n",
         privep->epphy, privreq->req.len, privreq->req.xfrd);
   usbtrace(TRACE_READ(privep->epphy), bcnt);
 
@@ -2108,8 +2110,8 @@ static inline void stm32_ep0out_testmode(struct stm32_usbdev_s *priv,
  * Name: stm32_ep0out_stdrequest
  *
  * Description:
- *   Handle a stanard request on EP0.  Pick off the things of interest to the
- *   USB device controller driver; pass what is left to the class driver.
+ *   Handle a standard request on EP0.  Pick off the things of interest to
+ *   the USB device controller driver; pass what is left to the class driver.
  *
  ****************************************************************************/
 
@@ -4317,7 +4319,7 @@ static struct usbdev_req_s *stm32_ep_allocreq(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, ((struct stm32_ep_s *)ep)->epphy);
 
-  privreq = (struct stm32_req_s *)kmm_malloc(sizeof(struct stm32_req_s));
+  privreq = kmm_malloc(sizeof(struct stm32_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_ALLOCFAIL), 0);
@@ -4364,7 +4366,7 @@ static void stm32_ep_freereq(struct usbdev_ep_s *ep,
 #ifdef CONFIG_USBDEV_DMA
 static void *stm32_ep_allocbuffer(struct usbdev_ep_s *ep, uint16_t bytes)
 {
-  usbtrace(TRACE_EPALLOCBUFFER, privep->epphy);
+  usbtrace(TRACE_EPALLOCBUFFER, ((struct stm32_ep_s *)ep)->epphy);
 
 #ifdef CONFIG_USBDEV_DMAMEMORY
   return usbdev_dma_alloc(bytes);
@@ -4385,7 +4387,7 @@ static void *stm32_ep_allocbuffer(struct usbdev_ep_s *ep, uint16_t bytes)
 #ifdef CONFIG_USBDEV_DMA
 static void stm32_ep_freebuffer(struct usbdev_ep_s *ep, void *buf)
 {
-  usbtrace(TRACE_EPFREEBUFFER, privep->epphy);
+  usbtrace(TRACE_EPFREEBUFFER, ((struct stm32_ep_s *)ep)->epphy);
 
 #ifdef CONFIG_USBDEV_DMAMEMORY
   usbdev_dma_free(buf);
@@ -5527,7 +5529,7 @@ void arm_usbinitialize(void)
 
   arm_usbuninitialize();
 
-  /* Initialie the driver data structure */
+  /* Initialize the driver data structure */
 
   stm32_swinitialize(priv);
 

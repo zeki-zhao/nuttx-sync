@@ -1,6 +1,8 @@
 /****************************************************************************
  * graphics/nxterm/nxterm_redraw.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,7 +30,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxglib.h>
@@ -92,11 +94,10 @@ void nxterm_redraw(NXTERM handle,
     }
 
   /* Then redraw each character on the display (Only the characters within
-   * the rectangle will actually be redrawn). 
+   * the rectangle will actually be redrawn).
    */
-//TODO:屏幕只显示在矩形中的字符，为避免显示字符数超过队列容量，考虑将队列改造为环形队列。
-  priv->nchars = (priv->nchars)%(priv->maxchars);
-  for (i = 0; i < priv->nchars; i++) //priv->nchars为当前队列中的所有字符数量
+
+  for (i = 0; i < priv->nchars; i++)
     {
       nxterm_fillchar(priv, rect, &priv->bm[i]);
     }

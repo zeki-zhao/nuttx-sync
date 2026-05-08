@@ -1,6 +1,8 @@
 /***************************************************************************
  * drivers/mtd/gd25.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,8 +35,9 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/ioctl.h>
@@ -400,7 +403,7 @@ static uint8_t gd25_waitwritecomplete(FAR struct gd25_dev_s *priv)
       if (priv->prev_instr != GD25_PP && (status & GD25_SR_WIP) != 0)
         {
           gd25_unlock(priv->spi);
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
           gd25_lock(priv->spi);
         }
     }
@@ -497,7 +500,7 @@ static bool gd25_is_erased(FAR struct gd25_dev_s *priv, off_t address,
     {
       /* Check if all bytes of page is in erased state. */
 
-      gd25_byteread(priv, (uint8_t *)buf, address, GD25_PAGE_SIZE);
+      gd25_byteread(priv, (FAR uint8_t *)buf, address, GD25_PAGE_SIZE);
 
       for (i = 0; i < GD25_PAGE_SIZE / sizeof(uint32_t); i++)
         {
@@ -1031,7 +1034,7 @@ FAR struct mtd_dev_s *gd25_initialize(FAR struct spi_dev_s *spi,
   FAR struct gd25_dev_s *priv;
   int ret;
 
-  priv = (FAR struct gd25_dev_s *)kmm_zalloc(sizeof(struct gd25_dev_s));
+  priv = kmm_zalloc(sizeof(struct gd25_dev_s));
   if (priv)
     {
       /* Initialize the allocated structure (unsupported methods were

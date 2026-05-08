@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/modem/alt1250/altcom_cmd.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -128,6 +130,8 @@
 
 #define APICMD_FW_INJECTDATA_MAXLEN                         (4096)
 #define APICMD_FW_INJECTDATA_MAXLEN_V4                      (3000)
+#define APICMD_FW_VER_BB_PRODUCT_LEN                        (5)
+#define APICMD_FW_VER_NP_PACKAGE_LEN                        (32)
 
 #define APICMD_IPV4_LEN                                     (4)
 #define APICMD_IPV6_LEN                                     (16)
@@ -811,8 +815,8 @@ begin_packed_struct struct apicmd_cmddat_setpsmres_s
 begin_packed_struct struct apicmd_cmddat_getverres_s
 {
   uint8_t result;
-  uint8_t bb_product[LTE_VER_BB_PRODUCT_LEN];
-  uint8_t np_package[LTE_VER_NP_PACKAGE_LEN];
+  uint8_t bb_product[APICMD_FW_VER_BB_PRODUCT_LEN];
+  uint8_t np_package[APICMD_FW_VER_NP_PACKAGE_LEN];
 } end_packed_struct;
 
 /* structure for APICMDID_FW_INJECTDELTAIMG */

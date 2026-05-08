@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/modem/alt1250/altcom_hdlr_other.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -122,7 +124,7 @@ int32_t altcom_errinfo_pkt_parse(FAR struct alt1250_dev_s *dev,
 
   info->err_indicator = in->indicator;
   info->err_result_code = ntohl(in->err_code);
-  info->err_no = altcom_errno2nuttx(ntohl(in->err_no));
+  info->err_no = altcom_geterrcode(in->err_no);
   memcpy(info->err_string, in->err_str, LTE_ERROR_STRING_MAX_LEN);
   info->err_string[LTE_ERROR_STRING_MAX_LEN - 1] = '\0';
 
@@ -169,7 +171,7 @@ int32_t altcom_sendatcmd_pkt_parse(FAR struct alt1250_dev_s *dev,
                                    size_t arglen, FAR uint64_t *bitmap)
 {
   FAR char *respbuff = (FAR char *)arg[0];
-  FAR int respbufflen = (int)arg[1];
+  int respbufflen = (int)arg[1];
   FAR int *resplen = (FAR int *)arg[2];
 
   if (respbufflen < pktsz)

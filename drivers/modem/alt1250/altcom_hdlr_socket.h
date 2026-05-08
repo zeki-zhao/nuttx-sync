@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/modem/alt1250/altcom_hdlr_socket.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -77,6 +79,10 @@ int32_t altcom_setsockopt_pkt_compose(FAR void **arg, size_t arglen,
 int32_t altcom_select_pkt_compose(FAR void **arg, size_t arglen,
                                   uint8_t altver, FAR uint8_t *pktbuf,
                                   const size_t pktsz, FAR uint16_t *altcid);
+int32_t altcom_shutdown_pkt_compose(FAR void **arg, size_t arglen,
+                                    uint8_t altver, FAR uint8_t *pktbuf,
+                                    const size_t pktsz,
+                                    FAR uint16_t *altcid);
 int32_t altcom_sockcomm_pkt_parse(FAR struct alt1250_dev_s *dev,
                                   FAR uint8_t *pktbuf, size_t pktsz,
                                   uint8_t altver, FAR void **arg,

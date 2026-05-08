@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/cxd56xx/spresense/include/cxd56_alt1250.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -56,7 +58,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int board_alt1250_initialize(FAR const char *devpath);
+int board_alt1250_initialize(const char *devpath);
 
 /****************************************************************************
  * Name: board_alt1250_uninitialize

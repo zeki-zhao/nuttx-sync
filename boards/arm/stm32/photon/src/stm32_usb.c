@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/photon/src/stm32_usb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,7 +26,7 @@
 
 #include <nuttx/config.h>
 #include "photon.h"
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <stdbool.h>
 #include <nuttx/usb/usbdev.h>
@@ -37,7 +39,7 @@
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup
+ *   Called from stm32_usbinitialize very early in initialization to setup
  *   USB-related GPIO pins for the Photon board.
  *
  ****************************************************************************/

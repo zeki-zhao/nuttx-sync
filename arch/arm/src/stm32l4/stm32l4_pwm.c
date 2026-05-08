@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_pwm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,7 +31,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/timers/pwm.h>
@@ -63,7 +65,7 @@
 #define TIMTYPE_GENERAL16    1  /* General 16-bit timers: TIM3,4 */
 #define TIMTYPE_COUNTUP16    2  /* General 16-bit count-up timers: TIM15-17 */
 #define TIMTYPE_COUNTUP16_N  3  /* General 16-bit count-up timers with
-                                 * complementary outptus
+                                 * complementary outputs
                                  */
 #define TIMTYPE_GENERAL32    4  /* General 32-bit timers: TIM2,5 */
 #define TIMTYPE_ADVANCED     5  /* Advanced timers:  TIM1,8 */
@@ -2525,7 +2527,7 @@ static int pwm_outputs_enable(struct pwm_lowerhalf_s *dev,
   uint32_t ccer   = 0;
   uint32_t regval = 0;
 
-  /* Get curren register state */
+  /* Get current register state */
 
   ccer = pwm_getreg(priv, STM32L4_GTIM_CCER_OFFSET);
 
@@ -2547,7 +2549,7 @@ static int pwm_outputs_enable(struct pwm_lowerhalf_s *dev,
 
   if (state == true)
     {
-      /* Enable outpus - set bits */
+      /* Enable outputs - set bits */
 
       ccer |= regval;
     }
@@ -2681,7 +2683,7 @@ pwm_outputs_from_channels(struct stm32l4_pwmtimer_s *priv)
 
       if (channel != 0)
         {
-          /* Enable output if confiugred */
+          /* Enable output if configured */
 
           if (priv->channels[i].out1.in_use == 1)
             {

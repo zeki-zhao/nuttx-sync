@@ -1,6 +1,8 @@
 ############################################################################
 # boards/risc-v/k210/maix-bit/src/Makefile
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -30,8 +32,8 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += k210_leds.c
 endif
 
-ifeq ($(CONFIG_DEV_GPIO),y)
-CSRCS += k210_gpio.c
+ifeq ($(CONFIG_USERLED_LOWER),y)
+CSRCS += k210_userleds.c
 endif
 
 include $(TOPDIR)/boards/Board.mk

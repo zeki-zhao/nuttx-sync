@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_qspi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,8 +35,9 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
+#include <arch/barriers.h>
 #include <arch/board/board.h>
 
 #include <nuttx/arch.h>
@@ -43,11 +46,11 @@
 #include <nuttx/cache.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/qspi.h>
 
 #include "arm_internal.h"
-#include "barriers.h"
 
 #include "stm32_gpio.h"
 #include "stm32_dma.h"
@@ -59,17 +62,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* QSPI memory synchronization */
-
-#define MEMORY_SYNC()     do { ARM_DSB(); ARM_ISB(); } while (0)
-
-/* Ensure that the DMA buffers are word-aligned. */
-
-#define ALIGN_SHIFT       2
-#define ALIGN_MASK        3
-#define ALIGN_UP(n)       (((n)+ALIGN_MASK) & ~ALIGN_MASK)
-#define IS_ALIGNED(n)     (((uint32_t)(n) & ALIGN_MASK) == 0)
 
 /* Debug ********************************************************************/
 
@@ -350,6 +342,9 @@ static const struct qspi_ops_s g_qspi0ops =
   .setfrequency      = qspi_setfrequency,
   .setmode           = qspi_setmode,
   .setbits           = qspi_setbits,
+#ifdef CONFIG_QSPI_HWFEATURES
+  .hwfeatures        = NULL,
+#endif
   .command           = qspi_command,
   .memory            = qspi_memory,
   .alloc             = qspi_alloc,
@@ -453,7 +448,7 @@ static inline uint32_t qspi_getreg(struct stm32h7_qspidev_s *priv,
 #ifdef CONFIG_STM32H7_QSPI_REGDEBUG
   if (qspi_checkreg(priv, false, value, address))
     {
-      spiinfo("%08x->%08x\n", address, value);
+      spiinfo("%08" PRIx32 "->%08" PRIx32 "\n", address, value);
     }
 #endif
 
@@ -476,7 +471,7 @@ static inline void qspi_putreg(struct stm32h7_qspidev_s *priv,
 #ifdef CONFIG_STM32H7_QSPI_REGDEBUG
   if (qspi_checkreg(priv, true, value, address))
     {
-      spiinfo("%08x<-%08x\n", address, value);
+      spiinfo("%08" PRIx32 "<-%08" PRIx32 "\n", address, value);
     }
 #endif
 
@@ -511,7 +506,7 @@ static void qspi_dumpregs(struct stm32h7_qspidev_s *priv, const char *msg)
    */
 
   regval = getreg32(priv->base + STM32_QUADSPI_CR_OFFSET);    /* Control Register */
-  spiinfo("CR:%08x\n", regval);
+  spiinfo("CR:%08" PRIx32 "\n", regval);
   spiinfo("  EN:%1d ABORT:%1d DMAEN:%1d TCEN:%1d SSHIFT:%1d\n"
           "  FTHRES: %d\n"
           "  TEIE:%1d TCIE:%1d FTIE:%1d SMIE:%1d TOIE:%1d APMS:%1d PMM:%1d\n"
@@ -532,21 +527,21 @@ static void qspi_dumpregs(struct stm32h7_qspidev_s *priv, const char *msg)
           (regval & QSPI_CR_PRESCALER_MASK) >> QSPI_CR_PRESCALER_SHIFT);
 
   regval = getreg32(priv->base + STM32_QUADSPI_DCR_OFFSET);   /* Device Configuration Register */
-  spiinfo("DCR:%08x\n", regval);
+  spiinfo("DCR:%08" PRIx32 "\n", regval);
   spiinfo("  CKMODE:%1d CSHT:%d FSIZE:%d\n",
           (regval & QSPI_DCR_CKMODE) ? 1 : 0,
           (regval & QSPI_DCR_CSHT_MASK) >> QSPI_DCR_CSHT_SHIFT,
           (regval & QSPI_DCR_FSIZE_MASK) >> QSPI_DCR_FSIZE_SHIFT);
 
   regval = getreg32(priv->base + STM32_QUADSPI_CCR_OFFSET);   /* Communication Configuration Register */
-  spiinfo("CCR:%08x\n", regval);
+  spiinfo("CCR:%08" PRIx32 "\n", regval);
   spiinfo("   INST:%02x IMODE:%d ADMODE:%d ADSIZE:%d ABMODE:%d\n"
           "   ABSIZE:%d DCYC:%d DMODE:%d FMODE:%d\n"
           "   SIOO:%1d DDRM:%1d\n",
           (regval & QSPI_CCR_INSTRUCTION_MASK) >> QSPI_CCR_INSTRUCTION_SHIFT,
           (regval & QSPI_CCR_IMODE_MASK) >> QSPI_CCR_IMODE_SHIFT,
           (regval & QSPI_CCR_ADMODE_MASK) >> QSPI_CCR_ADMODE_SHIFT,
-          (regval & QSPI_CCR_ADSIZE_MASK) >> QSPI_CCR_ABSIZE_SHIFT,
+          (regval & QSPI_CCR_ADSIZE_MASK) >> QSPI_CCR_ADSIZE_SHIFT,
           (regval & QSPI_CCR_ABMODE_MASK) >> QSPI_CCR_ABMODE_SHIFT,
           (regval & QSPI_CCR_ABSIZE_MASK) >> QSPI_CCR_ABSIZE_SHIFT,
           (regval & QSPI_CCR_DCYC_MASK) >> QSPI_CCR_DCYC_SHIFT,
@@ -556,7 +551,7 @@ static void qspi_dumpregs(struct stm32h7_qspidev_s *priv, const char *msg)
           (regval & QSPI_CCR_DDRM) ? 1 : 0);
 
   regval = getreg32(priv->base + STM32_QUADSPI_SR_OFFSET);    /* Status Register */
-  spiinfo("SR:%08x\n", regval);
+  spiinfo("SR:%08" PRIx32 "\n", regval);
   spiinfo("  TEF:%1d TCF:%1d FTF:%1d SMF:%1d TOF:%1d BUSY:%1d FLEVEL:%d\n",
           (regval & QSPI_SR_TEF) ? 1 : 0,
           (regval & QSPI_SR_TCF) ? 1 : 0,
@@ -567,17 +562,19 @@ static void qspi_dumpregs(struct stm32h7_qspidev_s *priv, const char *msg)
           (regval & QSPI_SR_FLEVEL_MASK) >> QSPI_SR_FLEVEL_SHIFT);
 
 #else
-  spiinfo("    CR:%08x   DCR:%08x   CCR:%08x    SR:%08x\n",
+  spiinfo("    CR:%08" PRIx32 "   DCR:%08" PRIx32
+          "   CCR:%08" PRIx32 "    SR:%08" PRIx32 "\n",
           getreg32(priv->base + STM32_QUADSPI_CR_OFFSET),     /* Control Register */
           getreg32(priv->base + STM32_QUADSPI_DCR_OFFSET),    /* Device Configuration Register */
           getreg32(priv->base + STM32_QUADSPI_CCR_OFFSET),    /* Communication Configuration Register */
           getreg32(priv->base + STM32_QUADSPI_SR_OFFSET));    /* Status Register */
-  spiinfo("   DLR:%08x   ABR:%08x PSMKR:%08x PSMAR:%08x\n",
+  spiinfo("   DLR:%08" PRIx32 "   ABR:%08" PRIx32
+          " PSMKR:%08" PRIx32 " PSMAR:%08" PRIx32 "\n",
           getreg32(priv->base + STM32_QUADSPI_DLR_OFFSET),    /* Data Length Register */
           getreg32(priv->base + STM32_QUADSPI_ABR_OFFSET),    /* Alternate Bytes Register */
           getreg32(priv->base + STM32_QUADSPI_PSMKR_OFFSET),  /* Polling Status mask Register */
           getreg32(priv->base + STM32_QUADSPI_PSMAR_OFFSET)); /* Polling Status match Register */
-  spiinfo("   PIR:%08x  LPTR:%08x\n",
+  spiinfo("   PIR:%08" PRIx32 "  LPTR:%08" PRIx32 "\n",
           getreg32(priv->base + STM32_QUADSPI_PIR_OFFSET),    /* Polling Interval Register */
           getreg32(priv->base + STM32_QUADSPI_LPTR_OFFSET));  /* Low-Power Timeout Register */
 #endif
@@ -593,62 +590,62 @@ static void qspi_dumpgpioconfig(const char *msg)
   /* Port B */
 
   regval = getreg32(STM32_GPIOB_MODER);
-  spiinfo("B_MODER:%08x\n", regval);
+  spiinfo("B_MODER:%08" PRIx32 "\n", regval);
 
   regval = getreg32(STM32_GPIOB_OTYPER);
-  spiinfo("B_OTYPER:%08x\n", regval);
+  spiinfo("B_OTYPER:%08" PRIx32 "\n", regval);
 
   regval = getreg32(STM32_GPIOB_OSPEED);
-  spiinfo("B_OSPEED:%08x\n", regval);
+  spiinfo("B_OSPEED:%08" PRIx32 "\n", regval);
 
   regval = getreg32(STM32_GPIOB_PUPDR);
-  spiinfo("B_PUPDR:%08x\n", regval);
+  spiinfo("B_PUPDR:%08" PRIx32 "\n", regval);
 
   regval = getreg32(STM32_GPIOB_AFRL);
-  spiinfo("B_AFRL:%08x\n", regval);
+  spiinfo("B_AFRL:%08" PRIx32 "\n", regval);
 
   regval = getreg32(STM32_GPIOB_AFRH);
-  spiinfo("B_AFRH:%08x\n", regval);
+  spiinfo("B_AFRH:%08" PRIx32 "\n", regval);
 
   /* Port D */
 
   regval = getreg32(STM32_GPIOD_MODER);
-  spiinfo("D_MODER:%08x\n", regval);
+  spiinfo("D_MODER:%08" PRIx32 "\n", regval);
 
   regval = getreg32(STM32_GPIOD_OTYPER);
-  spiinfo("D_OTYPER:%08x\n", regval);
+  spiinfo("D_OTYPER:%08" PRIx32 "\n", regval);
 
   regval = getreg32(STM32_GPIOD_OSPEED);
-  spiinfo("D_OSPEED:%08x\n", regval);
+  spiinfo("D_OSPEED:%08" PRIx32 "\n", regval);
 
   regval = getreg32(STM32_GPIOD_PUPDR);
-  spiinfo("D_PUPDR:%08x\n", regval);
+  spiinfo("D_PUPDR:%08" PRIx32 "\n", regval);
 
   regval = getreg32(STM32_GPIOD_AFRL);
-  spiinfo("D_AFRL:%08x\n", regval);
+  spiinfo("D_AFRL:%08" PRIx32 "\n", regval);
 
   regval = getreg32(STM32_GPIOD_AFRH);
-  spiinfo("D_AFRH:%08x\n", regval);
+  spiinfo("D_AFRH:%08" PRIx32 "\n", regval);
 
   /* Port E */
 
   regval = getreg32(STM32_GPIOE_MODER);
-  spiinfo("E_MODER:%08x\n", regval);
+  spiinfo("E_MODER:%08" PRIx32 "\n", regval);
 
   regval = getreg32(STM32_GPIOE_OTYPER);
-  spiinfo("E_OTYPER:%08x\n", regval);
+  spiinfo("E_OTYPER:%08" PRIx32 "\n", regval);
 
   regval = getreg32(STM32_GPIOE_OSPEED);
-  spiinfo("E_OSPEED:%08x\n", regval);
+  spiinfo("E_OSPEED:%08" PRIx32 "\n", regval);
 
   regval = getreg32(STM32_GPIOE_PUPDR);
-  spiinfo("E_PUPDR:%08x\n", regval);
+  spiinfo("E_PUPDR:%08" PRIx32 "\n", regval);
 
   regval = getreg32(STM32_GPIOE_AFRL);
-  spiinfo("E_AFRL:%08x\n", regval);
+  spiinfo("E_AFRL:%08" PRIx32 "\n", regval);
 
   regval = getreg32(STM32_GPIOE_AFRH);
-  spiinfo("E_AFRH:%08x\n", regval);
+  spiinfo("E_AFRH:%08" PRIx32 "\n", regval);
 }
 #endif
 
@@ -1606,7 +1603,7 @@ static int qspi_memory_dma(struct stm32h7_qspidev_s *priv,
 
   qspi_waitstatusflags(priv, QSPI_SR_TCF, 1);
   qspi_waitstatusflags(priv, QSPI_SR_BUSY, 0);
-  MEMORY_SYNC();
+  UP_MB();
 
   /* Dump the sampled DMA registers */
 
@@ -1848,7 +1845,7 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
       return 0;
     }
 
-  spiinfo("frequency=%d\n", frequency);
+  spiinfo("frequency=%" PRId32 "\n", frequency);
   DEBUGASSERT(priv);
 
   /* Wait till BUSY flag reset */
@@ -1902,14 +1899,14 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
   /* Calculate the new actual frequency */
 
   actual = QSPI_CLK_FREQUENCY / prescaler;
-  spiinfo("prescaler=%d actual=%d\n", prescaler, actual);
+  spiinfo("prescaler=%" PRId32 " actual=%" PRId32 "\n", prescaler, actual);
 
   /* Save the frequency setting */
 
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spiinfo("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %" PRId32 "->%" PRId32 "\n", frequency, actual);
   return actual;
 }
 
@@ -1980,7 +1977,7 @@ static void qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode)
         }
 
       qspi_putreg(priv, regval, STM32_QUADSPI_DCR_OFFSET);
-      spiinfo("DCR=%08x\n", regval);
+      spiinfo("DCR=%08" PRIx32 "\n", regval);
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
@@ -2076,7 +2073,7 @@ static int qspi_command(struct qspi_dev_s *dev,
   if (QSPICMD_ISDATA(cmdinfo->flags))
     {
       DEBUGASSERT(cmdinfo->buffer != NULL && cmdinfo->buflen > 0);
-      DEBUGASSERT(IS_ALIGNED(cmdinfo->buffer));
+      DEBUGASSERT(IS_ALIGNED((uintptr_t)cmdinfo->buffer, 4));
 
       if (QSPICMD_ISWRITE(cmdinfo->flags))
         {
@@ -2146,7 +2143,7 @@ static int qspi_command(struct qspi_dev_s *dev,
   /* Wait for the interrupt routine to finish it's magic */
 
   nxsem_wait(&priv->op_sem);
-  MEMORY_SYNC();
+  UP_MB();
 
   /* Convey the result */
 
@@ -2168,7 +2165,7 @@ static int qspi_command(struct qspi_dev_s *dev,
   if (QSPICMD_ISDATA(cmdinfo->flags))
     {
       DEBUGASSERT(cmdinfo->buffer != NULL && cmdinfo->buflen > 0);
-      DEBUGASSERT(IS_ALIGNED(cmdinfo->buffer));
+      DEBUGASSERT(IS_ALIGNED((uintptr_t)cmdinfo->buffer, 4));
 
       if (QSPICMD_ISWRITE(cmdinfo->flags))
         {
@@ -2179,7 +2176,7 @@ static int qspi_command(struct qspi_dev_s *dev,
           ret = qspi_receive_blocking(priv, &xctn);
         }
 
-      MEMORY_SYNC();
+      UP_MB();
     }
   else
     {
@@ -2255,7 +2252,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
   priv->xctn = &xctn;
 
   DEBUGASSERT(meminfo->buffer != NULL && meminfo->buflen > 0);
-  DEBUGASSERT(IS_ALIGNED(meminfo->buffer));
+  DEBUGASSERT(IS_ALIGNED((uintptr_t)meminfo->buffer, 4));
 
   if (QSPIMEM_ISWRITE(meminfo->flags))
     {
@@ -2304,7 +2301,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
   /* Wait for the interrupt routine to finish it's magic */
 
   nxsem_wait(&priv->op_sem);
-  MEMORY_SYNC();
+  UP_MB();
 
   /* convey the result */
 
@@ -2315,8 +2312,8 @@ static int qspi_memory(struct qspi_dev_s *dev,
 
   if (priv->candma &&
       meminfo->buflen > CONFIG_STM32H7_QSPI_DMATHRESHOLD &&
-      IS_ALIGNED((uintptr_t)meminfo->buffer) &&
-      IS_ALIGNED(meminfo->buflen))
+      IS_ALIGNED((uintptr_t)meminfo->buffer, 4) &&
+      IS_ALIGNED(meminfo->buflen, 4))
     {
       ret = qspi_memory_dma(priv, meminfo, &xctn);
     }
@@ -2335,7 +2332,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
       /* Transfer data */
 
       DEBUGASSERT(meminfo->buffer != NULL && meminfo->buflen > 0);
-      DEBUGASSERT(IS_ALIGNED(meminfo->buffer));
+      DEBUGASSERT(IS_ALIGNED((uintptr_t)meminfo->buffer, 4));
 
       if (QSPIMEM_ISWRITE(meminfo->flags))
         {
@@ -2351,7 +2348,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
       qspi_waitstatusflags(priv, QSPI_SR_TCF, 1);
       qspi_waitstatusflags(priv, QSPI_SR_BUSY, 0);
 
-      MEMORY_SYNC();
+      UP_MB();
     }
 
 #else
@@ -2366,7 +2363,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
   /* Transfer data */
 
   DEBUGASSERT(meminfo->buffer != NULL && meminfo->buflen > 0);
-  DEBUGASSERT(IS_ALIGNED(meminfo->buffer));
+  DEBUGASSERT(IS_ALIGNED((uintptr_t)meminfo->buffer, 4));
 
   if (QSPIMEM_ISWRITE(meminfo->flags))
     {
@@ -2382,7 +2379,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
   qspi_waitstatusflags(priv, QSPI_SR_TCF, 1);
   qspi_waitstatusflags(priv, QSPI_SR_BUSY, 0);
 
-  MEMORY_SYNC();
+  UP_MB();
 
 #endif
 
@@ -2412,7 +2409,9 @@ static void *qspi_alloc(struct qspi_dev_s *dev, size_t buflen)
    * hold the rested buflen in units a 32-bits.
    */
 
-  return kmm_malloc(ALIGN_UP(buflen));
+  /* Ensure that the DMA buffers are word-aligned. */
+
+  return kmm_malloc(ALIGN_UP(buflen, 4));
 }
 
 /****************************************************************************

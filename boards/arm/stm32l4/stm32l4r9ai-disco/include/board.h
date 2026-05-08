@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32l4/stm32l4r9ai-disco/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -216,7 +218,7 @@
  *   LED_SIGNAL           In a signal handler
  *   LED_ASSERTION        An assertion failed
  *   LED_PANIC            The system has crashed                  Blinking
- *   LED_IDLE             MCU is is sleep mode       ON
+ *   LED_IDLE             MCU is in sleep mode       ON
  *
  * Thus if BOARD_LED_GRN, NuttX has successfully booted and is, apparently,
  * running normally.  If BOARD_LED_RED is flashing at approximately 2Hz, then

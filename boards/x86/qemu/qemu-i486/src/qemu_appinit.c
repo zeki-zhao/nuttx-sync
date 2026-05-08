@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/x86/qemu/qemu-i486/src/qemu_appinit.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,7 +29,7 @@
 #include <nuttx/fs/fs.h>
 
 #include <stdio.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "x86_internal.h"
 

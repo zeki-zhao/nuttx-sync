@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32l4/steval-stlcs01v1/src/stm32_usb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,7 +31,8 @@
 #include <stdbool.h>
 #include <sched.h>
 #include <errno.h>
-#include <debug.h>
+
+#include <nuttx/debug.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
 #include "stm32l4.h"
@@ -65,7 +68,7 @@
  * Name: stm32l4_usbinitialize
  *
  * Description:
- *   Called from stm32l4_usbinitialize very early in inialization to setup
+ *   Called from stm32l4_usbinitialize very early in initialization to setup
  *   USB-related GPIO pins for the board.
  *
  ****************************************************************************/

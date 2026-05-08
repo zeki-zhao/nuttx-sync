@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/kinetis/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -111,4 +113,10 @@ CHIP_CSRCS += kinetis_flexcan.c
 endif
 endif
 
+endif
+
+ifeq ($(CONFIG_ANALOG),y)
+ifeq ($(CONFIG_DAC),y)
+CHIP_CSRCS += kinetis_dac.c
+endif
 endif

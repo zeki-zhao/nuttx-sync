@@ -1,11 +1,9 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_comp.c
  *
- *   Copyright (c) 2017 Gregory Nutt. All rights reserved.
- *
- * Based on COMP driver from the Motorola MDK:
- *
- *   Copyright (c) 2016 Motorola Mobility, LLC. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Motorola Mobility LLC. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,7 +40,7 @@
 
 #include <nuttx/config.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <string.h>
 
 #include <nuttx/analog/comp.h>

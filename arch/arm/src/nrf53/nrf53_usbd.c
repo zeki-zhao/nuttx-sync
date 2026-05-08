@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf53/nrf53_usbd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,7 +34,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -201,7 +203,7 @@
                            USBD_INT_ENDISOIN | USBD_INT_ENDISOOUT)
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* Parsed control request */
@@ -696,8 +698,8 @@ static bool nrf53_req_addlast(struct nrf53_ep_s *privep,
  * Name: nrf53_ep0out_stdrequest
  *
  * Description:
- *   Handle a stanard request on EP0.  Pick off the things of interest to the
- *   USB device controller driver; pass what is left to the class driver.
+ *   Handle a standard request on EP0.  Pick off the things of interest to
+ *   the USB device controller driver; pass what is left to the class driver.
  *
  ****************************************************************************/
 
@@ -1058,7 +1060,7 @@ static void nrf53_epin_transfer(struct nrf53_ep_s *privep, uint8_t *buf,
  * Name: nrf53_epout_allow
  *
  * Description:
- *   Allow OUT trafic on this endpoint
+ *   Allow OUT traffic on this endpoint
  *
  ****************************************************************************/
 
@@ -1255,7 +1257,7 @@ static void nrf53_epout_complete(struct nrf53_ep_s *privep)
       return;
     }
 
-  uinfo("EP%d: len=%d xfrd=%d\n", privep->epphy, privreq->req.len,
+  uinfo("EP%d: len=%zu xfrd=%zu\n", privep->epphy, privreq->req.len,
         privreq->req.xfrd);
 
   /* Return the completed read request to the class driver and mark the
@@ -1345,7 +1347,7 @@ static void nrf53_epout_receive(struct nrf53_ep_s *privep)
       return;
     }
 
-  uinfo("EP%d: len=%d xfrd=%d\n", privep->epphy,
+  uinfo("EP%d: len=%zu xfrd=%zu\n", privep->epphy,
         privreq->req.len, privreq->req.xfrd);
   usbtrace(TRACE_READ(privep->epphy), bcnt);
 
@@ -1621,7 +1623,7 @@ static void nrf53_usbreset(struct nrf53_usbdev_s *priv)
 
       privep->stalled = false;
 
-      /* Stop EPIN taks */
+      /* Stop EPIN task */
 
       nrf53_epin_stop(priv, i);
 
@@ -1634,7 +1636,7 @@ static void nrf53_usbreset(struct nrf53_usbdev_s *priv)
 
       privep->stalled = false;
 
-      /* Stop EPOUT taks */
+      /* Stop EPOUT task */
 
       nrf53_epout_stop(priv, i);
     }
@@ -2422,7 +2424,7 @@ static struct usbdev_req_s *nrf53_ep_allocreq(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, ((struct nrf53_ep_s *)ep)->epphy);
 
-  privreq = (struct nrf53_req_s *)kmm_malloc(sizeof(struct nrf53_req_s));
+  privreq = kmm_malloc(sizeof(struct nrf53_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(NRF53_TRACEERR_ALLOCFAIL), 0);
@@ -2570,7 +2572,7 @@ static int nrf53_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
             {
               usbtrace(TRACE_OUTREQQUEUED(privep->epphy), privreq->req.len);
 
-              /* Allow OUT trafic on this endpoint */
+              /* Allow OUT traffic on this endpoint */
 
               nrf53_epout_allow(privep);
             }
@@ -2633,7 +2635,7 @@ static int nrf53_ep_setstall(struct nrf53_ep_s *privep)
       regval |= USBD_EPSTALL_IO_OUT;
     }
 
-  /* Unstall a given EP */
+  /* Un-stall a given EP */
 
   regval |= USBD_EPSTALL_EP(privep->epphy) | USBD_EPSTALL_IO_STALL;
   nrf53_putreg(regval, NRF53_USBD_EPSTALL);
@@ -2667,7 +2669,7 @@ static int nrf53_ep_clrstall(struct nrf53_ep_s *privep)
       regval |= USBD_EPSTALL_IO_OUT;
     }
 
-  /* Unstall a given EP */
+  /* Un-stall a given EP */
 
   regval |= USBD_EPSTALL_EP(privep->epphy) | USBD_EPSTALL_IO_UNSTALL;
   nrf53_putreg(regval, NRF53_USBD_EPSTALL);
@@ -3052,9 +3054,8 @@ static void nrf53_hwinitialize(struct nrf53_usbdev_s *priv)
 {
   /* Wait for VBUS */
 
-  /* TODO: connect to POWER USB events */
-
-  while (getreg32(NRF53_USBREG_EVENTS_USBDETECTED) == 0);
+  while ((getreg32(NRF53_USBREG_USBREGSTATUS) &
+          USBREG_USBREGSTATUS_VBUSDETECT) == 0);
 
   /* Enable the USB controller */
 
@@ -3094,7 +3095,7 @@ void arm_usbinitialize(void)
 
   arm_usbuninitialize();
 
-  /* Initialie the driver data structure */
+  /* Initialize the driver data structure */
 
   nrf53_swinitialize(priv);
 

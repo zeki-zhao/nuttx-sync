@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/stm32/stm32f30xxx_irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -148,8 +150,8 @@
 #define STM32_IRQ_RESERVED80  (STM32_IRQ_FIRST + 80) /* 80: Reserved */
 #define STM32_IRQ_FPU         (STM32_IRQ_FIRST + 81) /* 81: FPU global interrupt */
 
-#define STM32_IRQ_NEXTINT     (82)
-#define NR_IRQS               (STM32_IRQ_FIRST + 82)
+#define STM32_IRQ_NEXTINTS    (82)
+#define NR_IRQS               (STM32_IRQ_FIRST + STM32_IRQ_NEXTINTS)
 
 /****************************************************************************
  * Public Types

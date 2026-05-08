@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_1wire.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,7 +37,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
@@ -727,7 +729,7 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
                                int count)
 {
   irqstate_t irqs;
-  int indx;
+  int index;
   int ret;
 
   /* Lock out other clients */
@@ -740,9 +742,9 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
 
   priv->result = ERROR;
 
-  for (indx = 0; indx < count; indx++)
+  for (index = 0; index < count; index++)
     {
-      switch (msgs[indx].task)
+      switch (msgs[index].task)
         {
         case ONEWIRETASK_NONE:
           priv->result = OK;
@@ -758,7 +760,7 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
           /* Atomic */
 
           irqs = enter_critical_section();
-          priv->msgs = &msgs[indx];
+          priv->msgs = &msgs[index];
           stm32_1wire_send(priv, RESET_TX);
           leave_critical_section(irqs);
 
@@ -778,7 +780,7 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
           /* Atomic */
 
           irqs = enter_critical_section();
-          priv->msgs = &msgs[indx];
+          priv->msgs = &msgs[index];
           priv->byte = priv->msgs->buffer;
           priv->bit = 0;
           stm32_1wire_send(priv, (*priv->byte & (1 << priv->bit)) ?
@@ -801,7 +803,7 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
           /* Atomic */
 
           irqs = enter_critical_section();
-          priv->msgs = &msgs[indx];
+          priv->msgs = &msgs[index];
           priv->byte = priv->msgs->buffer;
           priv->bit = 0;
           stm32_1wire_send(priv, READ_TX);
@@ -826,7 +828,7 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
   ret = priv->result;
   leave_critical_section(irqs);
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
   return ret;

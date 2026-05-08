@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_pwm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,7 +31,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
@@ -61,7 +63,7 @@
 #define TIMTYPE_GENERAL16    1  /* General 16-bit timers (up, down, up/down)*/
 #define TIMTYPE_COUNTUP16    2  /* General 16-bit count-up timers */
 #define TIMTYPE_COUNTUP16_N  3  /* General 16-bit count-up timers with
-                                 * complementary outptus
+                                 * complementary outputs
                                  */
 #define TIMTYPE_GENERAL32    4  /* General 32-bit timers (up, down, up/down)*/
 #define TIMTYPE_ADVANCED     5  /* Advanced timers */
@@ -145,7 +147,7 @@
 #define TIMRST_TIM16     RCC_APB2RSTR_TIM16RST
 #define TIMCLK_TIM17     STM32_APB2_TIM17_CLKIN
 #define TIMRCCEN_TIM17   STM32_RCC_APB2ENR
-#define TIMEN_TIM17      RCC_APB2ENR_TIM71EN
+#define TIMEN_TIM17      RCC_APB2ENR_TIM17EN
 #define TIMRCCRST_TIM17  STM32_RCC_APB2RSTR
 #define TIMRST_TIM17     RCC_APB2RSTR_TIM17RST
 
@@ -2625,7 +2627,7 @@ static int pwm_outputs_enable(struct pwm_lowerhalf_s *dev,
   uint32_t ccer   = 0;
   uint32_t regval = 0;
 
-  /* Get curren register state */
+  /* Get current register state */
 
   ccer = pwm_getreg(priv, STM32_GTIM_CCER_OFFSET);
 
@@ -2648,7 +2650,7 @@ static int pwm_outputs_enable(struct pwm_lowerhalf_s *dev,
 
   if (state == true)
     {
-      /* Enable outpus - set bits */
+      /* Enable outputs - set bits */
 
       ccer |= regval;
     }
@@ -2711,7 +2713,7 @@ errout:
  * Name: pwm_sync_configure
  *
  * Description:
- *   Confiugre an output synchronisation event for PWM timer (TRGO/TRGO2)
+ *   Configure an output synchronisation event for PWM timer (TRGO/TRGO2)
  *
  ****************************************************************************/
 
@@ -2813,7 +2815,7 @@ static uint16_t pwm_outputs_from_channels(struct stm32_pwmtimer_s *priv)
 
       if (channel != 0)
         {
-          /* Enable output if confiugred */
+          /* Enable output if configured */
 
           if (priv->channels[i].out1.in_use == 1)
             {
@@ -4227,6 +4229,14 @@ static int pwm_stop(struct pwm_lowerhalf_s *dev)
 
   regval &= ~resetbit;
   putreg32(regval, regaddr);
+
+  /* Clear all channels */
+
+  pwm_putreg(priv, STM32_GTIM_CCR1_OFFSET, 0);
+  pwm_putreg(priv, STM32_GTIM_CCR2_OFFSET, 0);
+  pwm_putreg(priv, STM32_GTIM_CCR3_OFFSET, 0);
+  pwm_putreg(priv, STM32_GTIM_CCR4_OFFSET, 0);
+
   leave_critical_section(flags);
 
   pwminfo("regaddr: %08" PRIx32 " resetbit: %08" PRIx32 "\n",

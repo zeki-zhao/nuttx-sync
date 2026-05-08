@@ -27,7 +27,7 @@
 #ifdef CONFIG_ESP32S3_SPI
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <sys/param.h>
 #include <sys/types.h>
 #include <inttypes.h>
@@ -52,8 +52,8 @@
 #include "hardware/esp32s3_soc.h"
 #include "hardware/esp32s3_system.h"
 
-#include "esp32s3_irq.h"
-#include "esp32s3_gpio.h"
+#include "esp_irq.h"
+#include "esp_gpio.h"
 #include "esp32s3_qspi.h"
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
@@ -212,8 +212,8 @@ struct esp32s3_qspi_priv_s
   uint8_t nbits;          /* Actual QSPI send/receive bits once transmission */
 
   uint8_t dummies;        /* Number of dummy cycles of command transfer */
-  uint8_t addr_lines;     /* Number of address transmiting I/O pins */
-  uint8_t data_lines;     /* Number of data transmiting I/O pins */
+  uint8_t addr_lines;     /* Number of address transmitting I/O pins */
+  uint8_t data_lines;     /* Number of data transmitting I/O pins */
 };
 
 /****************************************************************************
@@ -236,9 +236,9 @@ static void esp32s3_qspi_free(struct qspi_dev_s *dev, void *buffer);
 #ifdef CONFIG_ESP32S3_SPI_DMA
 static int esp32s3_qspi_interrupt(int irq, void *context, void *arg);
 static int esp32s3_qspi_wait_sem(struct esp32s3_qspi_priv_s *priv);
-static void esp32s3_qspi_init_dma(struct esp32s3_qspi_priv_s *priv);
+static int esp32s3_qspi_init_dma(struct esp32s3_qspi_priv_s *priv);
 #endif
-static void esp32s3_qspi_init(struct esp32s3_qspi_priv_s *priv);
+static int esp32s3_qspi_init(struct esp32s3_qspi_priv_s *priv);
 static void esp32s3_qspi_deinit(struct esp32s3_qspi_priv_s *priv);
 
 /****************************************************************************
@@ -289,6 +289,9 @@ static const struct qspi_ops_s esp32s3_spi2_ops =
   .setfrequency = esp32s3_qspi_setfrequency,
   .setmode      = esp32s3_qspi_setmode,
   .setbits      = esp32s3_qspi_setbits,
+#ifdef CONFIG_QSPI_HWFEATURES
+  .hwfeatures   = NULL,
+#endif
   .command      = esp32s3_qspi_command,
   .memory       = esp32s3_qspi_memory,
   .alloc        = esp32s3_qspi_alloc,
@@ -379,6 +382,9 @@ static const struct qspi_ops_s esp32s3_spi3_ops =
   .setfrequency = esp32s3_qspi_setfrequency,
   .setmode      = esp32s3_qspi_setmode,
   .setbits      = esp32s3_qspi_setbits,
+#ifdef CONFIG_QSPI_HWFEATURES
+  .hwfeatures   = NULL,
+#endif
   .command      = esp32s3_qspi_command,
   .memory       = esp32s3_qspi_memory,
   .alloc        = esp32s3_qspi_alloc,
@@ -717,7 +723,18 @@ static int esp32s3_qspi_command(struct qspi_dev_s *dev,
         }
     }
 
-  /* Initiliaze QSPI user register */
+  /* Initialize QSPI user register */
+
+#ifdef CONFIG_ESP32S3_SPI_DMA
+
+  /* Disable QSPI DMA */
+
+  regval  = getreg32(SPI_DMA_CONF_REG(id));
+  regval &= ~(SPI_DMA_TX_ENA_M | SPI_DMA_RX_ENA_M);
+  putreg32(regval, SPI_DMA_CONF_REG(id));
+
+  putreg32(0, SPI_DMA_INT_ENA_REG(id));
+#endif
 
   user_reg &= ~(SPI_USR_ADDR_M |
                 SPI_USR_MOSI_M |
@@ -747,7 +764,8 @@ static int esp32s3_qspi_command(struct qspi_dev_s *dev,
 
       user_reg |= SPI_USR_ADDR_M;
 
-      putreg32(cmdinfo->addr, SPI_ADDR_REG(id));
+      regval = cmdinfo->addr << (32 - cmdinfo->addrlen * 8);
+      putreg32(regval, SPI_ADDR_REG(id));
     }
 
   /* Set dummy */
@@ -840,7 +858,7 @@ static int esp32s3_qspi_command(struct qspi_dev_s *dev,
       ;
     }
 
-  /* Start transmision */
+  /* Start transmission */
 
   regval = getreg32(SPI_CMD_REG(id));
   regval |= SPI_USR_M;
@@ -913,7 +931,7 @@ static int esp32s3_qspi_memory(struct qspi_dev_s *dev,
   regval &= ~QSPI_DMA_RESET_MASK;
   putreg32(regval, SPI_DMA_CONF_REG(id));
 
-  /* Initiliaze QSPI user register */
+  /* Initialize QSPI user register */
 
   user_reg &= ~(SPI_USR_MOSI_M |
                 SPI_USR_MISO_M |
@@ -921,7 +939,7 @@ static int esp32s3_qspi_memory(struct qspi_dev_s *dev,
                 SPI_FWRITE_DUAL_M |
                 SPI_FWRITE_OCT_M |
                 SPI_FWRITE_QUAD_M);
-  user_reg |= SPI_USR_COMMAND_M | SPI_USR_ADDR_M;
+  user_reg |= SPI_USR_COMMAND_M;
 
   /* Set command bits and value, and command is always needed */
 
@@ -935,10 +953,16 @@ static int esp32s3_qspi_memory(struct qspi_dev_s *dev,
 
   /* Set address bits and value */
 
-  user1_reg &= ~SPI_USR_ADDR_BITLEN_M;
-  user1_reg |= (meminfo->addrlen * 8 - 1) << SPI_USR_ADDR_BITLEN_S;
+  if (meminfo->addrlen)
+    {
+      user_reg |= SPI_USR_ADDR_M;
 
-  putreg32(meminfo->addr, SPI_ADDR_REG(id));
+      user1_reg &= ~SPI_USR_ADDR_BITLEN_M;
+      user1_reg |= (meminfo->addrlen * 8 - 1) << SPI_USR_ADDR_BITLEN_S;
+
+      regval = meminfo->addr << (32 - meminfo->addrlen * 8);
+      putreg32(regval, SPI_ADDR_REG(id));
+    }
 
   /* Set dummy */
 
@@ -969,12 +993,12 @@ static int esp32s3_qspi_memory(struct qspi_dev_s *dev,
           user_reg |= SPI_FWRITE_QUAD_M;
         }
 
-      esp32s3_dma_setup(priv->dma_channel,
-                        true,
-                        priv->dma_desc,
+      esp32s3_dma_setup(priv->dma_desc,
                         QSPI_DMA_DESC_NUM,
                         (uint8_t *)meminfo->buffer,
-                        meminfo->buflen);
+                        meminfo->buflen,
+                        true, priv->dma_channel);
+      esp32s3_dma_load(priv->dma_desc, priv->dma_channel, true);
       esp32s3_dma_enable(priv->dma_channel, true);
     }
   else if (QSPIMEM_ISREAD(meminfo->flags))
@@ -985,12 +1009,12 @@ static int esp32s3_qspi_memory(struct qspi_dev_s *dev,
 
       user_reg |= SPI_USR_MISO_M;
 
-      esp32s3_dma_setup(priv->dma_channel,
-                        false,
-                        priv->dma_desc,
+      esp32s3_dma_setup(priv->dma_desc,
                         QSPI_DMA_DESC_NUM,
                         (uint8_t *)meminfo->buffer,
-                        meminfo->buflen);
+                        meminfo->buflen,
+                        false, priv->dma_channel);
+      esp32s3_dma_load(priv->dma_desc, priv->dma_channel, false);
       esp32s3_dma_enable(priv->dma_channel, false);
     }
 
@@ -1051,13 +1075,13 @@ static int esp32s3_qspi_memory(struct qspi_dev_s *dev,
       ;
     }
 
-  /* Start transmision */
+  /* Start transmission */
 
   regval = getreg32(SPI_CMD_REG(id));
   regval |= SPI_USR_M;
   putreg32(regval, SPI_CMD_REG(id));
 
-  /* Wait for transmision done */
+  /* Wait for transmission done */
 
   esp32s3_qspi_wait_sem(priv);
 
@@ -1152,12 +1176,12 @@ static int esp32s3_qspi_wait_sem(struct esp32s3_qspi_priv_s *priv)
  *   priv - QSPI private state data
  *
  * Returned Value:
- *   None.
+ *   Zero on success; a negated errno on failure
  *
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
-void esp32s3_qspi_init_dma(struct esp32s3_qspi_priv_s *priv)
+static int esp32s3_qspi_init_dma(struct esp32s3_qspi_priv_s *priv)
 {
   const struct esp32s3_qspi_config_s *config = priv->config;
 
@@ -1169,25 +1193,48 @@ void esp32s3_qspi_init_dma(struct esp32s3_qspi_priv_s *priv)
 
   modifyreg32(SYSTEM_PERIP_RST_EN0_REG, config->dma_rst_bit, 0);
 
-  /* Initialize GDMA controller */
-
-  esp32s3_dma_init();
-
   /* Request a GDMA channel for QSPI peripheral */
 
   priv->dma_channel = esp32s3_dma_request(config->dma_periph, 1, 1, true);
   if (priv->dma_channel < 0)
     {
       spierr("Failed to allocate GDMA channel\n");
-
-      DEBUGPANIC();
+      return ERROR;
     }
 
   /* Disable segment transaction mode for QSPI Master */
 
   putreg32((SPI_SLV_RX_SEG_TRANS_CLR_EN_M | SPI_SLV_TX_SEG_TRANS_CLR_EN_M),
            SPI_DMA_CONF_REG(config->id));
+
+  return OK;
 }
+
+/****************************************************************************
+ * Name: esp32s3_qspi_dma_deinit
+ *
+ * Description:
+ *   Deinitialize ESP32-S3 QSPI GDMA engine.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_qspi_dma_deinit(struct esp32s3_qspi_priv_s *priv)
+{
+  /* Release a DMA channel from peripheral */
+
+  esp32s3_dma_release(priv->dma_channel);
+
+  /* Disable DMA clock for the SPI peripheral */
+
+  modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, priv->config->dma_clk_bit, 0);
+}
+
 #endif
 
 /****************************************************************************
@@ -1210,22 +1257,22 @@ static void esp32s3_qspi_init_iomux(struct esp32s3_qspi_priv_s *priv)
   uint32_t attr = OUTPUT_FUNCTION_5;
   const struct esp32s3_qspi_config_s *config = priv->config;
 
-  esp32s3_configgpio(config->cs_pin,  attr);
-  esp32s3_configgpio(config->clk_pin, attr);
+  esp_configgpio(config->cs_pin,  attr);
+  esp_configgpio(config->clk_pin, attr);
 
   attr |= INPUT;
 
-  esp32s3_configgpio(config->mosi_pin, attr);
-  esp32s3_configgpio(config->miso_pin, attr);
-  esp32s3_configgpio(config->io2_pin,  attr);
-  esp32s3_configgpio(config->io3_pin,  attr);
+  esp_configgpio(config->mosi_pin, attr);
+  esp_configgpio(config->miso_pin, attr);
+  esp_configgpio(config->io2_pin,  attr);
+  esp_configgpio(config->io3_pin,  attr);
 
-  esp32s3_gpio_matrix_out(config->cs_pin,   SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s3_gpio_matrix_out(config->clk_pin,  SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s3_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s3_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s3_gpio_matrix_out(config->io2_pin,  SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s3_gpio_matrix_out(config->io3_pin,  SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->cs_pin,   SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->clk_pin,  SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->io2_pin,  SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->io3_pin,  SIG_GPIO_OUT_IDX, 0, 0);
 }
 #endif
 
@@ -1249,29 +1296,29 @@ static void esp32s3_qspi_init_iomatrix(struct esp32s3_qspi_priv_s *priv)
   uint32_t attr = OUTPUT;
   const struct esp32s3_qspi_config_s *config = priv->config;
 
-  esp32s3_configgpio(config->cs_pin, OUTPUT);
-  esp32s3_gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
+  esp_configgpio(config->cs_pin, OUTPUT);
+  esp_gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
 
-  esp32s3_configgpio(config->clk_pin, OUTPUT);
-  esp32s3_gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
+  esp_configgpio(config->clk_pin, OUTPUT);
+  esp_gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
 
   attr |= INPUT;
 
-  esp32s3_configgpio(config->mosi_pin, attr);
-  esp32s3_gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
-  esp32s3_gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
+  esp_configgpio(config->mosi_pin, attr);
+  esp_gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
+  esp_gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
 
-  esp32s3_configgpio(config->miso_pin, attr);
-  esp32s3_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
-  esp32s3_gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
+  esp_configgpio(config->miso_pin, attr);
+  esp_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
+  esp_gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
 
-  esp32s3_configgpio(config->io2_pin, attr);
-  esp32s3_gpio_matrix_in(config->io2_pin, config->io2_insig, 0);
-  esp32s3_gpio_matrix_out(config->io2_pin, config->io2_outsig, 0, 0);
+  esp_configgpio(config->io2_pin, attr);
+  esp_gpio_matrix_in(config->io2_pin, config->io2_insig, 0);
+  esp_gpio_matrix_out(config->io2_pin, config->io2_outsig, 0, 0);
 
-  esp32s3_configgpio(config->io3_pin, attr);
-  esp32s3_gpio_matrix_in(config->io3_pin, config->io3_insig, 0);
-  esp32s3_gpio_matrix_out(config->io3_pin, config->io3_outsig, 0, 0);
+  esp_configgpio(config->io3_pin, attr);
+  esp_gpio_matrix_in(config->io3_pin, config->io3_insig, 0);
+  esp_gpio_matrix_out(config->io3_pin, config->io3_outsig, 0, 0);
 }
 #endif
 
@@ -1319,11 +1366,11 @@ static void esp32s3_qspi_init_gpio(struct esp32s3_qspi_priv_s *priv)
  *   priv - QSPI private state data
  *
  * Returned Value:
- *   None.
+ *   Zero on success; a negated errno on failure
  *
  ****************************************************************************/
 
-static void esp32s3_qspi_init(struct esp32s3_qspi_priv_s *priv)
+static int esp32s3_qspi_init(struct esp32s3_qspi_priv_s *priv)
 {
   const struct esp32s3_qspi_config_s *config = priv->config;
   uint8_t id = config->id;
@@ -1345,12 +1392,19 @@ static void esp32s3_qspi_init(struct esp32s3_qspi_priv_s *priv)
   putreg32(0, SPI_CTRL_REG(id));
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
-  esp32s3_qspi_init_dma(priv);
+  if (esp32s3_qspi_init_dma(priv) != OK)
+    {
+      modifyreg32(SYSTEM_PERIP_RST_EN0_REG, 0, priv->config->clk_bit);
+      modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, priv->config->clk_bit, 0);
+      return ERROR;
+    }
 #endif
 
   esp32s3_qspi_setfrequency(&priv->spi_dev, QSPI_DEFAULT_FREQ);
   esp32s3_qspi_setbits(&priv->spi_dev, QSPI_DEFAULT_WIDTH);
   esp32s3_qspi_setmode(&priv->spi_dev, QSPI_DEFAULT_MODE);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1372,8 +1426,7 @@ static void esp32s3_qspi_deinit(struct esp32s3_qspi_priv_s *priv)
   const struct esp32s3_qspi_config_s *config = priv->config;
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
-  modifyreg32(SYSTEM_PERIP_RST_EN0_REG, 0, config->dma_rst_bit);
-  modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, config->dma_clk_bit, 0);
+  esp32s3_qspi_dma_deinit(priv);
 #endif
 
   modifyreg32(SYSTEM_PERIP_RST_EN0_REG, 0, config->rst_bit);
@@ -1433,8 +1486,8 @@ static int esp32s3_qspi_interrupt(int irq, void *context, void *arg)
  *   dev        - Device-specific state data
  *   dummies    - Number of dummy cycles, this only works in command
  *                transfer, not works in memory transfer
- *   addr_lines - Number of address transmiting I/O pins
- *   data_lines - Number of data transmiting I/O pins
+ *   addr_lines - Number of address transmitting I/O pins
+ *   data_lines - Number of data transmitting I/O pins
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise -1 (ERROR).
@@ -1474,6 +1527,56 @@ int esp32s3_qspibus_set_attr(struct qspi_dev_s *dev,
   priv->data_lines = data_lines;
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: esp32s3_qspibus_set_delay
+ *
+ * Description:
+ *   Set timing delay for QSPI input and output data.
+ *
+ * Input Parameters:
+ *   dev        - Device-specific state data
+ *   din_mode   - Input mode(0~3) to delay input data
+ *   din_num    - The delay number(0~3) to input data
+ *   dout_mode  - Output mode(0,1) to delay output data
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise -1 (ERROR).
+ *
+ ****************************************************************************/
+
+int esp32s3_qspibus_set_delay(struct qspi_dev_s *dev,
+                              uint8_t din_mode,
+                              uint8_t din_num,
+                              uint8_t dout_mode)
+{
+  struct esp32s3_qspi_priv_s *priv = (struct esp32s3_qspi_priv_s *)dev;
+  uint8_t id = priv->config->id;
+
+  if ((din_mode > 3) || (din_num > 3) || (dout_mode > 1))
+    {
+      return -1;
+    }
+
+  uint32_t din_mode_reg = (din_mode << SPI_DIN0_MODE_S) |
+                          (din_mode << SPI_DIN1_MODE_S) |
+                          (din_mode << SPI_DIN2_MODE_S) |
+                          (din_mode << SPI_DIN3_MODE_S);
+  uint32_t din_num_reg = (din_num << SPI_DIN0_NUM_S) |
+                         (din_num << SPI_DIN1_NUM_S) |
+                         (din_num << SPI_DIN2_NUM_S) |
+                         (din_num << SPI_DIN3_NUM_S);
+  uint32_t dout_mode_reg = (dout_mode << SPI_DOUT0_MODE_S) |
+                           (dout_mode << SPI_DOUT1_MODE_S) |
+                           (dout_mode << SPI_DOUT2_MODE_S) |
+                           (dout_mode << SPI_DOUT3_MODE_S);
+
+  putreg32(din_mode_reg, SPI_DIN_MODE_REG(id));
+  putreg32(din_num_reg, SPI_DIN_NUM_REG(id));
+  putreg32(dout_mode_reg, SPI_DOUT_MODE_REG(id));
+
+  return 0;
 }
 
 /****************************************************************************
@@ -1525,10 +1628,12 @@ struct qspi_dev_s *esp32s3_qspibus_initialize(int port)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpu = up_cpu_index();
-  priv->cpuint = esp32s3_setup_irq(priv->cpu, priv->config->periph,
-                                   ESP32S3_INT_PRIO_DEF,
-                                   ESP32S3_CPUINT_LEVEL);
+  priv->cpu = this_cpu();
+  priv->cpuint = esp_setup_irq(priv->config->periph,
+                               ESP32S3_INT_PRIO_DEF,
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               esp32s3_qspi_interrupt,
+                               priv);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type. */
@@ -1537,25 +1642,22 @@ struct qspi_dev_s *esp32s3_qspibus_initialize(int port)
       return NULL;
     }
 
-  /* Attach and enable the IRQ */
-
-  if (irq_attach(priv->config->irq, esp32s3_qspi_interrupt, priv) != OK)
-    {
-      /* Failed to attach IRQ, so CPU interrupt must be freed. */
-
-      esp32s3_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
-      priv->cpuint = -ENOMEM;
-      nxmutex_unlock(&priv->lock);
-
-      return NULL;
-    }
-
   /* Enable the CPU interrupt that is linked to the QSPI device. */
 
   up_enable_irq(priv->config->irq);
 #endif
 
-  esp32s3_qspi_init(priv);
+  if (esp32s3_qspi_init(priv) != OK)
+    {
+#ifdef CONFIG_ESP32S3_SPI_DMA
+      up_disable_irq(priv->config->irq);
+      esp_teardown_irq(priv->config->periph, priv->cpuint);
+      priv->cpuint = -ENOMEM;
+#endif
+      nxmutex_unlock(&priv->lock);
+      return NULL;
+    }
+
   priv->refs++;
   nxmutex_unlock(&priv->lock);
   return spi_dev;
@@ -1595,9 +1697,7 @@ int esp32s3_qspibus_uninitialize(struct qspi_dev_s *dev)
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
   up_disable_irq(priv->config->irq);
-  esp32s3_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
-  irq_detach(priv->config->irq);
-
+  esp_teardown_irq(priv->config->periph, priv->cpuint);
   priv->cpuint = -ENOMEM;
 #endif
 

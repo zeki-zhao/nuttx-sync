@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_dma2d.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,8 +35,8 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
@@ -67,7 +69,7 @@
                                             STM32_DMA2D_CR_MODE_BLEND   | \
                                             STM32_DMA2D_CR_MODE_COLOR
 
-/* Only 8 bit per pixel overal supported */
+/* Only 8 bit per pixel overall supported */
 
 #define DMA2D_PF_BYPP(n)                    ((n) / 8)
 
@@ -330,7 +332,7 @@ static int stm32_dma2dirq(int irq, void *context, void *arg)
   uint32_t regval = getreg32(STM32_DMA2D_ISR);
   struct stm32_interrupt_s *priv = &g_interrupt;
 
-  reginfo("irq = %d, regval = %08x\n", (unsigned int)irq, (unsigned int)regval);
+  reginfo("irq = %d, regval = %08" PRIx32 "\n", irq, regval);
 
   if (regval & DMA2D_ISR_TCIF)
     {
@@ -469,9 +471,9 @@ static int stm32_dma2d_loadclut(uintptr_t pfcreg)
 
   regval  = getreg32(pfcreg);
   regval |= DMA2D_XGPFCCR_START;
-  reginfo("set regval=%08x\n", regval);
+  reginfo("set regval=%08" PRIx32 "\n", regval);
   putreg32(regval, pfcreg);
-  reginfo("configured regval=%08x\n", getreg32(pfcreg));
+  reginfo("configured regval=%08" PRIx32 "\n", getreg32(pfcreg));
 
   /* Wait until clut is finished */
 
@@ -1083,7 +1085,6 @@ static int stm32_dma2d_blend(struct stm32_dma2d_overlay_s *doverlay,
 int stm32_dma2dinitialize(void)
 {
   lcdinfo("Initialize DMA2D driver\n");
-  syslog(LOG_INFO,"nitialize DMA2D driver\n");
 
   if (g_initialized == false)
     {

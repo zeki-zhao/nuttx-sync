@@ -27,7 +27,7 @@
 #ifdef CONFIG_ESP32S3_SPI
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <sys/param.h>
 #include <sys/types.h>
 #include <inttypes.h>
@@ -45,11 +45,12 @@
 #include <arch/board/board.h>
 
 #include "esp32s3_spi.h"
-#include "esp32s3_irq.h"
-#include "esp32s3_gpio.h"
+#include "esp_irq.h"
+#include "esp_gpio.h"
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
 #include "esp32s3_dma.h"
+#include "hardware/esp32s3_dma.h"
 #endif
 
 #include "xtensa.h"
@@ -136,6 +137,7 @@ struct esp32s3_spi_config_s
 #ifdef CONFIG_ESP32S3_SPI_DMA
   uint32_t dma_clk_bit;       /* DMA clock enable bit */
   uint32_t dma_rst_bit;       /* DMA reset bit */
+  uint8_t dma_periph;         /* DMA peripheral */
 #endif
   uint32_t cs_insig;          /* SPI CS input signal index */
   uint32_t cs_outsig;         /* SPI CS output signal index */
@@ -204,12 +206,11 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
                                      const void *txbuffer,
                                      void *rxbuffer,
                                      uint32_t nwords);
-#else
+#endif
 static void esp32s3_spi_poll_exchange(struct esp32s3_spi_priv_s *priv,
                                       const void *txbuffer,
                                       void *rxbuffer,
                                       size_t nwords);
-#endif
 #ifndef CONFIG_SPI_EXCHANGE
 static void esp32s3_spi_sndblock(struct spi_dev_s *dev,
                                  const void *txbuffer,
@@ -222,9 +223,9 @@ static void esp32s3_spi_recvblock(struct spi_dev_s *dev,
 static int esp32s3_spi_trigger(struct spi_dev_s *dev);
 #endif
 #ifdef CONFIG_ESP32S3_SPI_DMA
-static void esp32s3_spi_dma_init(struct spi_dev_s *dev);
+static int esp32s3_spi_dma_init(struct spi_dev_s *dev);
 #endif
-static void esp32s3_spi_init(struct spi_dev_s *dev);
+static int esp32s3_spi_init(struct spi_dev_s *dev);
 static void esp32s3_spi_deinit(struct spi_dev_s *dev);
 
 /****************************************************************************
@@ -251,6 +252,7 @@ static const struct esp32s3_spi_config_s esp32s3_spi2_config =
 #ifdef CONFIG_ESP32S3_SPI_DMA
   .dma_clk_bit  = SYSTEM_SPI2_DMA_CLK_EN,
   .dma_rst_bit  = SYSTEM_SPI2_DMA_RST,
+  .dma_periph   = ESP32S3_DMA_PERIPH_SPI2,
 #endif
   .cs_insig     = FSPICS0_IN_IDX,
   .cs_outsig    = FSPICS0_OUT_IDX,
@@ -345,15 +347,16 @@ static const struct esp32s3_spi_config_s esp32s3_spi3_config =
 #ifdef CONFIG_ESP32S3_SPI_DMA
   .dma_clk_bit  = SYSTEM_SPI3_DMA_CLK_EN,
   .dma_rst_bit  = SYSTEM_SPI3_DMA_RST,
+  .dma_periph   = ESP32S3_DMA_PERIPH_SPI3,
 #endif
-  .cs_insig     = FSPICS0_IN_IDX,
-  .cs_outsig    = FSPICS0_OUT_IDX,
-  .mosi_insig   = FSPID_IN_IDX,
-  .mosi_outsig  = FSPID_OUT_IDX,
-  .miso_insig   = FSPIQ_IN_IDX,
-  .miso_outsig  = FSPIQ_OUT_IDX,
-  .clk_insig    = FSPICLK_IN_IDX,
-  .clk_outsig   = FSPICLK_OUT_IDX
+  .cs_insig     = SPI3_CS0_IN_IDX,
+  .cs_outsig    = SPI3_CS0_OUT_IDX,
+  .mosi_insig   = SPI3_D_IN_IDX,
+  .mosi_outsig  = SPI3_D_OUT_IDX,
+  .miso_insig   = SPI3_Q_IN_IDX,
+  .miso_outsig  = SPI3_Q_OUT_IDX,
+  .clk_insig    = SPI3_CLK_IN_IDX,
+  .clk_outsig   = SPI3_CLK_OUT_IDX
 };
 
 static const struct spi_ops_s esp32s3_spi3_ops =
@@ -430,8 +433,8 @@ static struct esp32s3_spi_priv_s esp32s3_spi3_priv =
  *   Set the bits of the SPI register.
  *
  * Input Parameters:
- *   addr   - Address of the register of interest
- *   bits   - Bits to be set
+ *   addr - Address of the register of interest
+ *   bits - Bits to be set
  *
  * Returned Value:
  *   None.
@@ -452,8 +455,8 @@ static inline void esp32s3_spi_set_regbits(uint32_t addr, uint32_t bits)
  *   Clear the bits of the SPI register.
  *
  * Input Parameters:
- *   addr   - Address of the register of interest
- *   bits   - Bits to be cleared
+ *   addr - Address of the register of interest
+ *   bits - Bits to be cleared
  *
  * Returned Value:
  *   None.
@@ -490,11 +493,16 @@ static inline bool esp32s3_spi_iomux(struct esp32s3_spi_priv_s *priv)
 
   if (cfg->id == 2)
     {
-      if (cfg->mosi_pin == SPI2_IOMUX_MOSIPIN &&
+      if (
+#if CONFIG_ESP32S3_SPI2_MOSIPIN >= 0
+          cfg->mosi_pin == SPI2_IOMUX_MOSIPIN &&
+#endif
 #ifndef CONFIG_ESP32S3_SPI_SWCS
           cfg->cs_pin == SPI2_IOMUX_CSPIN &&
 #endif
+#if CONFIG_ESP32S3_SPI2_MISOPIN >= 0
           cfg->miso_pin == SPI2_IOMUX_MISOPIN &&
+#endif
           cfg->clk_pin == SPI2_IOMUX_CLKPIN)
         {
           mapped = true;
@@ -511,8 +519,8 @@ static inline bool esp32s3_spi_iomux(struct esp32s3_spi_priv_s *priv)
  *   Lock or unlock the SPI device.
  *
  * Input Parameters:
- *   dev    - Device-specific state data
- *   lock   - true: Lock SPI bus, false: unlock SPI bus
+ *   dev  - Device-specific state data
+ *   lock - true: Lock SPI bus, false: unlock SPI bus
  *
  * Returned Value:
  *   The result of lock or unlock the SPI device.
@@ -587,7 +595,10 @@ static void esp32s3_spi_select(struct spi_dev_s *dev,
 #if SPI_HAVE_SWCS
   struct esp32s3_spi_priv_s *priv = (struct esp32s3_spi_priv_s *)dev;
 
-  esp32s3_gpiowrite(priv->config->cs_pin, !selected);
+  if (priv->config->cs_pin >= 0)
+    {
+      esp_gpiowrite(priv->config->cs_pin, !selected);
+    }
 #endif
 
   spiinfo("devid: %08" PRIx32 " CS: %s\n",
@@ -882,6 +893,7 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
   if (tp == NULL)
     {
       tp = rp;
+      memset(tp, 0, bytes);
     }
 
   esp32s3_spi_set_regbits(SPI_DMA_INT_CLR_REG(priv->config->id),
@@ -894,18 +906,20 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
     {
       /* Reset SPI DMA TX FIFO */
 
-      esp32s3_spi_set_regbits(SPI_DMA_CONF_REG(priv->config->id),
-                              SPI_DMA_RESET_MASK);
-      esp32s3_spi_clr_regbits(SPI_DMA_CONF_REG(priv->config->id),
-                              SPI_DMA_RESET_MASK);
+      SET_GDMA_CH_BITS(DMA_OUT_CONF0_CH0_REG, priv->dma_channel,
+                       DMA_OUT_RST_CH0);
+
+      CLR_GDMA_CH_BITS(DMA_OUT_CONF0_CH0_REG, priv->dma_channel,
+                       DMA_OUT_RST_CH0);
 
       /* Enable SPI DMA TX */
 
       esp32s3_spi_set_regbits(SPI_DMA_CONF_REG(priv->config->id),
                               SPI_DMA_TX_ENA_M);
 
-      n = esp32s3_dma_setup(channel, true, priv->dma_txdesc,
-                            SPI_DMA_DESC_NUM, tp, bytes);
+      n = esp32s3_dma_setup(priv->dma_txdesc, SPI_DMA_DESC_NUM,
+                            tp, bytes, true, priv->dma_channel);
+      esp32s3_dma_load(priv->dma_txdesc, channel, true);
       esp32s3_dma_enable(channel, true);
 
       putreg32((n * 8 - 1), SPI_MS_DLEN_REG(priv->config->id));
@@ -916,13 +930,22 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
 
       if (rp != NULL)
         {
+          /* Reset SPI DMA RX FIFO */
+
+          SET_GDMA_CH_BITS(DMA_IN_CONF0_CH0_REG, priv->dma_channel,
+                           DMA_IN_RST_CH0);
+
+          CLR_GDMA_CH_BITS(DMA_IN_CONF0_CH0_REG, priv->dma_channel,
+                           DMA_IN_RST_CH0);
+
           /* Enable SPI DMA RX */
 
           esp32s3_spi_set_regbits(SPI_DMA_CONF_REG(priv->config->id),
                                   SPI_DMA_RX_ENA_M);
 
-          esp32s3_dma_setup(channel, false, priv->dma_rxdesc,
-                            SPI_DMA_DESC_NUM, rp, bytes);
+          esp32s3_dma_setup(priv->dma_rxdesc, SPI_DMA_DESC_NUM,
+                            rp, bytes, false, priv->dma_channel);
+          esp32s3_dma_load(priv->dma_rxdesc, channel, false);
           esp32s3_dma_enable(channel, false);
 
           esp32s3_spi_set_regbits(SPI_USER_REG(priv->config->id),
@@ -977,6 +1000,14 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
 static uint32_t esp32s3_spi_poll_send(struct esp32s3_spi_priv_s *priv,
                                       uint32_t wd)
 {
+#ifdef CONFIG_ESP32S3_SPI_DMA
+  esp32s3_spi_clr_regbits(SPI_DMA_CONF_REG(priv->config->id),
+                          SPI_DMA_TX_ENA_M);
+
+  esp32s3_spi_clr_regbits(SPI_DMA_CONF_REG(priv->config->id),
+                          SPI_DMA_RX_ENA_M);
+#endif
+
   uint32_t val;
 
   putreg32((priv->nbits - 1), SPI_MS_DLEN_REG(priv->config->id));
@@ -1057,6 +1088,14 @@ static void esp32s3_spi_poll_exchange(struct esp32s3_spi_priv_s *priv,
                                       void *rxbuffer,
                                       size_t nwords)
 {
+#ifdef CONFIG_ESP32S3_SPI_DMA
+  esp32s3_spi_clr_regbits(SPI_DMA_CONF_REG(priv->config->id),
+                          SPI_DMA_TX_ENA_M);
+
+  esp32s3_spi_clr_regbits(SPI_DMA_CONF_REG(priv->config->id),
+                          SPI_DMA_RX_ENA_M);
+#endif
+
   const uint32_t total_bytes = nwords * (priv->nbits / 8);
   uintptr_t bytes_remaining = total_bytes;
   const uint8_t *tp = (const uint8_t *)txbuffer;
@@ -1196,7 +1235,7 @@ static void esp32s3_spi_exchange(struct spi_dev_s *dev,
 #ifdef CONFIG_ESP32S3_SPI_DMA
   size_t thld = CONFIG_ESP32S3_SPI_DMATHRESHOLD;
 
-  if (nwords > thld)
+  if ((nwords * priv->nbits) / 8 > thld)
     {
       esp32s3_spi_dma_exchange(priv, txbuffer, rxbuffer, nwords);
     }
@@ -1275,7 +1314,7 @@ static void esp32s3_spi_recvblock(struct spi_dev_s *dev,
  *   Trigger a previously configured DMA transfer.
  *
  * Input Parameters:
- *   dev      - Device-specific state data
+ *   dev - Device-specific state data
  *
  * Returned Value:
  *   OK       - Trigger was fired
@@ -1291,6 +1330,8 @@ static int esp32s3_spi_trigger(struct spi_dev_s *dev)
 }
 #endif
 
+#ifdef CONFIG_ESP32S3_SPI_DMA
+
 /****************************************************************************
  * Name: esp32s3_spi_dma_init
  *
@@ -1298,15 +1339,14 @@ static int esp32s3_spi_trigger(struct spi_dev_s *dev)
  *   Initialize ESP32-S3 SPI connection to GDMA engine.
  *
  * Input Parameters:
- *   dev      - Device-specific state data
+ *   dev - Device-specific state data
  *
  * Returned Value:
- *   None.
+ *   OK on success; A negated errno value on failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_SPI_DMA
-void esp32s3_spi_dma_init(struct spi_dev_s *dev)
+static int esp32s3_spi_dma_init(struct spi_dev_s *dev)
 {
   struct esp32s3_spi_priv_s *priv = (struct esp32s3_spi_priv_s *)dev;
 
@@ -1318,25 +1358,49 @@ void esp32s3_spi_dma_init(struct spi_dev_s *dev)
 
   modifyreg32(SYSTEM_PERIP_RST_EN0_REG, priv->config->dma_rst_bit, 0);
 
-  /* Initialize GDMA controller */
-
-  esp32s3_dma_init();
-
   /* Request a GDMA channel for SPI peripheral */
 
-  priv->dma_channel = esp32s3_dma_request(ESP32S3_DMA_PERIPH_SPI2, 1, 1,
+  priv->dma_channel = esp32s3_dma_request(priv->config->dma_periph, 1, 1,
                                           true);
   if (priv->dma_channel < 0)
     {
       spierr("Failed to allocate GDMA channel\n");
-
-      DEBUGPANIC();
+      return ERROR;
     }
 
   /* Disable segment transaction mode for SPI Master */
 
   putreg32((SPI_SLV_RX_SEG_TRANS_CLR_EN_M | SPI_SLV_TX_SEG_TRANS_CLR_EN_M),
            SPI_DMA_CONF_REG(priv->config->id));
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp32s3_spi_dma_deinit
+ *
+ * Description:
+ *   Deinitialize ESP32-S3 SPI GDMA engine.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_spi_dma_deinit(struct spi_dev_s *dev)
+{
+  struct esp32s3_spi_priv_s *priv = (struct esp32s3_spi_priv_s *)dev;
+
+  /* Release a DMA channel from peripheral */
+
+  esp32s3_dma_release(priv->dma_channel);
+
+  /* Disable DMA clock for the SPI peripheral */
+
+  modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, priv->config->dma_clk_bit, 0);
 }
 #endif
 
@@ -1347,27 +1411,70 @@ void esp32s3_spi_dma_init(struct spi_dev_s *dev)
  *   Initialize ESP32-S3 SPI hardware interface.
  *
  * Input Parameters:
- *   dev      - Device-specific state data
+ *   dev - Device-specific state data
  *
  * Returned Value:
- *   None.
+ *   OK on success; A negated errno value on failure.
  *
  ****************************************************************************/
 
-static void esp32s3_spi_init(struct spi_dev_s *dev)
+static int esp32s3_spi_init(struct spi_dev_s *dev)
 {
   struct esp32s3_spi_priv_s *priv = (struct esp32s3_spi_priv_s *)dev;
   const struct esp32s3_spi_config_s *config = priv->config;
   uint32_t regval;
 
-  esp32s3_gpiowrite(config->cs_pin, true);
-  esp32s3_gpiowrite(config->mosi_pin, true);
-  esp32s3_gpiowrite(config->miso_pin, true);
-  esp32s3_gpiowrite(config->clk_pin, true);
+  if (config->cs_pin >= 0)
+    {
+      esp_gpiowrite(config->cs_pin, true);
+    }
+#ifdef CONFIG_ESP32S3_SPI_UDCS
+#ifdef CONFIG_ESP32S3_SPI2
+  else if (config->id == ESP32S3_SPI2)
+    {
+      esp32s3_spi2_select(dev, config->id, false);
+    }
+#endif
+#ifdef CONFIG_ESP32S3_SPI3
+  else if (config->id == ESP32S3_SPI3)
+    {
+      esp32s3_spi3_select(dev, config->id, false);
+    }
+#endif
+#endif
+
+  if (config->mosi_pin >= 0)
+    {
+      esp_gpiowrite(config->mosi_pin, true);
+    }
+
+  if (config->miso_pin >= 0)
+    {
+      esp_gpiowrite(config->miso_pin, true);
+    }
+
+  esp_gpiowrite(config->clk_pin, true);
 
 #if SPI_HAVE_SWCS
-  esp32s3_configgpio(config->cs_pin, OUTPUT_FUNCTION_1);
-  esp32s3_gpio_matrix_out(config->cs_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  if (config->cs_pin >= 0)
+    {
+      esp_configgpio(config->cs_pin, OUTPUT_FUNCTION_1);
+      esp_gpio_matrix_out(config->cs_pin, SIG_GPIO_OUT_IDX, 0, 0);
+    }
+#ifdef CONFIG_ESP32S3_SPI_UDCS
+#ifdef CONFIG_ESP32S3_SPI2
+  else if (config->id == ESP32S3_SPI2)
+    {
+      esp32s3_spi2_select(dev, config->id, false);
+    }
+#endif
+#ifdef CONFIG_ESP32S3_SPI3
+  else if (config->id == ESP32S3_SPI3)
+    {
+      esp32s3_spi3_select(dev, config->id, false);
+    }
+#endif
+#endif
 #endif
 
   /* SPI3 doesn't have IOMUX, if SPI3 is enabled use GPIO Matrix for both */
@@ -1375,32 +1482,53 @@ static void esp32s3_spi_init(struct spi_dev_s *dev)
   if (esp32s3_spi_iomux(priv))
     {
 #if !SPI_HAVE_SWCS
-      esp32s3_configgpio(config->cs_pin, OUTPUT_FUNCTION_5);
-      esp32s3_gpio_matrix_out(config->cs_pin, SIG_GPIO_OUT_IDX, 0, 0);
+      if (config->cs_pin >= 0)
+        {
+          esp_configgpio(config->cs_pin, OUTPUT_FUNCTION_5);
+          esp_gpio_matrix_out(config->cs_pin, SIG_GPIO_OUT_IDX, 0, 0);
+        }
 #endif
-      esp32s3_configgpio(config->mosi_pin, OUTPUT_FUNCTION_5);
-      esp32s3_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
 
-      esp32s3_configgpio(config->miso_pin, INPUT_FUNCTION_5 | PULLUP);
-      esp32s3_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
+      if (config->mosi_pin >= 0)
+        {
+          esp_configgpio(config->mosi_pin, OUTPUT_FUNCTION_5);
+          esp_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
+        }
 
-      esp32s3_configgpio(config->clk_pin, OUTPUT_FUNCTION_5);
-      esp32s3_gpio_matrix_out(config->clk_pin, SIG_GPIO_OUT_IDX, 0, 0);
+      if (config->miso_pin >= 0)
+        {
+          esp_configgpio(config->miso_pin, INPUT_FUNCTION_5 | PULLUP);
+          esp_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
+        }
+
+      esp_configgpio(config->clk_pin, OUTPUT_FUNCTION_5);
+      esp_gpio_matrix_out(config->clk_pin, SIG_GPIO_OUT_IDX, 0, 0);
     }
   else
     {
 #if !SPI_HAVE_SWCS
-      esp32s3_configgpio(config->cs_pin, OUTPUT);
-      esp32s3_gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
+      if (config->cs_pin >= 0)
+        {
+          esp_configgpio(config->cs_pin, OUTPUT);
+          esp_gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
+        }
 #endif
-      esp32s3_configgpio(config->mosi_pin, OUTPUT);
-      esp32s3_gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
 
-      esp32s3_configgpio(config->miso_pin, INPUT | PULLUP);
-      esp32s3_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
+      if (config->mosi_pin >= 0)
+        {
+          esp_configgpio(config->mosi_pin, OUTPUT);
+          esp_gpio_matrix_out(config->mosi_pin,
+                                  config->mosi_outsig, 0, 0);
+        }
 
-      esp32s3_configgpio(config->clk_pin, OUTPUT);
-      esp32s3_gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
+      if (config->miso_pin >= 0)
+        {
+          esp_configgpio(config->miso_pin, INPUT | PULLUP);
+          esp_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
+        }
+
+      esp_configgpio(config->clk_pin, OUTPUT);
+      esp_gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
     }
 
   modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0, config->clk_bit);
@@ -1425,12 +1553,19 @@ static void esp32s3_spi_init(struct spi_dev_s *dev)
            SPI_USER1_REG(priv->config->id));
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
-  esp32s3_spi_dma_init(dev);
+  if (esp32s3_spi_dma_init(dev) != OK)
+    {
+      modifyreg32(SYSTEM_PERIP_RST_EN0_REG, 0, priv->config->clk_bit);
+      modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, priv->config->clk_bit, 0);
+      return ERROR;
+    }
 #endif
 
   esp32s3_spi_setfrequency(dev, config->clk_freq);
   esp32s3_spi_setbits(dev, config->width);
   esp32s3_spi_setmode(dev, config->mode);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1440,7 +1575,7 @@ static void esp32s3_spi_init(struct spi_dev_s *dev)
  *   Deinitialize ESP32-S3 SPI hardware interface.
  *
  * Input Parameters:
- *   dev      - Device-specific state data
+ *   dev - Device-specific state data
  *
  * Returned Value:
  *   None.
@@ -1452,7 +1587,7 @@ static void esp32s3_spi_deinit(struct spi_dev_s *dev)
   struct esp32s3_spi_priv_s *priv = (struct esp32s3_spi_priv_s *)dev;
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
-  modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, priv->config->dma_clk_bit, 0);
+  esp32s3_spi_dma_deinit(dev);
 #endif
 
   modifyreg32(SYSTEM_PERIP_RST_EN0_REG, 0, priv->config->clk_bit);
@@ -1502,7 +1637,7 @@ static int esp32s3_spi_interrupt(int irq, void *context, void *arg)
  *   Initialize the selected SPI bus.
  *
  * Input Parameters:
- *   port     - Port number (for hardware that has multiple SPI interfaces)
+ *   port - Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
  *   Valid SPI device structure reference on success; NULL on failure.
@@ -1548,8 +1683,7 @@ struct spi_dev_s *esp32s3_spibus_initialize(int port)
       /* Disable the provided CPU Interrupt to configure it. */
 
       up_disable_irq(priv->config->irq);
-      esp32s3_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
-      irq_detach(priv->config->irq);
+      esp_teardown_irq(priv->config->periph, priv->cpuint);
 
       priv->cpuint = -ENOMEM;
       priv->cpu = -ENODEV;
@@ -1557,10 +1691,12 @@ struct spi_dev_s *esp32s3_spibus_initialize(int port)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpu = up_cpu_index();
-  priv->cpuint = esp32s3_setup_irq(priv->cpu, priv->config->periph,
-                                   ESP32S3_INT_PRIO_DEF,
-                                   ESP32S3_CPUINT_LEVEL);
+  priv->cpu = this_cpu();
+  priv->cpuint = esp_setup_irq(priv->config->periph,
+                               ESP32S3_INT_PRIO_DEF,
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               esp32s3_spi_interrupt,
+                               priv);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type. */
@@ -1569,25 +1705,22 @@ struct spi_dev_s *esp32s3_spibus_initialize(int port)
       return NULL;
     }
 
-  /* Attach and enable the IRQ */
-
-  if (irq_attach(priv->config->irq, esp32s3_spi_interrupt, priv) != OK)
-    {
-      /* Failed to attach IRQ, so CPU interrupt must be freed. */
-
-      esp32s3_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
-      priv->cpuint = -ENOMEM;
-      nxmutex_unlock(&priv->lock);
-
-      return NULL;
-    }
-
   /* Enable the CPU interrupt that is linked to the SPI device. */
 
   up_enable_irq(priv->config->irq);
 #endif
 
-  esp32s3_spi_init(spi_dev);
+  if (esp32s3_spi_init(spi_dev) != OK)
+    {
+#ifdef CONFIG_ESP32S3_SPI_DMA
+      up_disable_irq(priv->config->irq);
+      esp_teardown_irq(priv->config->periph, priv->cpuint);
+      priv->cpuint = -ENOMEM;
+#endif
+      nxmutex_unlock(&priv->lock);
+      return NULL;
+    }
+
   priv->refs++;
 
   nxmutex_unlock(&priv->lock);
@@ -1601,7 +1734,7 @@ struct spi_dev_s *esp32s3_spibus_initialize(int port)
  *   Uninitialize an SPI bus.
  *
  * Input Parameters:
- *   dev      - Device-specific state data
+ *   dev - Device-specific state data
  *
  * Returned Value:
  *   Zero (OK) is returned on success. Otherwise -1 (ERROR).
@@ -1628,8 +1761,7 @@ int esp32s3_spibus_uninitialize(struct spi_dev_s *dev)
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
   up_disable_irq(priv->config->irq);
-  esp32s3_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
-  irq_detach(priv->config->irq);
+  esp_teardown_irq(priv->config->periph, priv->cpuint);
 
   priv->cpuint = -ENOMEM;
 

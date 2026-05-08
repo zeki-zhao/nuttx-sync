@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f103-minimum/src/stm32_mcp2515.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,7 +28,7 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/spi/spi.h>
 #include <nuttx/can/mcp2515.h>

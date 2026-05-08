@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/modem/alt1250/altcom_hdlr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -124,6 +126,7 @@ static compose_inst_t g_composehdlrs[] =
   CTABLE_CONTENT(RECVFROM, altcom_recvfrom),
   CTABLE_CONTENT(SELECT, altcom_select),
   CTABLE_CONTENT(SENDTO, altcom_sendto),
+  CTABLE_CONTENT(SHUTDOWN, altcom_shutdown),
   CTABLE_CONTENT(SOCKET, altcom_socket),
   CTABLE_CONTENT(SETSOCKOPT, altcom_setsockopt),
   CTABLE_CONTENT(SENDATCMD, altcom_sendatcmd),
@@ -199,6 +202,7 @@ static parse_inst_t g_parsehdlrs[] =
   PTABLE_CONTENT(SOCK_RECVFROM, altcom_recvfrom),
   PTABLE_CONTENT(SOCK_SELECT, altcom_select),
   PTABLE_CONTENT(SOCK_SENDTO, altcom_sockcomm),
+  PTABLE_CONTENT(SOCK_SHUTDOWN, altcom_sockcomm),
   PTABLE_CONTENT(SOCK_SOCKET, altcom_sockcomm),
   PTABLE_CONTENT(SOCK_SETSOCKOPT, altcom_sockcomm),
   PTABLE_CONTENT(SEND_ATCMD, altcom_sendatcmd),

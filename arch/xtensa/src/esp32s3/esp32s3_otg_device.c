@@ -33,7 +33,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -49,10 +49,10 @@
 #include "hardware/esp32s3_system.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
 #include "hardware/esp32s3_usb_wrap.h"
-#include "hardware/esp32s3_rtccntl.h"
+#include "soc/rtc_cntl_reg.h"
 #include "hardware/esp32s3_pinmap.h"
-#include "esp32s3_gpio.h"
-#include "esp32s3_irq.h"
+#include "esp_gpio.h"
+#include "esp_irq.h"
 #include "esp32s3_otg.h"
 
 /****************************************************************************
@@ -1268,7 +1268,7 @@ static void esp32s3_epin_request(struct esp32s3_usbdev_s *priv,
       return;
     }
 
-  uinfo("EP%d req=%p: len=%d xfrd=%d zlp=%d\n",
+  uinfo("EP%d req=%p: len=%zu xfrd=%zu zlp=%d\n",
         privep->epphy, privreq, privreq->req.len,
         privreq->req.xfrd, privep->zlp);
 
@@ -1550,7 +1550,7 @@ static void esp32s3_epout_complete(struct esp32s3_usbdev_s *priv,
       return;
     }
 
-  uinfo("EP%d: len=%d xfrd=%d\n",
+  uinfo("EP%d: len=%zu xfrd=%zu\n",
         privep->epphy, privreq->req.len, privreq->req.xfrd);
 
   /* Return the completed read request to the class driver and mark the state
@@ -1682,7 +1682,7 @@ static inline void esp32s3_epout_receive(struct esp32s3_ep_s *privep,
       return;
     }
 
-  uinfo("EP%d: len=%d xfrd=%d\n", privep->epphy, privreq->req.len,
+  uinfo("EP%d: len=%zu xfrd=%zu\n", privep->epphy, privreq->req.len,
         privreq->req.xfrd);
   usbtrace(TRACE_READ(privep->epphy), bcnt);
 
@@ -2167,8 +2167,8 @@ static void esp32s3_ep0out_testmode(struct esp32s3_usbdev_s *priv,
  * Name: esp32s3_ep0out_stdrequest
  *
  * Description:
- *   Handle a stanard request on EP0.  Pick off the things of interest to the
- *   USB device controller driver; pass what is left to the class driver.
+ *   Handle a standard request on EP0.  Pick off the things of interest to
+ *   the USB device controller driver; pass what is left to the class driver.
  *
  ****************************************************************************/
 
@@ -3724,6 +3724,7 @@ static int esp32s3_usbinterrupt(int irq, void *context, void *arg)
         {
           usbtrace(TRACE_INTDECODE(ESP32S3_TRACEINTID_SOF),
                    (uint16_t)regval);
+          usbdev_sof_irq(&priv->usbdev, esp32s3_getframe(&priv->usbdev));
         }
 #endif
 
@@ -4381,7 +4382,7 @@ static struct usbdev_req_s *esp32s3_ep_allocreq(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, ((struct esp32s3_ep_s *)ep)->epphy);
 
-  privreq = (struct esp32s3_req_s *)kmm_zalloc(sizeof(struct esp32s3_req_s));
+  privreq = kmm_zalloc(sizeof(struct esp32s3_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(ESP32S3_TRACEERR_ALLOCFAIL), 0);
@@ -5062,14 +5063,22 @@ static int esp32s3_pullup(struct usbdev_s *dev, bool enable)
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
 
   irqstate_t flags = enter_critical_section();
-  regval = esp32s3_getreg(ESP32S3_OTG_DCTL);
   if (enable)
     {
       /* Connect the device by clearing the soft disconnect bit in the DCTL
        * register.
        */
 
+      regval = esp32s3_getreg(ESP32S3_OTG_DCTL);
       regval &= ~OTG_DCTL_SDIS;
+      esp32s3_putreg(regval, ESP32S3_OTG_DCTL);
+
+      /* Set DP pull-up */
+
+      regval  = esp32s3_getreg(USB_WRAP_OTG_CONF_REG);
+      regval &= ~USB_WRAP_DP_PULLDOWN;
+      regval |= USB_WRAP_DP_PULLUP;
+      esp32s3_putreg(regval, USB_WRAP_OTG_CONF_REG);
     }
   else
     {
@@ -5077,10 +5086,18 @@ static int esp32s3_pullup(struct usbdev_s *dev, bool enable)
        * register.
        */
 
+      regval = esp32s3_getreg(ESP32S3_OTG_DCTL);
       regval |= OTG_DCTL_SDIS;
+      esp32s3_putreg(regval, ESP32S3_OTG_DCTL);
+
+      /* Set DP pull-down */
+
+      regval  = esp32s3_getreg(USB_WRAP_OTG_CONF_REG);
+      regval &= ~USB_WRAP_DP_PULLUP;
+      regval |= USB_WRAP_DP_PULLDOWN;
+      esp32s3_putreg(regval, USB_WRAP_OTG_CONF_REG);
     }
 
-  esp32s3_putreg(regval, ESP32S3_OTG_DCTL);
   leave_critical_section(flags);
   return OK;
 }
@@ -5292,15 +5309,16 @@ static void esp32s3_hwinitialize(struct esp32s3_usbdev_s *priv)
 
   /* Configure USB PHY */
 
-  regval  = esp32s3_getreg(RTC_CNTL_RTC_USB_CONF_REG);
+  regval  = esp32s3_getreg(RTC_CNTL_USB_CONF_REG);
   regval |= RTC_CNTL_SW_HW_USB_PHY_SEL | RTC_CNTL_SW_USB_PHY_SEL;
-  esp32s3_putreg(regval, RTC_CNTL_RTC_USB_CONF_REG);
+  esp32s3_putreg(regval, RTC_CNTL_USB_CONF_REG);
+
+  /* Set USB DM and DP pin pull-down */
 
   regval  = esp32s3_getreg(USB_WRAP_OTG_CONF_REG);
-  regval &= ~(USB_WRAP_PHY_SEL | USB_WRAP_DM_PULLUP |
-              USB_WRAP_DP_PULLDOWN | USB_WRAP_DM_PULLDOWN);
-  regval |= USB_WRAP_PAD_PULL_OVERRIDE | USB_WRAP_DP_PULLUP |
-            USB_WRAP_USB_PAD_ENABLE;
+  regval &= ~(USB_WRAP_PHY_SEL | USB_WRAP_DP_PULLUP | USB_WRAP_DM_PULLUP);
+  regval |= USB_WRAP_PAD_PULL_OVERRIDE | USB_WRAP_DP_PULLDOWN |
+            USB_WRAP_DM_PULLDOWN | USB_WRAP_USB_PAD_ENABLE;
   esp32s3_putreg(regval, USB_WRAP_OTG_CONF_REG);
 
   /* At start-up the core is in FS mode. */
@@ -5590,26 +5608,25 @@ void xtensa_usbinitialize(void)
 
   /* Configure OTG alternate function pins */
 
-  esp32s3_configgpio(USB_IOMUX_DM, DRIVE_3);
-  esp32s3_configgpio(USB_IOMUX_DP, DRIVE_3);
+  esp_configgpio(USB_IOMUX_DM, DRIVE_3);
+  esp_configgpio(USB_IOMUX_DP, DRIVE_3);
 
-  /**
-   * USB_OTG_IDDIG_IN_IDX:     connected connector is mini-B side
+  /* USB_OTG_IDDIG_IN_IDX:     connected connector is mini-B side
    * USB_SRP_BVALID_IN_IDX:    HIGH to force USB device mode
    * USB_OTG_VBUSVALID_IN_IDX: receiving a valid Vbus from device
    * USB_OTG_AVALID_IN_IDX:    HIGH to force USB host mode
    */
 
-  esp32s3_gpio_matrix_in(MATRIX_DETACH_IN_LOW_HIGH,
+  esp_gpio_matrix_in(MATRIX_DETACH_IN_LOW_HIGH,
                          USB_OTG_IDDIG_IN_IDX,
                          false);
-  esp32s3_gpio_matrix_in(MATRIX_DETACH_IN_LOW_HIGH,
+  esp_gpio_matrix_in(MATRIX_DETACH_IN_LOW_HIGH,
                          USB_SRP_BVALID_IN_IDX,
                          false);
-  esp32s3_gpio_matrix_in(MATRIX_DETACH_IN_LOW_HIGH,
+  esp_gpio_matrix_in(MATRIX_DETACH_IN_LOW_HIGH,
                          USB_OTG_VBUSVALID_IN_IDX,
                          false);
-  esp32s3_gpio_matrix_in(MATRIX_DETACH_IN_LOW_PIN,
+  esp_gpio_matrix_in(MATRIX_DETACH_IN_LOW_PIN,
                          USB_OTG_AVALID_IN_IDX,
                          false);
 
@@ -5619,19 +5636,19 @@ void xtensa_usbinitialize(void)
 
   xtensa_usbuninitialize();
 
-  /* Initialie the driver data structure */
+  /* Initialize the driver data structure */
 
   esp32s3_swinitialize(priv);
 
   /* Attach the OTG interrupt handler */
 
-  priv->cpu = up_cpu_index();
-  priv->cpuint = esp32s3_setup_irq(priv->cpu, ESP32S3_PERIPH_USB,
-                                   1, ESP32S3_CPUINT_LEVEL);
+  priv->cpu = this_cpu();
+  priv->cpuint = esp_setup_irq(ESP32S3_PERIPH_USB,
+                               1,
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               esp32s3_usbinterrupt,
+                               NULL);
   DEBUGASSERT(priv->cpuint >= 0);
-
-  ret = irq_attach(ESP32S3_IRQ_USB, esp32s3_usbinterrupt, NULL);
-  DEBUGASSERT(ret == 0);
 
   /* Initialize the USB OTG core */
 
@@ -5684,7 +5701,6 @@ void xtensa_usbuninitialize(void)
   /* Disable and detach IRQs */
 
   up_disable_irq(ESP32S3_IRQ_USB);
-  irq_detach(ESP32S3_IRQ_USB);
 
   /* Disable all endpoint interrupts */
 

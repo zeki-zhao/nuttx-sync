@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_iwdg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,8 +30,8 @@
 #include <stdint.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/timers/watchdog.h>
@@ -225,7 +227,7 @@ static uint16_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  wdinfo("%08x->%04x\n", addr, val);
+  wdinfo("%08" PRIx32 "->%04x\n", addr, val);
   return val;
 }
 #endif
@@ -243,7 +245,7 @@ static void stm32_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  wdinfo("%08x<-%04x\n", addr, val);
+  wdinfo("%08" PRIx32 "<-%04x\n", addr, val);
 
   /* Write the value */
 

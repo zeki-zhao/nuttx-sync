@@ -1,6 +1,8 @@
 /****************************************************************************
  * graphics/nxmu/nxmu_server.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,7 +34,7 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/mqueue.h>
 #include <nuttx/nx/nx.h>
@@ -159,10 +161,9 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
   int            ret;
 
   memset(nxmu, 0, sizeof(struct nxmu_state_s));
-   
 
   /* Configure the framebuffer/LCD device */
-   
+
   ret = nxbe_configure(dev, &nxmu->be);
   if (ret < 0)
     {
@@ -186,18 +187,18 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
    * Open the incoming server MQ.  The server receives messages on the
    * background window's incoming message queue.
    */
-   
+
   attr.mq_maxmsg  = CONFIG_NX_MXSERVERMSGS;
   attr.mq_msgsize = NX_MXSVRMSGLEN;
   attr.mq_flags   = 0;
-   
+
   nxmu->conn.crdmq = nxmq_open(mqname, O_RDONLY | O_CREAT, 0666, &attr);
   if (nxmu->conn.crdmq < 0)
     {
       gerr("ERROR: nxmq_open(%s) failed: %d\n", mqname, nxmu->conn.crdmq);
       return nxmu->conn.crdmq;
     }
- 
+
   /* NOTE that the outgoing client MQ (cwrmq) is not initialized.  The
    * background window never initiates messages.
    */
@@ -206,7 +207,7 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
    * background window which will, of course, be received and handled by
    * the server message loop.
    */
- 
+
   nxmu->conn.swrmq = nxmq_open(mqname, O_WRONLY);
   if (nxmu->conn.swrmq < 0)
     {
@@ -214,7 +215,7 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
       nxmq_close(nxmu->conn.crdmq);
       return nxmu->conn.swrmq;
     }
- 
+
   /* The server is now "connected" to itself via the background window */
 
   nxmu->conn.state = NX_CLISTATE_CONNECTED;
@@ -279,18 +280,16 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
   DEBUGASSERT(mqname != NULL || dev != NULL);
 
   /* Initialize and configure the server */
-   
+
   ret = nxmu_setup(mqname, dev, &nxmu);
-   
   if (ret < 0)
     {
       return ret;
     }
 
   /* Produce the initial, background display */
-   
+
   nxbe_redraw(&nxmu.be, &nxmu.be.bkgd, &nxmu.be.bkgd.bounds);
-   
 
   /* Message Loop ***********************************************************/
 

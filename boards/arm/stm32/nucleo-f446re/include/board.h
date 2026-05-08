@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/nucleo-f446re/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,8 +31,6 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
-
-#include <stm32.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -350,7 +350,7 @@
  *   LED_SIGNAL           In a signal handler        No change
  *   LED_ASSERTION        An assertion failed        No change
  *   LED_PANIC            The system has crashed     Blinking
- *   LED_IDLE             MCU is is sleep mode       Not used
+ *   LED_IDLE             MCU is in sleep mode       Not used
  *
  * Thus if LD2, NuttX has successfully booted and is, apparently, running
  * normally.  If LD2 is flashing at approximately 2Hz, then a fatal error

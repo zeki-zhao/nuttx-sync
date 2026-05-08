@@ -1,6 +1,8 @@
 /****************************************************************************
  * graphics/nxterm/nxterm_register.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,10 +32,11 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/spinlock.h>
 
 #include "nxterm.h"
 
@@ -58,6 +61,7 @@ FAR struct nxterm_state_s *
   DEBUGASSERT(handle && wndo && ops && (unsigned)minor < 256);
 
   /* Allocate the driver structure */
+
   priv = (FAR struct nxterm_state_s *)
     kmm_zalloc(sizeof(struct nxterm_state_s));
   if (!priv)
@@ -67,13 +71,13 @@ FAR struct nxterm_state_s *
     }
 
   /* Initialize the driver structure */
+
   priv->ops     = ops;
   priv->handle  = handle;
   priv->minor   = minor;
   memcpy(&priv->wndo, wndo, sizeof(struct nxterm_window_s));
 
   nxmutex_init(&priv->lock);
-  
 #ifdef CONFIG_DEBUG_GRAPHICS
   priv->holder  = NO_HOLDER;
 #endif
@@ -82,7 +86,10 @@ FAR struct nxterm_state_s *
   nxsem_init(&priv->waitsem, 0, 0);
 #endif
 
+  spin_lock_init(&priv->spinlock);
+
   /* Connect to the font cache for the configured font characteristics */
+
   priv->fcache = nxf_cache_connect(wndo->fontid, wndo->fcolor[0],
                                    wndo->wcolor[0], CONFIG_NXTERM_BPP,
                                    CONFIG_NXTERM_CACHESIZE);
@@ -94,6 +101,7 @@ FAR struct nxterm_state_s *
     }
 
   /* Get the handle of the font managed by the font cache */
+
   hfont = nxf_cache_getfonthandle(priv->fcache);
   if (hfont == NULL)
     {
@@ -105,23 +113,29 @@ FAR struct nxterm_state_s *
   /* Get information about the font set being used and save this in the
    * state structure
    */
+
   fontset         = nxf_getfontset(hfont);
   priv->fheight   = fontset->mxheight;
   priv->fwidth    = fontset->mxwidth;
   priv->spwidth   = fontset->spwidth;
 
   /* Set up the text cache */
+
   priv->maxchars  = CONFIG_NXTERM_MXCHARS;
 
   /* Clear the display */
+
   nxterm_clear(priv);
 
   /* Set the initial display position */
+
   nxterm_home(priv);
 
   /* Show the cursor */
+
   priv->cursor.code = CONFIG_NXTERM_CURSORCHAR;
   nxterm_showcursor(priv);
+
   /* Register the driver */
 
   snprintf(devname, sizeof(devname), NX_DEVNAME_FORMAT, minor);

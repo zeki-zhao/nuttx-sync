@@ -1,8 +1,9 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/stm32_tim.c
  *
- *   Copyright (C) 2019 Fundação CERTI. All rights reserved.
- *   Author: Daniel Pereira Volpato <dpo@certi.org.br>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019 Fundação CERTI. All rights reserved.
+ * SPDX-FileContributor: Daniel Pereira Volpato <dpo@certi.org.br>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -47,7 +48,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <arch/board/board.h>
 
@@ -265,6 +266,13 @@ struct stm32_tim_priv_s
  * Private Function prototypes
  ****************************************************************************/
 
+/* Timer helpers */
+
+static void stm32_tim_reload_counter(struct stm32_tim_dev_s *dev);
+static void stm32_tim_enable(struct stm32_tim_dev_s *dev);
+static void stm32_tim_disable(struct stm32_tim_dev_s *dev);
+static void stm32_tim_reset(struct stm32_tim_dev_s *dev);
+
 /* Timer methods */
 
 static int  stm32_tim_setmode(struct stm32_tim_dev_s *dev,
@@ -276,6 +284,7 @@ static void stm32_tim_setperiod(struct stm32_tim_dev_s *dev,
                                 uint32_t period);
 static uint32_t stm32_tim_getperiod(struct stm32_tim_dev_s *dev);
 static uint32_t stm32_tim_getcounter(struct stm32_tim_dev_s *dev);
+static int  stm32_tim_getwidth(struct stm32_tim_dev_s *dev);
 static int  stm32_tim_setchannel(struct stm32_tim_dev_s *dev,
                                  uint8_t channel,
                                  stm32_tim_channel_t mode);
@@ -297,12 +306,15 @@ static void stm32_tim_ackint(struct stm32_tim_dev_s *dev, int source);
 
 static const struct stm32_tim_ops_s stm32_tim_ops =
 {
+  .enable         = &stm32_tim_enable,
+  .disable        = &stm32_tim_disable,
   .setmode        = &stm32_tim_setmode,
   .setclock       = &stm32_tim_setclock,
   .getclock       = &stm32_tim_getclock,
   .setperiod      = &stm32_tim_setperiod,
   .getperiod      = &stm32_tim_getperiod,
   .getcounter     = &stm32_tim_getcounter,
+  .getwidth       = &stm32_tim_getwidth,
   .setchannel     = &stm32_tim_setchannel,
   .setcompare     = &stm32_tim_setcompare,
   .getcapture     = &stm32_tim_getcapture,
@@ -739,21 +751,30 @@ static uint32_t stm32_tim_getperiod (struct stm32_tim_dev_s *dev)
   return stm32_getreg32 (dev, STM32_GTIM_ARR_OFFSET);
 }
 
+static int stm32_tim_getwidth(struct stm32_tim_dev_s *dev)
+{
+  DEBUGASSERT(dev != NULL);
+
+#ifdef HAVE_TIM2_32BIT
+  /* TIM2 is 16-bit on L0 */
+
+  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM2_BASE)
+    {
+      return 32;
+    }
+#endif
+
+  /* All other timers are 16-bit */
+
+  return 16;
+}
+
 static uint32_t stm32_tim_getcounter(struct stm32_tim_dev_s *dev)
 {
   DEBUGASSERT(dev != NULL);
-  /* According to STM32G0x0 datasheet, TIMx_CNT registers are 32-bits but
-   * CNT field is 16-bits [15:0].
-   * TIM 1, 3, 6-7, 14-17
-   */
-
-  /* In datasheet page 988, there is a useless bit named UIFCPY in TIMx_CNT.
-   * reset it it result when not TIM2 or TIM5.
-   */
-
-  uint32_t counter = stm32_getreg32(dev, STM32_GTIM_CNT_OFFSET);
-  counter &= 0xffff;
-  return counter;
+  return stm32_tim_getwidth(dev) > 16 ?
+    stm32_getreg32(dev, STM32_GTIM_CNT_OFFSET) :
+    (uint32_t)stm32_getreg16(dev, STM32_GTIM_CNT_OFFSET);
 }
 
 static int stm32_tim_setisr(struct stm32_tim_dev_s *dev,
@@ -887,11 +908,19 @@ static int stm32_tim_setmode(struct stm32_tim_dev_s *dev,
    * disable it, simply set its clock to valid frequency or zero.
    */
 
-  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM6_BASE || \
-      ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM7_BASE)
+#ifdef STM32_TIM6_BASE
+  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM6_BASE)
     {
       return -EINVAL;
     }
+#endif
+
+#ifdef STM32_TIM7_BASE
+  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM7_BASE)
+    {
+      return -EINVAL;
+    }
+#endif
 
   /* Decode operational modes */
 
@@ -975,11 +1004,19 @@ static int stm32_tim_setchannel(struct stm32_tim_dev_s *dev,
    * disable it, simply set its clock to valid frequency or zero.
    */
 
-  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM6_BASE || \
-      ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM7_BASE)
+#ifdef STM32_TIM6_BASE
+  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM6_BASE)
     {
       return -EINVAL;
     }
+#endif
+
+#ifdef STM32_TIM7_BASE
+  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM7_BASE)
+    {
+      return -EINVAL;
+    }
+#endif
 
   /* Decode configuration */
 

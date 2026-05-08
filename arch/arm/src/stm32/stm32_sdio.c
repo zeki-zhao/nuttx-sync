@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_sdio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,7 +31,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
@@ -808,12 +810,18 @@ static void stm32_sdiodump(struct stm32_sdioregs_s *regs, const char *msg)
   mcinfo("  POWER[%08x]: %08x\n", STM32_SDIO_POWER,   regs->power);
   mcinfo("  CLKCR[%08x]: %08x\n", STM32_SDIO_CLKCR,   regs->clkcr);
   mcinfo("  DCTRL[%08x]: %08x\n", STM32_SDIO_DCTRL,   regs->dctrl);
-  mcinfo(" DTIMER[%08x]: %08x\n", STM32_SDIO_DTIMER,  regs->dtimer);
-  mcinfo("   DLEN[%08x]: %08x\n", STM32_SDIO_DLEN,    regs->dlen);
-  mcinfo(" DCOUNT[%08x]: %08x\n", STM32_SDIO_DCOUNT,  regs->dcount);
-  mcinfo("    STA[%08x]: %08x\n", STM32_SDIO_STA,     regs->sta);
-  mcinfo("   MASK[%08x]: %08x\n", STM32_SDIO_MASK,    regs->mask);
-  mcinfo("FIFOCNT[%08x]: %08x\n", STM32_SDIO_FIFOCNT, regs->fifocnt);
+  mcinfo(" DTIMER[%08x]: %08" PRIx32 "\n",
+         STM32_SDIO_DTIMER,  regs->dtimer);
+  mcinfo("   DLEN[%08x]: %08" PRIx32 "\n",
+         STM32_SDIO_DLEN,    regs->dlen);
+  mcinfo(" DCOUNT[%08x]: %08" PRIx32 "\n",
+         STM32_SDIO_DCOUNT,  regs->dcount);
+  mcinfo("    STA[%08x]: %08" PRIx32 "\n",
+         STM32_SDIO_STA,     regs->sta);
+  mcinfo("   MASK[%08x]: %08" PRIx32 "\n",
+         STM32_SDIO_MASK,    regs->mask);
+  mcinfo("FIFOCNT[%08x]: %08" PRIx32 "\n",
+         STM32_SDIO_FIFOCNT, regs->fifocnt);
 }
 #endif
 
@@ -1701,7 +1709,6 @@ static sdio_capset_t stm32_capabilities(struct sdio_dev_s *dev)
 static sdio_statset_t stm32_status(struct sdio_dev_s *dev)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-  priv->cdstatus = priv->cdstatus | 0x01;
   return priv->cdstatus;
 }
 
@@ -2197,7 +2204,7 @@ static int stm32_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
  *
  * Returned Value:
  *   Number of bytes sent on success; a negated errno on failure.  Here a
- *   failure means only a faiure to obtain the requested response (due to
+ *   failure means only a failure to obtain the requested response (due to
  *   transport problem -- timeout, CRC, etc.).  The implementation only
  *   assures that the response is returned intacta and does not check errors
  *   within the response itself.
@@ -2249,7 +2256,7 @@ static int stm32_recvshortcrc(struct sdio_dev_s *dev, uint32_t cmd,
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R5_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R6_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2314,7 +2321,7 @@ static int stm32_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2371,7 +2378,7 @@ static int stm32_recvshort(struct sdio_dev_s *dev, uint32_t cmd,
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R4_RESPONSE &&
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -3038,7 +3045,7 @@ struct sdio_dev_s *sdio_initialize(int slotno)
    * If bus is multiplexed then there is a custom bus configuration utility
    * in the scope of the board support package.
    */
-syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
+
 #ifndef CONFIG_SDIO_MUXBUS
   stm32_configgpio(GPIO_SDIO_D0 | SDIO_PULLUP_ENABLE);
 #ifndef CONFIG_STM32_SDIO_WIDTH_D1_ONLY

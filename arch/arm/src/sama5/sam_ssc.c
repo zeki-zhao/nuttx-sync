@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_ssc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,7 +34,7 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <arch/board/board.h>
 
@@ -380,7 +382,7 @@
 /* Debug ********************************************************************/
 
 /* Check if SSC debut is enabled (non-standard.. no support in
- * include/debug.h
+ * include/nuttx/debug.h
  */
 
 #ifndef CONFIG_DEBUG_I2S_INFO
@@ -659,7 +661,7 @@ static const struct i2s_ops_s g_sscops =
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 
@@ -3336,7 +3338,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
    * chip select structures.
    */
 
-  priv = (struct sam_ssc_s *)kmm_zalloc(sizeof(struct sam_ssc_s));
+  priv = kmm_zalloc(sizeof(struct sam_ssc_s));
   if (!priv)
     {
       i2serr("ERROR: Failed to allocate a chip select structure\n");
