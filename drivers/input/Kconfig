@@ -581,6 +581,23 @@ config INPUT_GT9XX_I2C_FREQUENCY
 	---help---
 		I2C frequency in Hz
 
+config INPUT_GT9XX_MULTITOUCH
+	bool "Multi-touch support"
+	default n
+	---help---
+		Enable multi-touch support for GT9XX touch panel.
+		When enabled, reports up to CONFIG_INPUT_GT9XX_MAX_TOUCH
+		simultaneous touch points.
+		When disabled, only single touch point is reported.
+
+config INPUT_GT9XX_MAX_TOUCH
+	int "Maximum number of touch points"
+	depends on INPUT_GT9XX_MULTITOUCH
+	default 5
+	range 1 10
+	---help---
+		Maximum number of simultaneous touch points supported.
+
 endif # INPUT_GT9XX
 
 config INPUT_BUTTONS

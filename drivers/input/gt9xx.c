@@ -37,6 +37,7 @@
 #include <poll.h>
 #include <assert.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
@@ -67,6 +68,15 @@
 #define GTP_REG_VERSION    0x8140  /* Product ID */
 #define GTP_READ_COOR_ADDR 0x814e  /* Touch Panel Status */
 #define GTP_POINT1         0x8150  /* Touch Point 1 */
+#define GTP_POINT_SIZE     8       /* Each touch point occupies 8 bytes */
+#ifndef CONFIG_INPUT_GT9XX_MAX_TOUCH
+#  define CONFIG_INPUT_GT9XX_MAX_TOUCH 1
+#endif
+#define GTP_MAX_TOUCH      CONFIG_INPUT_GT9XX_MAX_TOUCH
+
+#ifndef MIN
+#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#endif
 
 /****************************************************************************
  * Private Types
@@ -90,9 +100,16 @@ struct gt9xx_dev_s
   mutex_t devlock;  /* Mutex to prevent concurrent reads */
   uint8_t cref;     /* Reference Counter for device */
   bool int_pending; /* True if a Touch Interrupt is pending processing */
+#ifndef CONFIG_INPUT_GT9XX_MULTITOUCH
   uint16_t x;       /* X Coordinate of Last Touch Point */
   uint16_t y;       /* Y Coordinate of Last Touch Point */
   uint8_t flags;    /* Touch Up or Touch Down for Last Touch Point */
+#else
+  uint16_t last_x[GTP_MAX_TOUCH]; /* Per-point tracking for multi-touch */
+  uint16_t last_y[GTP_MAX_TOUCH];
+  uint8_t last_flags[GTP_MAX_TOUCH];
+  int prev_npoints;               /* Number of points from last read */
+#endif
 
   /* Poll Waiters for device */
 
@@ -386,17 +403,17 @@ static int gt9xx_read_touch_data(FAR struct gt9xx_dev_s *dev,
   uint8_t status[1];
   uint8_t status_code;
   uint8_t touched_points;
-  uint8_t touch[6];
+  uint8_t touch[GTP_POINT_SIZE];
   uint16_t x;
   uint16_t y;
   uint8_t flags;
   int ret;
+  int i;
 
   /* Erase the Touch Sample and Touch Point */
 
   iinfo("\n");
   DEBUGASSERT(dev && sample);
-  memset(sample, 0, sizeof(*sample));
 
   /* Read the Touch Panel Status */
 
@@ -416,29 +433,39 @@ static int gt9xx_read_touch_data(FAR struct gt9xx_dev_s *dev,
 
   if (status_code != 0 && touched_points >= 1)
     {
-      /* Read the First Touch Point (6 bytes) */
+      int n = MIN(touched_points, GTP_MAX_TOUCH);
+      sample->npoints = n;
 
-      ret = gt9xx_i2c_read(dev, GTP_POINT1, touch, sizeof(touch));
-      if (ret < 0)
+      for (i = 0; i < n; i++)
         {
-          ierr("Read Touch Point failed: %d\n", ret);
-          return ret;
+          /* Read each touch point at GTP_POINT1 + i * 6 */
+
+          ret = gt9xx_i2c_read(dev, GTP_POINT1 + i * GTP_POINT_SIZE,
+                               touch, sizeof(touch));
+          if (ret < 0)
+            {
+              ierr("Read Touch Point %d failed: %d\n", i, ret);
+              return ret;
+            }
+
+          /* Decode the Touch Coordinates */
+
+          x = touch[0] + (touch[1] << 8);
+          y = touch[2] + (touch[3] << 8);
+
+          /* Return the Touch Coordinates as Touch Down */
+
+          flags = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID;
+          sample->point[i].id = i;
+          sample->point[i].x = x;
+          sample->point[i].y = y;
+          sample->point[i].flags = flags;
+          iinfo("touch %d down x=%d, y=%d\n", i, x, y);
         }
-
-      /* Decode the Touch Coordinates */
-
-      x = touch[0] + (touch[1] << 8);
-      y = touch[2] + (touch[3] << 8);
-
-      /* Return the Touch Coordinates as Touch Down */
-
-      flags = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID;
-      sample->npoints = 1;
-      sample->point[0].id = 0;
-      sample->point[0].x = x;
-      sample->point[0].y = y;
-      sample->point[0].flags = flags;
-      iinfo("touch down x=%d, y=%d\n", x, y);
+    }
+  else
+    {
+      sample->npoints = 0;
     }
 
   /* Set the Touch Panel Status to 0 */
@@ -475,15 +502,20 @@ static ssize_t gt9xx_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode *inode;
   FAR struct gt9xx_dev_s *priv;
-  struct touch_sample_s sample;
-  const size_t outlen = sizeof(sample);
+  struct
+  {
+    int npoints;
+    struct touch_point_s point[GTP_MAX_TOUCH];
+  } sample_storage;
+  struct touch_sample_s *sample = (struct touch_sample_s *)&sample_storage;
+  const size_t outlen = sizeof(sample_storage);
   irqstate_t flags;
   int ret;
 
   /* Returned Touch Sample will have 0 or 1 Touch Points */
 
   iinfo("buflen=%zu\n", buflen);
-  if (buflen < outlen)
+  if (buflen < sizeof(struct touch_sample_s))
     {
       ierr("Buffer should be at least %zu bytes, got %zu bytes\n",
            outlen, buflen);
@@ -506,81 +538,142 @@ static ssize_t gt9xx_read(FAR struct file *filep, FAR char *buffer,
 
   ret = -EINVAL;
 
-  /* If waiting for Touch Up, return the Last Touch Point as Touch Up */
+  /* If non-blocking and no interrupt pending, don't touch I2C */
 
-  if (priv->flags & TOUCH_DOWN)
+  if ((filep->f_oflags & O_NONBLOCK) && !priv->int_pending)
     {
-      /* Begin Critical Section */
+      ret = -EAGAIN;
+      goto errout;
+    }
 
-      flags = enter_critical_section();
+  /* Read touch data from hardware */
 
-      /* Mark the Last Touch Point as Touch Up */
+  memset(sample, 0, outlen);
+  ret = gt9xx_read_touch_data(priv, sample);
+  if (ret < 0)
+    {
+      goto errout;
+    }
 
-      priv->flags = TOUCH_UP | TOUCH_ID_VALID | TOUCH_POS_VALID;
+  if (sample->npoints >= 1)
+    {
+#ifdef CONFIG_INPUT_GT9XX_MULTITOUCH
+      /* Check if all touch points are duplicates of the last read */
+      int i;
+      bool all_dup = true;
+      for (i = 0; i < sample->npoints; i++)
+        {
+          if (!(priv->last_flags[i] & TOUCH_DOWN) ||
+              priv->last_x[i] != sample->point[i].x ||
+              priv->last_y[i] != sample->point[i].y)
+            {
+              all_dup = false;
+              break;
+            }
+        }
 
-      /* End Critical Section */
+      if (all_dup && priv->prev_npoints > 0)
+        {
+          memset(sample, 0, outlen);
+          sample->npoints = 0;
+        }
+      else
+        {
+          /* New or changed touch data — update per-point cache */
+          for (i = 0; i < sample->npoints; i++)
+            {
+              priv->last_x[i] = sample->point[i].x;
+              priv->last_y[i] = sample->point[i].y;
+              priv->last_flags[i] = TOUCH_DOWN | TOUCH_ID_VALID |
+                                    TOUCH_POS_VALID;
+            }
+          priv->prev_npoints = sample->npoints;
+        }
+#else
+      /* Filter single-point duplicates (same position, touch still active) */
 
-      leave_critical_section(flags);
+      if (sample->npoints == 1 && (priv->flags & TOUCH_DOWN) &&
+          priv->x == sample->point[0].x &&
+          priv->y == sample->point[0].y)
+        {
+          memset(sample, 0, outlen);
+          sample->npoints = 0;
+          iinfo("skip duplicate x=%d, y=%d\n", priv->x, priv->y);
+        }
+      else
+        {
+          /* New touch data — save first point state */
 
-      /* Return the Last Touch Point, changed to Touch Up */
-
-      memset(&sample, 0, sizeof(sample));
-      sample.npoints = 1;
-      sample.point[0].id = 0;
-      sample.point[0].x = priv->x;
-      sample.point[0].y = priv->y;
-      sample.point[0].flags = priv->flags;
-      memcpy(buffer, &sample, sizeof(sample));
-      ret = OK;
-      iinfo("touch up x=%d, y=%d\n", priv->x, priv->y);
+          priv->x = sample->point[0].x;
+          priv->y = sample->point[0].y;
+          priv->flags = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID;
+        }
+#endif
     }
   else
     {
-      /* Otherwise read the Touch Point over I2C */
+#ifdef CONFIG_INPUT_GT9XX_MULTITOUCH
+      /* Hardware reports no touches — generate TOUCH_UP for all
+       * previously tracked points.
+       */
 
-      ret = gt9xx_read_touch_data(priv, &sample);
-
-      /* Skip duplicates */
-
-      if (sample.npoints >= 1 &&
-          priv->x == sample.point[0].x &&
-          priv->y == sample.point[0].y)
+      if (priv->prev_npoints > 0)
         {
-          memset(&sample, 0, sizeof(sample));
-          sample.npoints = 0;
-          iinfo("skip duplicate x=%d, y=%d\n", priv->x, priv->y);
+          int i;
+          memset(sample, 0, outlen);
+          sample->npoints = priv->prev_npoints;
+          for (i = 0; i < priv->prev_npoints; i++)
+            {
+              if (priv->last_flags[i] & TOUCH_DOWN)
+                {
+                  sample->point[i].id = i;
+                  sample->point[i].x = priv->last_x[i];
+                  sample->point[i].y = priv->last_y[i];
+                  sample->point[i].flags = TOUCH_UP | TOUCH_ID_VALID |
+                                           TOUCH_POS_VALID;
+                }
+
+              priv->last_flags[i] = 0;
+            }
+
+          priv->prev_npoints = 0;
+        }
+#else
+      /* Hardware reports no touches */
+
+      if (priv->flags & TOUCH_DOWN)
+        {
+          /* Touch was active — generate TOUCH_UP for the last known point */
+
+          memset(sample, 0, outlen);
+          sample->npoints = 1;
+          sample->point[0].id = 0;
+          sample->point[0].x = priv->x;
+          sample->point[0].y = priv->y;
+          sample->point[0].flags = TOUCH_UP | TOUCH_ID_VALID |
+                                   TOUCH_POS_VALID;
+          iinfo("touch up x=%d, y=%d\n", priv->x, priv->y);
         }
 
-      /* Return the Touch Point */
-
-      memcpy(buffer, &sample, sizeof(sample));
-
-      /* Begin Critical Section */
-
-      flags = enter_critical_section();
-
-      /* Clear the Interrupt Pending Flag */
-
-      priv->int_pending = false;
-
-      /* Remember the Last Touch Point */
-
-      if (sample.npoints >= 1)
-        {
-          priv->x = sample.point[0].x;
-          priv->y = sample.point[0].y;
-          priv->flags = sample.point[0].flags;
-        }
-
-      /* End Critical Section */
-
-      leave_critical_section(flags);
+      priv->flags = 0;
+#endif
     }
+
+  /* Copy results to user buffer */
+
+  memcpy(buffer, sample, MIN(outlen, buflen));
+
+  /* Clear the Interrupt Pending Flag */
+
+  flags = enter_critical_section();
+  priv->int_pending = false;
+  leave_critical_section(flags);
 
   /* End Mutex: Unlock to allow next read */
 
+errout:
   nxmutex_unlock(&priv->devlock);
-  return (ret < 0) ? ret : outlen;
+  return (ret < 0) ? ret : MIN(outlen, buflen);
 }
 
 
