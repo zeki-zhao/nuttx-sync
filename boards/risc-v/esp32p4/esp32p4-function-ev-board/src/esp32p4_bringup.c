@@ -109,6 +109,10 @@
 #  include "esp_board_adc.h"
 #endif
 
+#ifdef CONFIG_PM
+#  include "espressif/esp_pm.h"
+#endif
+
 #ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
 #  include "espressif/esp_nxdiag.h"
 #endif
@@ -139,12 +143,6 @@
  *
  * Description:
  *   Perform architecture-specific initialization.
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize().
  *
  * Input Parameters:
  *   None.
@@ -423,6 +421,16 @@ int esp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_PM
+  /* Configure PM */
+
+  ret = esp_pmconfigure();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_pmconfigure failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
   ret = esp_nxdiag_initialize();
   if (ret < 0)
@@ -439,17 +447,31 @@ int esp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESPRESSIF_EMAC
+  ret = board_emac_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_emac_init failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_ESPRESSIF_USE_LP_CORE
 
   /* ULP initialization should be the handled later than
    * peripherals to use supported peripherals properly on ULP core
    */
 
-  esp_ulp_init();
-
+  ret = esp_ulp_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_ulp_init failed: %d\n", ret);
+    }
+  else
+    {
 #  ifdef CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
-  esp_ulp_load_bin((char *)esp_ulp_bin, esp_ulp_bin_len);
+      esp_ulp_load_bin((char *)esp_ulp_bin, esp_ulp_bin_len);
 #  endif
+    }
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but

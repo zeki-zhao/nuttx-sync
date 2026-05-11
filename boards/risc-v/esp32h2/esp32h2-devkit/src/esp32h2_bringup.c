@@ -152,9 +152,6 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize().
- *
  * Input Parameters:
  *   None.
  *
@@ -451,7 +448,7 @@ int esp_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
+#ifdef CONFIG_PM
   /* Configure PM */
 
   ret = esp_pmconfigure();

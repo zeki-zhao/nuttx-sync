@@ -49,6 +49,7 @@ set(ESP32P4_INCLUDES
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_app_format/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_blockdev/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_common/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_event/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/${CHIP_SERIES}/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_cam/${CHIP_SERIES}/include
@@ -118,6 +119,9 @@ set(ESP32P4_INCLUDES
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_mm/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_psram/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_psram/device/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_psram/xip_impl/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_rom/${CHIP_SERIES}
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_rom/${CHIP_SERIES}/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_rom/${CHIP_SERIES}/include/${CHIP_SERIES}
@@ -182,18 +186,24 @@ set(ESP_ROM_LD_DIR
 set(ESP_SOC_LD_DIR ${ESP_HAL_3RDPARTY_REPO}/components/soc/${CHIP_SERIES}/ld)
 set(ESP_RISCV_LD_DIR ${ESP_HAL_3RDPARTY_REPO}/components/riscv/ld)
 
-if(CONFIG_ESP32P4_REV_MIN_300)
+if(NOT "${CONFIG_ESP32P4_SELECTS_REV_LESS_V3}" STREQUAL "y")
   set(_esp32p4_rom_ld_files
       ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco5.ld
       ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco5.libc.ld
-      ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco5.libgcc.ld
-      ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco5.newlib.ld)
+      ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco5.libgcc.ld)
+  if(NOT "${CONFIG_ESPRESSIF_DONT_USE_ROM_LIBC}" STREQUAL "y")
+    list(APPEND _esp32p4_rom_ld_files
+         ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco5.newlib.ld)
+  endif()
 else()
   set(_esp32p4_rom_ld_files
       ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.ld
       ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libc.ld
-      ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libgcc.ld
-      ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.newlib.ld)
+      ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libgcc.ld)
+  if(NOT "${CONFIG_ESPRESSIF_DONT_USE_ROM_LIBC}" STREQUAL "y")
+    list(APPEND _esp32p4_rom_ld_files
+         ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.newlib.ld)
+  endif()
 endif()
 
 list(
@@ -303,8 +313,10 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/mac_addr.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/mspi/mspi_timing_tuning/mspi_timing_tuning.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/periph_ctrl.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/ldo/esp_ldo_regulator.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/lowpower/port/${CHIP_SERIES}/sleep_cpu_asm.S
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/lowpower/port/${CHIP_SERIES}/sleep_cpu.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/lowpower/port/${CHIP_SERIES}/sleep_cpu_static.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/lowpower/port/${CHIP_SERIES}/sleep_clock.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/cpu_region_protect.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/esp_clk_tree.c
@@ -341,6 +353,8 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_mm/esp_cache_utils.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_mm/esp_mmu_map.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_mm/port/${CHIP_SERIES}/ext_mem_layout.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm/pm_impl.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm/pm_locks.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_rom/patches/esp_rom_clic.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_rom/patches/esp_rom_crc.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_rom/patches/esp_rom_efuse.c
@@ -423,6 +437,36 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/heap_caps.c
   ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/platform/os.c)
 
+if(CONFIG_ESPRESSIF_WIFI OR CONFIG_ESPRESSIF_EMAC)
+  list(APPEND HAL_SRCS ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/esp_event.c)
+endif()
+
+if(CONFIG_ESPRESSIF_EMAC)
+  list(
+    APPEND
+    HAL_SRCS
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_emac/emac_hal.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_emac/${CHIP_SERIES}/emac_periph.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_eth/src/esp_eth.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_eth/src/mac/esp_eth_mac_esp.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_eth/src/mac/esp_eth_mac_esp_dma.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_eth/src/mac/esp_eth_mac_esp_gpio.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_eth/src/phy/esp_eth_phy_802_3.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_eth/src/phy/esp_eth_phy_generic.c
+    # log_buffers.c provides ESP_LOG_BUFFER_HEXDUMP used by esp_eth_mac_esp.c
+    # for its dump_hal_registers diagnostic helper; util.c supplies the hex
+    # conversion helper consumed by log_buffers.c.
+    ${ESP_HAL_3RDPARTY_REPO}/components/log/src/util.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/log/src/buffer/log_buffers.c)
+  target_include_directories(
+    arch PRIVATE ${ESP_HAL_3RDPARTY_REPO}/components/esp_eth/include)
+endif()
+
+# Bootloader common
+list(
+  APPEND HAL_SRCS
+  ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/bootloader_mem.c)
+
 if(CONFIG_ESPRESSIF_SIMPLE_BOOT)
   list(
     APPEND
@@ -438,13 +482,35 @@ if(CONFIG_ESPRESSIF_SIMPLE_BOOT)
     ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/bootloader_common.c
     ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/bootloader_console_loader.c
     ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/bootloader_console.c
-    ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/bootloader_mem.c
     ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/bootloader_random_${CHIP_SERIES}.c
     ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/bootloader_random.c
     ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/bootloader_sha.c
     ${ESP_HAL_3RDPARTY_REPO}/components/efuse/src/esp_efuse_fields.c
     ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/bootloader_banner_wrap.c)
   target_link_options(nuttx PRIVATE -Wl,--wrap=bootloader_print_banner)
+endif()
+
+if(CONFIG_ESPRESSIF_SPIRAM)
+  list(
+    APPEND
+    HAL_SRCS
+    ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/bootloader_flash/src/bootloader_flash_config_${CHIP_SERIES}.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_mspi/${CHIP_SERIES}/mspi_periph.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/mspi/mspi_timing_tuning/port/${CHIP_SERIES}/mspi_timing_config.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/mspi/mspi_timing_tuning/tuning_scheme_impl/mspi_timing_by_dqs.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/mspi/mspi_timing_tuning/tuning_scheme_impl/mspi_timing_by_flash_delay.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_psram/system_layer/esp_psram_mspi.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_psram/system_layer/esp_psram.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_psram/device/esp_psram_impl_ap_hex.c
+  )
+
+  if(CONFIG_SPIRAM_FLASH_LOAD_TO_PSRAM)
+    list(
+      APPEND
+      HAL_SRCS
+      ${ESP_HAL_3RDPARTY_REPO}/components/esp_psram/xip_impl/mmu_psram_flash_v2.c
+    )
+  endif()
 endif()
 
 if(CONFIG_ESPRESSIF_IDF_ENV_FPGA)

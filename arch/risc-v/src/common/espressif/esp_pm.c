@@ -51,6 +51,7 @@
 #  include "driver/gpio.h"
 #  include "espressif/esp_gpio.h"
 #  include "hal/gpio_types.h"
+#  include "soc/soc_caps.h"
 #endif
 #ifdef CONFIG_PM_UART_WAKEUP
 #  include "driver/uart_wakeup.h"
@@ -827,7 +828,8 @@ void esp_pmstandby(uint64_t time_in_us)
     }
 #endif
 
-#ifdef CONFIG_PM_GPIO_WAKEUP
+#if defined(CONFIG_PM_GPIO_WAKEUP) && \
+    defined(SOC_GPIO_SUPPORT_HP_PERIPH_PD_SLEEP_WAKEUP)
   if (cause == ESP_SLEEP_WAKEUP_GPIO)
     {
       gpio_mask = esp_sleep_get_gpio_wakeup_status();
@@ -862,8 +864,6 @@ void esp_pmsleep(uint64_t time_in_us)
   esp_pm_deep_sleep_start();
 }
 
-#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
-
 /****************************************************************************
  * Name: esp_pmconfigure
  *
@@ -891,7 +891,11 @@ int esp_pmconfigure(void)
   esp_pm_config_t pm_config =
     {
       .max_freq_mhz = CONFIG_ESPRESSIF_CPU_FREQ_MHZ,
+#ifdef CONFIG_ESPRESSIF_DFS
+      .min_freq_mhz = CONFIG_ESPRESSIF_MIN_CPU_FREQ_MHZ,
+#else
       .min_freq_mhz = CONFIG_ESPRESSIF_CPU_FREQ_MHZ,
+#endif
 #ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
       .light_sleep_enable = true
 #endif
@@ -913,9 +917,13 @@ int esp_pmconfigure(void)
   esp_pm_gpio_wakeup_prepare();
 #endif
 #ifdef CONFIG_PM_UART_WAKEUP
+#  ifdef SOC_UART_SUPPORT_XTAL_CLK
+  esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_ON);
+#  endif
   esp_pm_uart_wakeup_prepare();
 #endif /* CONFIG_PM_UART_WAKEUP */
 
+#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
   err = esp_pm_register_skip_light_sleep_callback(
           esp_pm_skip_light_sleep);
   if (err != ESP_OK)
@@ -948,7 +956,7 @@ int esp_pmconfigure(void)
       pwrerr("Failed to set console UART handling mode: %d\n", err);
       return -ENOMEM;
     }
+#endif
 
   return ret;
 }
-#endif /* CONFIG_ESPRESSIF_AUTO_SLEEP */

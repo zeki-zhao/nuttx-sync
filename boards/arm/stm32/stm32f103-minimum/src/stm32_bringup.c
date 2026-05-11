@@ -235,9 +235,6 @@ static int g_sensor_devno;
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library
- *
  ****************************************************************************/
 
 int stm32_bringup(void)
@@ -576,6 +573,30 @@ int stm32_bringup(void)
 
 #ifdef CONFIG_USBADB
   usbdev_adb_initialize();
+#endif
+
+#ifdef CONFIG_STM32_CAN_CHARDRIVER
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = stm32_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_STM32_CAN_SOCKET
+  /* Initialize CAN socket interface */
+
+  /* STM32F103C8 may not have enough Flash for SocketCAN; use a part with
+   * more Flash (e.g. STM32F103CB).
+   */
+
+  ret = stm32_cansock_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_cansock_setup failed: %d\n", ret);
+    }
 #endif
 
   return ret;

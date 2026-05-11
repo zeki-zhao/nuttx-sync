@@ -164,6 +164,10 @@ if(CONFIG_ESP_MCPWM)
   list(APPEND SRCS esp_mcpwm.c)
 endif()
 
+if(CONFIG_ESPRESSIF_EMAC)
+  list(APPEND SRCS esp_emac.c)
+endif()
+
 if(CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL)
   list(APPEND SRCS esp_nxdiag.c)
 endif()
@@ -209,7 +213,7 @@ if(DEFINED ENV{ESP_HAL_3RDPARTY_VERSION})
       CACHE STRING "ESP HAL 3rdparty version")
 else()
   set(ESP_HAL_3RDPARTY_VERSION
-      b7e51db97a3f9dc82d3b3524d2bad298ba1e2647
+      e10e44f52e41aee7a617b4d144982a1998a17fc5
       CACHE STRING "ESP HAL 3rdparty version")
 endif()
 
@@ -243,8 +247,6 @@ if(NOT IS_DIRECTORY "${ESP_HAL_3RDPARTY_REPO}")
   # NXTMPDIR contains a cached version of the esp-hal-3rdparty repository, which
   # is located on nuttx/../nxtmpdir/esp-hal-3rdparty if it exists.
   if(NXTMPDIR)
-    include(${NUTTX_DIR}/cmake/nuttx_3rdparty.cmake)
-    nuttx_make_nxtmpdir()
     set(ESP_HAL_NXTMPDIR_CACHE "${NXTMPDIR_PATH}/${ESP_HAL_3RDPARTY_REPO_NAME}")
     get_filename_component(ESP_HAL_NXTMPDIR_CACHE "${ESP_HAL_NXTMPDIR_CACHE}"
                            REALPATH)

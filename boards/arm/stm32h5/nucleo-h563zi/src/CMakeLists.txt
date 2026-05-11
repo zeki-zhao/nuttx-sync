@@ -32,10 +32,6 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_ADC)
   list(APPEND SRCS stm32_adc.c)
 endif()
@@ -46,6 +42,10 @@ endif()
 
 if(CONFIG_STM32H5_FDCAN)
   list(APPEND SRCS stm32_can.c)
+endif()
+
+if(CONFIG_STM32H5_USBFS_HOST)
+  list(APPEND SRCS stm32_usb.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})

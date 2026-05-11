@@ -177,6 +177,12 @@ adc
 Enables the ADC driver. ADC unit(s) are registered (``/dev/adc0`` as ADC1).
 Attenuation, mode, and channel set can be adjusted in ``ADC Configuration``.
 
+autopm
+------
+
+This configuration makes the device automatically enter the low power consumption mode
+when in the idle state, powering off the cpu and other peripherals.
+
 bmp180
 ------
 
@@ -203,6 +209,19 @@ efuse
 -----
 
 Enables the eFuse driver (supports virtual eFuses). Access via ``/dev/efuse``.
+
+ethernet
+--------
+
+Enables using the in-chip ethernet MAC controller attached to the board's PHY pins.
+This example enables the DHCP client and the ping tool to test the Ethernet connection, which
+should be working out of the box when the ethernet cable is connected to the board::
+
+    nsh> ifconfig
+    eth0	Link encap:Ethernet HWaddr 30:ed:a0:ec:f1:60 at RUNNING mtu 1500
+          inet addr:10.0.10.50 DRaddr:10.0.10.1 Mask:255.255.255.0
+
+It also provides the iperf tool to test the Ethernet connection.
 
 gpio
 ----
@@ -291,6 +310,21 @@ System switch to the PM sleep mode, you need to enter::
     nsh> pmconfig relax normal
     nsh> pmconfig relax normal
 
+To save power without using sleep modes, lowering the clock speed is another approach. For dynamic frequency scaling
+``CONFIG_ESPRESSIF_DFS`` option needs to enabled and minimum CPU frequency needs to set under ``CONFIG_ESPRESSIF_MIN_CPU_FREQ`` option.
+With these options, the device scales the CPU clock according to workload.
+
+psram_usrheap
+-------------
+
+This configuration enables allocating the userspace heap into SPIRAM and reserves the
+internal RAM for kernel heap. For instance, for a 32MB PSRAM::
+
+    nsh> free
+          total       used       free    maxused    maxfree  nused  nfree name
+        602004       6492     595512       6872     595512     36      1 Kmem
+      33554428       4276   33550152       4656   33550152      8      1 Umem
+
 pwm
 ---
 
@@ -309,7 +343,7 @@ Demonstrates the hardware RNG.
 rmt
 ---
 
-Configures an RMT TX/RX pair and the ``rmtchar`` example. Also includes ``ws2812`` for addressable LEDs.
+Configures an RMT TX/RX pair and the ``irtest`` example. Also includes ``ws2812`` for addressable LEDs.
 
 rtc
 ---

@@ -55,7 +55,10 @@ endif()
 
 # Find Python 3 interpreter
 
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
+find_package(
+  Python3 REQUIRED
+  COMPONENTS Interpreter
+  QUIET)
 if(NOT Python3_Interpreter_FOUND)
   message(FATAL_ERROR "Did NOT find Python interpreter.")
 endif()
@@ -226,6 +229,16 @@ set(ENV{HOST_WINDOWS} n)
 set(ENV{HOST_OTHER} n)
 
 include(nuttx_sethost)
+
+option(NXTMPDIR "Create the nxtmpdir folder for third-party packages." OFF)
+
+include(nuttx_3rdparty)
+
+if(NXTMPDIR)
+  nuttx_make_nxtmpdir()
+else()
+  nuttx_remove_nxtmpdir()
+endif()
 
 include(nuttx_parse_function_args)
 include(nuttx_add_subdirectory)

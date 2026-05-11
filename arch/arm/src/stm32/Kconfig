@@ -1686,6 +1686,7 @@ config STM32_STM32F412
 	select STM32_HAVE_TIM12
 	select STM32_HAVE_TIM13
 	select STM32_HAVE_TIM14
+	select STM32_HAVE_USART3
 	select STM32_HAVE_USART2
 	select STM32_HAVE_USART6
 	select STM32_HAVE_I2C1
@@ -3479,26 +3480,6 @@ config STM32_NOEXT_VECTORS
 	---help---
 		Sometimes you may not need any Vector support beyond SysTick
 		and wish to save memory. This applies only to ARMv7-M architectures.
-
-config STM32_USE_LEGACY_PINMAP
-	bool "Use the legacy pinmap with GPIO_SPEED_xxx included."
-	default y
-	---help---
-		In the past, pinmap files included GPIO_SPEED_xxxMhz. These speed
-		settings should have come from the board.h as it describes the wiring
-		of the SoC to the board. The speed is really slew rate control and
-		therefore is related to the layout and can only be properly set
-		in board.h.
-
-		STM32_USE_LEGACY_PINMAP is provided, to allow lazy migration to
-		using pinmaps without speeds. The work required to do this can be aided
-		by running tools/stm32_pinmap_tool.py. The tools will take a board.h
-		file and a legacy pinmap and output the required changes that one needs
-		to make to a board.h file.
-
-		Eventually, STM32_USE_LEGACY_PINMAP will be deprecated and the legacy
-		pinmaps removed from NuttX. Any new boards added should set
-		STM32_USE_LEGACY_PINMAP=n and fully define the pins in board.h
 
 config STM32_SYSCFG_IOCOMPENSATION
 	bool "SYSCFG I/O Compensation"
@@ -12003,6 +11984,10 @@ config STM32_DMA2D_REGDEBUG
 endmenu
 endif # STM32_DMA2D
 
+config STM32_QE
+	bool
+	default n
+
 menu "STM32 QEncoder Driver"
 	depends on SENSORS_QENCODER
 	depends on STM32_TIM1 || STM32_TIM2 || STM32_TIM3 || STM32_TIM4 || STM32_TIM5 || STM32_TIM8
@@ -12019,6 +12004,7 @@ config STM32_TIM1_QE
 	bool "TIM1 QE"
 	default n
 	depends on STM32_TIM1
+	select STM32_QE
 	---help---
 		Reserve TIM1 for use by QEncoder.
 
@@ -12037,6 +12023,7 @@ config STM32_TIM2_QE
 	bool "TIM2 QE"
 	default n
 	depends on STM32_TIM2
+	select STM32_QE
 	---help---
 		Reserve TIM2 for use by QEncoder.
 
@@ -12055,6 +12042,7 @@ config STM32_TIM3_QE
 	bool "TIM3 QE"
 	default n
 	depends on STM32_TIM3
+	select STM32_QE
 	---help---
 		Reserve TIM3 for use by QEncoder.
 
@@ -12073,6 +12061,7 @@ config STM32_TIM4_QE
 	bool "TIM4 QE"
 	default n
 	depends on STM32_TIM4
+	select STM32_QE
 	---help---
 		Reserve TIM4 for use by QEncoder.
 
@@ -12091,6 +12080,7 @@ config STM32_TIM5_QE
 	bool "TIM5 QE"
 	default n
 	depends on STM32_TIM5
+	select STM32_QE
 	---help---
 		Reserve TIM5 for use by QEncoder.
 
@@ -12109,6 +12099,7 @@ config STM32_TIM8_QE
 	bool "TIM8 QE"
 	default n
 	depends on STM32_TIM8
+	select STM32_QE
 	---help---
 		Reserve TIM8 for use by QEncoder.
 

@@ -23,8 +23,6 @@
 set(SRCS esp32p4_boot.c esp32p4_bringup.c)
 
 if(CONFIG_BOARDCTL)
-  list(APPEND SRCS esp32p4_appinit.c)
-
   if(CONFIG_BOARDCTL_RESET)
     list(APPEND SRCS esp32p4_reset.c)
   endif()
@@ -36,6 +34,10 @@ endif()
 
 if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS esp32p4_buttons.c)
+endif()
+
+if(CONFIG_ESPRESSIF_EMAC)
+  list(APPEND SRCS esp32p4_ethernet.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})
@@ -52,7 +54,7 @@ set(LDSCRIPTS "${BOARD_COMMON_DIR}/scripts/${CHIP_SERIES}_aliases.ld"
               "${BOARD_COMMON_DIR}/scripts/${CHIP_SERIES}_flat_memory.ld")
 
 if(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT OR CONFIG_ESPRESSIF_SIMPLE_BOOT)
-  if(CONFIG_ESP32P4_REV_MIN_300)
+  if(NOT "${CONFIG_ESP32P4_SELECTS_REV_LESS_V3}" STREQUAL "y")
     list(APPEND LDSCRIPTS
          "${BOARD_COMMON_DIR}/scripts/${CHIP_SERIES}_sections.rev3.ld")
   else()
