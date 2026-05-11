@@ -48,8 +48,8 @@ static int myled_read(FAR struct file *filep, FAR char *buffer, size_t buflen){
     return OK;
 }
 static int myled_write(FAR struct file *filep, FAR const char *buffer,size_t buflen){
-    FAR struct inode *inode    = filep->f_inode;
-    FAR struct myled_lower_s *lower = inode->i_private;
+    // FAR struct inode *inode    = filep->f_inode;
+    // FAR struct myled_lower_s *lower = inode->i_private;
     // syslog(LOG_DEBUG,"in myled_write\n");
 
     return OK;
