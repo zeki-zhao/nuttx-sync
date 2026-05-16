@@ -246,7 +246,7 @@ int stm32_sdio_initialize(void);
 void weak_function stm32_spidev_initialize(void);
 
 #ifdef CONFIG_MY_LED
-void board_myled_initialize(void);
+int board_myled_initialize(void);
 #endif
 
 #ifdef CONFIG_MY_TOUCH
