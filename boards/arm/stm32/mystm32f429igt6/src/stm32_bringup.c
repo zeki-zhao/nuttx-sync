@@ -28,12 +28,17 @@
 #include <stdio.h>
 #include <debug.h>
 #include <errno.h>
+#include <sys/stat.h>
 
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 
 #include "mystm32f429igt6.h"
+
+#ifdef CONFIG_FS_FAT
+#  include <arch/board/board_paths.h>
+#endif
 
 #ifdef CONFIG_STM32_SPI4
 #  include <nuttx/mmcsd.h>
@@ -81,6 +86,36 @@ int stm32_bringup(void)
 
     printf(COLOR_GREEN "Hello,Zeki\nWelcome to Nuttx of STM32F429IGT6" COLOR_RESET);
 
+#ifdef HAVE_SDIO
+    /* Initialize the SDIO block driver */
+
+    ret = stm32_sdio_initialize();
+    if (ret != OK){
+        syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
+        ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+        return ret;
+    }else{
+#if defined(CONFIG_FS_FAT) && !defined(CONFIG_DISABLE_MOUNTPOINT)
+        /* Mount the SD card to /mnt/sd if FATFS is enabled */
+        char devpath[32];
+        snprintf(devpath, sizeof(devpath), "/dev/mmcsd%d", SDIO_MINOR);
+        ret = nx_mount(devpath, "/mnt/sd", "vfat", 0, NULL);
+        if (ret < 0){
+            syslog(LOG_ERR,"ERROR: Failed to mount SD card to /mnt/sd: %d\n", ret);
+        }else{
+            /* Ensure required data directories exist on SD card */
+            mkdir(SD_STATE_DIR, 0777);
+            mkdir(SD_LOG_DIR, 0777);
+            mkdir(SD_CONFIG_DIR, 0777);
+            mkdir(SD_FIRMWARE_DIR, 0777);
+        }
+#else
+        syslog(LOG_WARN, "WARNING: SDIO device registered but FATFS not enabled, "
+                     "SD card not mounted\n");
+#endif
+    }
+#endif
+
 #if defined (CONFIG_MY_LED)
     board_myled_initialize();
 #endif
@@ -102,7 +137,6 @@ int stm32_bringup(void)
 
 #ifdef HAVE_PROC
   /* mount the proc filesystem */
-
     ret = nx_mount(NULL, CONFIG_NSH_PROC_MOUNTPOINT, "procfs", 0, NULL);
     if (ret < 0)
     {
@@ -391,33 +425,6 @@ int stm32_bringup(void)
       syslog(LOG_ERR, "ERROR: stm32_adc_setup() failed: %d\n", ret);
     }
 #endif
-
-
-#ifdef HAVE_SDIO
-  /* Initialize the SDIO block driver */
-
-    ret = stm32_sdio_initialize();
-    if (ret != OK){
-      syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
-      ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
-      return ret;
-    }else{
-#if defined(CONFIG_FS_FAT) && !defined(CONFIG_DISABLE_MOUNTPOINT)
-  /* Mount the SD card to /mnt/sd if FATFS is enabled */
-      char devpath[32];
-      snprintf(devpath, sizeof(devpath), "/dev/mmcsd%d", SDIO_MINOR);
-      ret = nx_mount(devpath, "/mnt/sd", "vfat", 0, NULL);
-      if (ret < 0){
-        syslog(LOG_ERR,
-                "ERROR: Failed to mount SD card to /mnt/sd: %d\n", ret);
-      }
-  #else
-    syslog(LOG_WARN, "WARNING: SDIO device registered but FATFS not enabled, "
-                     "SD card not mounted\n");
-  #endif
-    }
-#endif
-
 
 #ifdef CONFIG_MMCSD_SPI
   /* Initialize the MMC/SD SPI driver (SPI2 is used) */
