@@ -90,6 +90,8 @@ if(CONFIG_STM32_LTDC)
     list(APPEND SRCS stm32_lcd.c)
 endif()
 
+list(APPEND SRCS stm32_myinit.c)
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")
