@@ -88,7 +88,7 @@ config STM32F429I_DISCO_RAMMTD_SIZE
 
 config STM32F429IDISCO_USBHOST_STACKSIZE
 	int "USB host waiter stack size"
-	default 1024
+	default 2048
 	depends on USBHOST
 
 config STM32F429IDISCO_USBHOST_PRIO

@@ -44,14 +44,14 @@
  *
  * This is the canonical configuration:
  *   System Clock source           : PLL (HSE)
- *   SYSCLK(Hz)                    : 180000000    Determined by PLL
+ *   SYSCLK(Hz)                    : 168000000    Determined by PLL
  *                                                configuration
- *   HCLK(Hz)                      : 180000000    (STM32_RCC_CFGR_HPRE)
+ *   HCLK(Hz)                      : 168000000    (STM32_RCC_CFGR_HPRE)
  *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
  *   APB1 Prescaler                : 4            (STM32_RCC_CFGR_PPRE1)
  *   APB2 Prescaler                : 2            (STM32_RCC_CFGR_PPRE2)
- *   HSE Frequency(Hz)             : 8000000      (STM32_BOARD_XTAL)
- *   PLLM                          : 8            (STM32_PLLCFG_PLLM)
+ *   HSE Frequency(Hz)             : 25000000     (STM32_BOARD_XTAL)
+ *   PLLM                          : 25           (STM32_PLLCFG_PLLM)
  *   PLLN                          : 336          (STM32_PLLCFG_PLLN)
  *   PLLP                          : 2            (STM32_PLLCFG_PLLP)
  *   PLLQ                          : 7            (STM32_PLLCFG_PLLQ)
@@ -67,7 +67,7 @@
 
 /* HSI - 16 MHz RC factory-trimmed
  * LSI - 32 KHz RC
- * HSE - On-board crystal frequency is 8MHz
+ * HSE - On-board crystal frequency is 25MHz
  * LSE - 32.768 kHz
  */
 
@@ -82,7 +82,7 @@
  *
  * PLL source is HSE
  * PLL_VCO = (STM32_HSE_FREQUENCY / PLLM) * PLLN
- *         = (8,000,000 / 8) * 336
+ *         = (25,000,000 / 25) * 336
  *         = 336,000,000
  * SYSCLK  = PLL_VCO / PLLP
  *         = 336,000,000 / 2 = 168,000,000
@@ -91,12 +91,12 @@
  *         = 48,000,000
  */
 
-#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(15)
-#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(216)
+#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(25)
+#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(336)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
-#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(4)
+#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(7)
 
-#define STM32_SYSCLK_FREQUENCY  180000000ul
+#define STM32_SYSCLK_FREQUENCY  168000000ul
 
 /* AHB clock (HCLK) is SYSCLK (168MHz) */
 
@@ -263,6 +263,11 @@
 #define GPIO_SPI4_MOSI GPIO_SPI4_MOSI_1
 #define GPIO_SPI4_SCK  GPIO_SPI4_SCK_1
 
+/* USB OTG HS pin configuration */
+
+#define GPIO_OTGHSFS_DM   (GPIO_OTGHSFS_DM_0|GPIO_SPEED_100MHz)
+#define GPIO_OTGHSFS_DP   (GPIO_OTGHSFS_DP_0|GPIO_SPEED_100MHz)
+
 /* FMC - SDRAM */
 
 #define GPIO_FMC_SDCKE1 GPIO_FMC_SDCKE1_2
@@ -346,7 +351,7 @@
 /* LTDC PLL configuration
  *
  * PLLSAI_VCO = STM32_HSE_FREQUENCY / PLLM
- *            = 8000000ul / 8
+ *            = 25000000ul / 25
  *            = 1,000,000
  *
  * PLL LCD clock output
