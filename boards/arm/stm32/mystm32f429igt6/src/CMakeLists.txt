@@ -44,10 +44,6 @@ if(CONFIG_STM32_OTGHS)
   list(APPEND SRCS stm32_usb.c)
 endif()
 
-if(CONFIG_INPUT_STMPE811)
-  list(APPEND SRCS stm32_stmpe811.c)
-endif()
-
 if(CONFIG_STM32F429I_DISCO_ILI9341)
   list(APPEND SRCS stm32_ili93414ws.c)
 endif()
@@ -74,6 +70,14 @@ if(CONFIG_STM32F429I_DISCO_HIGHPRI)
   list(APPEND SRCS stm32_highpri.c)
 endif()
 
+if(CONFIG_STM32_SDIO)
+  list(APPEND SRCS stm32_sdio.c)
+endif()
+
+if(CONFIG_STM32_LTDC)
+  list(APPEND SRCS stm32_lcd.c)
+endif()
+
 if(CONFIG_MY_LED)
   list(APPEND SRCS stm32_myled.c)
 endif()
@@ -82,16 +86,11 @@ if(CONFIG_MY_TOUCH)
   list(APPEND SRCS stm32_mytouch.c)
 endif()
 
-if(CONFIG_STM32_SDIO)
-  list(APPEND SRCS stm32_sdio.c)
-endif()
-
-if(CONFIG_STM32_LTDC)
-    list(APPEND SRCS stm32_lcd.c)
-endif()
-
+list(APPEND SRCS stm32_buzzer.c)
 list(APPEND SRCS stm32_myinit.c)
 
 target_sources(board PRIVATE ${SRCS})
+
+target_include_directories(board PRIVATE ${CMAKE_SOURCE_DIR}/arch/arm/src/stm32)
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")

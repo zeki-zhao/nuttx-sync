@@ -124,6 +124,8 @@ int stm32_bringup(void)
     board_touch_initialize();
 #endif
 
+    board_buzzer_init();
+
 #if defined(CONFIG_STM32_SPI4)
   struct spi_dev_s *spi;
 #endif

@@ -236,6 +236,12 @@ int board_myled_initialize(void);
 void board_touch_initialize(void);
 #endif
 
+void board_buzzer_init(void);
+void board_buzzer_start(int half_period_us);
+void board_buzzer_stop(void);
+void board_buzzer_set_period(int half_period_us);
+int  board_note_to_hp(const char *name);
+
 /****************************************************************************
  * Name: stm32_usbinitialize
  *
