@@ -33,6 +33,7 @@
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/spi/spi.h>
 
 #include "mystm32f429igt6.h"
 
@@ -61,6 +62,10 @@
 #  include <nuttx/input/buttons.h>
 #endif
 
+#ifdef CONFIG_MTD
+# include <nuttx/mtd/mtd.h>
+# include <fcntl.h>
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -99,6 +104,7 @@ int stm32_bringup(void)
         /* Mount the SD card to /mnt/sd if FATFS is enabled */
         char devpath[32];
         snprintf(devpath, sizeof(devpath), "/dev/mmcsd%d", SDIO_MINOR);
+        mkdir("/mnt/sd", 0777);
         ret = nx_mount(devpath, "/mnt/sd", "vfat", 0, NULL);
         if (ret < 0){
             syslog(LOG_ERR,"ERROR: Failed to mount SD card to /mnt/sd: %d\n", ret);
@@ -126,16 +132,6 @@ int stm32_bringup(void)
 
     board_buzzer_init();
 
-#if defined(CONFIG_STM32_SPI4)
-  struct spi_dev_s *spi;
-#endif
-#if defined(CONFIG_MTD)
-  struct mtd_dev_s *mtd;
-  struct mtd_geometry_s geo;
-#endif
-#if defined(CONFIG_MTD_PARTITION_NAMES)
-  const char *partname = CONFIG_STM32F429I_DISCO_FLASH_PART_NAMES;
-#endif
 
 #ifdef HAVE_PROC
   /* mount the proc filesystem */
@@ -150,180 +146,115 @@ int stm32_bringup(void)
 
   /* Configure SPI-based devices */
 
-#ifdef CONFIG_STM32_SPI4
+#if defined(CONFIG_STM32_SPI1)
+  struct spi_dev_s *spi;
   /* Get the SPI port */
+ #endif
 
-  syslog(LOG_INFO, "Initializing SPI port 4\n");
+#if defined(CONFIG_MTD)
+    struct mtd_dev_s *mtd;
+    struct mtd_geometry_s geo;
 
-  spi = stm32_spibus_initialize(4);
+    FAR struct mtd_dev_s *primary;
+    FAR struct mtd_dev_s *secondary;
+    FAR struct mtd_dev_s *recovery;
+    FAR struct mtd_dev_s *config;
+    FAR struct mtd_dev_s *assets;
+#endif
+
+#if defined(CONFIG_STM32_SPI1)
+  syslog(LOG_INFO, "Initializing SPI port 1\n");
+
+  spi = stm32_spi1initialize();
   if (!spi)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 4\n");
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 1\n");
       return -ENODEV;
     }
 
-  syslog(LOG_INFO, "Successfully initialized SPI port 4\n");
+  syslog(LOG_INFO, "Successfully initialized SPI port 1\n");
 
-  /* Now bind the SPI interface to the SST25F064 SPI FLASH driver.  This
-   * is a FLASH device that has been added external to the board (i.e.
-   * the board does not ship from STM with any on-board FLASH.
-   */
-
-#if defined(CONFIG_MTD) && defined(CONFIG_MTD_SST25XX)
+#if defined(CONFIG_MTD) && defined(CONFIG_MTD_W25)
+  /* Quick SPI1 communication test: read JEDEC ID from W25Q directly */
   syslog(LOG_INFO, "Bind SPI to the SPI flash driver\n");
 
-  mtd = sst25xx_initialize(spi);
+  mtd = w25_initialize(spi);
   if (!mtd)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SPI port 4 to the SPI FLASH"
-                      " driver\n");
+      syslog(LOG_ERR, "ERROR: SPI1 communication test FAILED - "
+                      "w25_initialize returned NULL (no JEDEC ID match)\n");
     }
   else
     {
-      syslog(LOG_INFO, "Successfully bound SPI port 4 to the SPI FLASH"
-                       " driver\n");
+      syslog(LOG_INFO, "SPI1 communication OK - W25 detected\n");
 
-      /* Get the geometry of the FLASH device */
+      /* Read geometry and print flash info */
 
       ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY,
                        (unsigned long)((uintptr_t)&geo));
       if (ret < 0)
         {
-          ferr("ERROR: mtd->ioctl failed: %d\n", ret);
-          return ret;
+          syslog(LOG_ERR, "ERROR: Failed to get W25 geometry: %d\n", ret);
+        }
+      else
+        {
+          syslog(LOG_INFO, "W25 Flash: %lu sectors x %lu bytes/sector = "
+                           "%lu MB\n",
+                 (unsigned long)geo.neraseblocks,
+                 (unsigned long)geo.erasesize,
+                 (unsigned long)(geo.erasesize *
+                                 geo.neraseblocks / (1024 * 1024)));
         }
 
-#ifdef CONFIG_STM32F429I_DISCO_FLASH_PART
+      /* Parse flash partitions using mtd_partition() */
+
+      primary = mtd_partition(mtd,
+                    PRIMARY_OFFSET / geo.blocksize,
+                    PRIMARY_SIZE   / geo.blocksize);
+      mtd_setpartitionname(primary, "primary");
+
+      secondary = mtd_partition(mtd,
+                    SECONDARY_OFFSET / geo.blocksize,
+                    SECONDARY_SIZE   / geo.blocksize);
+      mtd_setpartitionname(secondary, "secondary");
+
+      recovery = mtd_partition(mtd,
+                    RECOVERY_OFFSET / geo.blocksize,
+                    RECOVERY_SIZE   / geo.blocksize);
+      mtd_setpartitionname(recovery, "recovery");
+
+      config = mtd_partition(mtd,
+                    CONFIG_OFFSET / geo.blocksize,
+                    CONFIG_SIZE   / geo.blocksize);
+      mtd_setpartitionname(config, "config");
+
+#if defined(CONFIG_FS_LITTLEFS)
+      assets = mtd_partition(mtd,
+                    ASSETS_OFFSET / geo.blocksize,
+                    ASSETS_SIZE   / geo.blocksize);
+
+      ret = register_mtddriver("/dev/assets", assets, 0755, NULL);
+      if (ret < 0)
         {
-          int partno;
-          int partsize;
-          int partoffset;
-          int partszbytes;
-          int erasesize;
-          const char *partstring = CONFIG_STM32F429I_DISCO_FLASH_PART_LIST;
-          const char *ptr;
-          struct mtd_dev_s *mtd_part;
-          char  partref[16];
-
-          /* Now create a partition on the FLASH device */
-
-          partno = 0;
-          ptr = partstring;
-          partoffset = 0;
-
-          /* Get the Flash erase size */
-
-          erasesize = geo.erasesize;
-
-          while (*ptr != '\0')
+          syslog(LOG_ERR, "ERROR: Failed to register /dev/assets: %d\n",
+                 ret);
+        }
+      else
+        {
+          mkdir("/mnt/assets", 0777);
+          ret = nx_mount("/dev/assets", "/mnt/assets", "littlefs", 0,
+                         "autoformat");
+          if (ret < 0)
             {
-              /* Get the partition size */
-
-              partsize = atoi(ptr);
-              partszbytes = (partsize << 10); /* partsize is defined in KB */
-
-              /* Check if partition size is bigger then erase block */
-
-              if (partszbytes < erasesize)
-                {
-                  ferr("ERROR: Partition size is lesser than erasesize!\n");
-                  return -1;
-                }
-
-              /* Check if partition size is multiple of erase block */
-
-              if ((partszbytes % erasesize) != 0)
-                {
-                  ferr("ERROR: Partition size is not multiple of"
-                       " erasesize!\n");
-                  return -1;
-                }
-
-              mtd_part    = mtd_partition(mtd, partoffset,
-                                          partszbytes / erasesize);
-              partoffset += partszbytes / erasesize;
-
-#ifdef CONFIG_STM32F429I_DISCO_FLASH_CONFIG_PART
-              /* Test if this is the config partition */
-
-              if (CONFIG_STM32F429I_DISCO_FLASH_CONFIG_PART_NUMBER == partno)
-                {
-                  /* Register the partition as the config device */
-
-                  mtdconfig_register(mtd_part);
-                }
-              else
-#endif
-                {
-                  /* Now initialize a SMART Flash block device and bind it
-                   * to the MTD device.
-                   */
-
-#if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
-                  snprintf(partref, sizeof(partref), "p%d", partno);
-                  smart_initialize(CONFIG_STM32F429I_DISCO_FLASH_MINOR,
-                                   mtd_part, partref);
-#endif
-                }
-
-#if defined(CONFIG_MTD_PARTITION_NAMES)
-              /* Set the partition name */
-
-              if (mtd_part == NULL)
-                {
-                  ferr("ERROR: failed to create partition %s\n", partname);
-                  return -1;
-                }
-
-              mtd_setpartitionname(mtd_part, partname);
-
-              /* Now skip to next name.  We don't need to split the string
-               * here because the MTD partition logic will only display names
-               * up to the comma, thus allowing us to use a single static
-               * name in the code.
-               */
-
-              while (*partname != ',' && *partname != '\0')
-                {
-                  /* Skip to next ',' */
-
-                  partname++;
-                }
-
-              if (*partname == ',')
-                {
-                  partname++;
-                }
-#endif
-
-              /* Update the pointer to point to the next size in the list */
-
-              while ((*ptr >= '0') && (*ptr <= '9'))
-                {
-                  ptr++;
-                }
-
-              if (*ptr == ',')
-                {
-                  ptr++;
-                }
-
-              /* Increment the part number */
-
-              partno++;
+              syslog(LOG_ERR, "ERROR: Failed to mount littlefs: %d\n", ret);
             }
         }
-#else /* CONFIG_STM32F429I_DISCO_FLASH_PART */
-
-      /* Configure the device with no partition support */
-
-      smart_initialize(CONFIG_STM32F429I_DISCO_FLASH_MINOR, mtd, NULL);
-
-#endif /* CONFIG_STM32F429I_DISCO_FLASH_PART */
+#endif /* CONFIG_FS_LITTLEFS */
     }
 
 #endif /* CONFIG_MTD */
-#endif /* CONFIG_STM32_SPI4 */
+#endif /* CONFIG_STM32_SPI1 */
+
 
 #ifdef CONFIG_VIDEO_FB
   /* Initialize and register the framebuffer driver */

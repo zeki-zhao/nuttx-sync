@@ -170,16 +170,27 @@
 
 /* SPI chip selects */
 
-#define GPIO_CS_MEMS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN1)
-#define GPIO_CS_LCD     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN2)
-#define GPIO_LCD_DC     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN13)
+#define GPIO_CS_FLASH   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTI|GPIO_PIN8)
 #define GPIO_LCD_ENABLE (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                          GPIO_OUTPUT_CLEAR|GPIO_PORTF|GPIO_PIN10)
-#define GPIO_CS_SST25   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN4)
+
+/* W25Q128 partition layout (128 Mbit = 16 MB SPI NOR flash) */
+
+#define PRIMARY_OFFSET    0x000000
+#define PRIMARY_SIZE      0x100000                  /* 1 MB */
+
+#define SECONDARY_OFFSET  (PRIMARY_OFFSET + PRIMARY_SIZE)
+#define SECONDARY_SIZE    0x100000                  /* 1 MB */
+
+#define RECOVERY_OFFSET   (SECONDARY_OFFSET + SECONDARY_SIZE)
+#define RECOVERY_SIZE     0x100000                  /* 1 MB */
+
+#define CONFIG_OFFSET     (RECOVERY_OFFSET + RECOVERY_SIZE)
+#define CONFIG_SIZE       0x10000                   /* 64 KB */
+
+#define ASSETS_OFFSET     (CONFIG_OFFSET + CONFIG_SIZE)
+#define ASSETS_SIZE       (0x1000000 - ASSETS_OFFSET)  /* Remainder ~12.94 MB */
 
 /****************************************************************************
  * Public Types
@@ -269,26 +280,7 @@ void weak_function stm32_usbinitialize(void);
 int stm32_usbhost_initialize(void);
 #endif
 
-/****************************************************************************
- * Name: stm32_tsc_setup
- *
- * Description:
- *   This function is called by board-bringup logic to configure the
- *   touchscreen device.  This function will register the driver as
- *   /dev/inputN where N is the minor device number.
- *
- * Input Parameters:
- *   minor   - The input device minor number
- *
- * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is
- *   returned to indicate the nature of the failure.
- *
- ****************************************************************************/
 
-#ifdef CONFIG_INPUT_STMPE811
-int stm32_tsc_setup(int minor);
-#endif
 
 /****************************************************************************
  * Name: stm32_sdram_initialize
@@ -329,27 +321,9 @@ void stm32_ledpminitialize(void);
 void stm32_pmbuttons(void);
 #endif
 
-/****************************************************************************
- * Name:  stm32_ili93414ws_initialize
- *
- * Description:
- *   Initialize the device structure to control the LCD Single chip driver.
- *
- * Input Parameters:
- *
- * Returned Value:
- *   On success, this function returns a reference to the LCD control object
- *   for the specified ILI9341 LCD Single chip driver connected as 4 wire
- *   serial (spi). NULL is returned on any failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32F429I_DISCO_ILI9341
-struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
-#endif
 
 /****************************************************************************
- * Name: stm32_spi5initialize
+ * Name: stm32_spi1initialize
  *
  * Description:
  *   Initialize the selected SPI port.
@@ -370,27 +344,10 @@ struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_SPI5
-struct spi_dev_s *stm32_spi5initialize(void);
+#ifdef CONFIG_STM32_SPI1
+struct spi_dev_s *stm32_spi1initialize(void);
 #endif
 
-/****************************************************************************
- * Name: stm32_l3gd20initialize()
- *
- * Description:
- *   Initialize and register the L3GD20 3 axis gyroscope sensor driver.
- *
- * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/gyro0"
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SPI) & defined(CONFIG_SENSORS_L3GD20)
-int stm32_l3gd20initialize(const char *devpath);
-#endif
 
 /****************************************************************************
  * Name: stm32_pwm_setup

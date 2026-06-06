@@ -256,9 +256,9 @@
 
 /* SPI - There is a MEMS device on SPI5 using these pins: */
 
-#define GPIO_SPI5_MISO GPIO_SPI5_MISO_1
-#define GPIO_SPI5_MOSI GPIO_SPI5_MOSI_1
-#define GPIO_SPI5_SCK  GPIO_SPI5_SCK_1
+#define GPIO_SPI1_MISO (GPIO_SPI1_MISO_2 | GPIO_SPEED_50MHz)
+#define GPIO_SPI1_MOSI (GPIO_SPI1_MOSI_2 | GPIO_SPEED_50MHz)
+#define GPIO_SPI1_SCK  (GPIO_SPI1_SCK_2  | GPIO_SPEED_50MHz)
 
 /* SPI - External SPI flash may be connected on SPI4: */
 
