@@ -41,17 +41,8 @@
 #  include <arch/board/board_paths.h>
 #endif
 
-#ifdef CONFIG_STM32_SPI4
-#  include <nuttx/mmcsd.h>
-#endif
-
-
 #ifdef CONFIG_VIDEO_FB
 #  include <nuttx/video/fb.h>
-#endif
-
-#ifdef CONFIG_USBMONITOR
-#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #ifdef CONFIG_STM32_OTGHS
@@ -65,6 +56,14 @@
 #ifdef CONFIG_MTD
 # include <nuttx/mtd/mtd.h>
 # include <fcntl.h>
+#endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD
+struct mtd_dev_s *g_mtd_secondary;
 #endif
 
 /****************************************************************************
@@ -156,7 +155,6 @@ int stm32_bringup(void)
     struct mtd_geometry_s geo;
 
     FAR struct mtd_dev_s *primary;
-    FAR struct mtd_dev_s *secondary;
     FAR struct mtd_dev_s *recovery;
     FAR struct mtd_dev_s *config;
     FAR struct mtd_dev_s *assets;
@@ -213,10 +211,10 @@ int stm32_bringup(void)
                     PRIMARY_SIZE   / geo.blocksize);
       mtd_setpartitionname(primary, "primary");
 
-      secondary = mtd_partition(mtd,
+      g_mtd_secondary = mtd_partition(mtd,
                     SECONDARY_OFFSET / geo.blocksize,
                     SECONDARY_SIZE   / geo.blocksize);
-      mtd_setpartitionname(secondary, "secondary");
+      mtd_setpartitionname(g_mtd_secondary, "secondary");
 
       recovery = mtd_partition(mtd,
                     RECOVERY_OFFSET / geo.blocksize,

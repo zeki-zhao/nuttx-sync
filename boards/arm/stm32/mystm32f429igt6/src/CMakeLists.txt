@@ -86,11 +86,16 @@ if(CONFIG_MY_TOUCH)
   list(APPEND SRCS stm32_mytouch.c)
 endif()
 
+if(CONFIG_FAT_DMAMEMORY)
+  list(APPEND SRCS stm32_dma_alloc.c)
+endif()
+
 list(APPEND SRCS stm32_buzzer.c)
 list(APPEND SRCS stm32_myinit.c)
+list(APPEND SRCS stm32_bot_image.c)
 
 target_sources(board PRIVATE ${SRCS})
 
 target_include_directories(board PRIVATE ${CMAKE_SOURCE_DIR}/arch/arm/src/stm32)
 
-set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")
+set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flat.ld")

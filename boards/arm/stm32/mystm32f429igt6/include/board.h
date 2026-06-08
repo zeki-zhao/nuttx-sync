@@ -278,6 +278,12 @@
 #define GPIO_FMC_SDNWE  GPIO_FMC_SDNWE_1
 
 
+/* DMA Channel/Stream Selections ********************************************/
+
+/* SDIO DMA */
+
+#define DMAMAP_SDIO DMAMAP_SDIO_1
+
 /* SDIO dividers.  Note that slower clocking is required when DMA is disabled
  * in order to avoid RX overrun/TX underrun errors due to delayed responses
  * to service FIFOs in interrupt driven mode.  These values have not been
@@ -559,5 +565,14 @@
                               GPIO_OUTPUT_CLEAR|GPIO_PORTD|GPIO_PIN13) 
 #endif
 
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD
+struct mtd_dev_s;
+extern struct mtd_dev_s *g_mtd_secondary;
+#endif
 
 #endif /* __BOARDS_ARM_STM32_STM32F429I_DISCO_INCLUDE_BOARD_H */
