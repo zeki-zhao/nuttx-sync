@@ -112,3 +112,46 @@ else()
   # set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flat.ld")
   set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/app.ld")
 endif()
+
+
+if(CONFIG_BOOT_NXBOOT AND NOT CONFIG_NXBOOT_BOOTLOADER)
+  execute_process(
+    COMMAND git -C ${CMAKE_SOURCE_DIR} describe --tags --dirty --always
+    OUTPUT_VARIABLE NX_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+  )
+
+  if(NOT NX_VERSION)
+    set(NX_VERSION "0.0.0")
+  endif()
+
+  string(REGEX REPLACE "^v" "" NX_VERSION "${NX_VERSION}")
+  string(REGEX REPLACE "-.*" "" NX_VERSION "${NX_VERSION}")
+
+  if(NOT NX_VERSION MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+")
+    set(NX_VERSION "0.0.0")
+  endif()
+
+  add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/nuttx.img
+    COMMAND python3 ${NUTTX_APPS_DIR}/boot/nxboot/tools/nximage.py
+            -v
+            ${CMAKE_BINARY_DIR}/nuttx.bin
+            ${CMAKE_BINARY_DIR}/nuttx.img
+            --version ${NX_VERSION}
+            --header_size ${CONFIG_NXBOOT_HEADER_SIZE}
+            --identifier ${CONFIG_NXBOOT_PLATFORM_IDENTIFIER}
+    DEPENDS ${CMAKE_BINARY_DIR}/nuttx.bin
+    COMMENT "Generating nuttx.img"
+  )
+
+  add_custom_target(nxboot_img
+    DEPENDS ${CMAKE_BINARY_DIR}/nuttx.img
+  )
+
+  if(NOT TARGET nuttx_post_build)
+    add_custom_target(nuttx_post_build)
+  endif()
+  add_dependencies(nuttx_post_build nxboot_img)
+endif()
