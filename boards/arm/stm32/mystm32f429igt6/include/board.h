@@ -148,32 +148,6 @@
 #define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
 /* LED definitions **********************************************************/
-
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
- * any way.  The following definitions are used to access individual LEDs.
- */
-
-/* LED index values for use with board_userled() */
-
-#define BOARD_LED1        0
-#define BOARD_LED2        1
-#define BOARD_NLEDS       2
-
-#define LED_COUNT  3
-
-#define BOARD_LED_GREEN   BOARD_LED1
-#define BOARD_LED_ORANGE  BOARD_LED2
-
-/* LED bits for use with board_userled_all() */
-
-#define BOARD_LED1_BIT    (1 << BOARD_LED1)
-#define BOARD_LED2_BIT    (1 << BOARD_LED2)
-
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on
- * board the stm32f429i-disco.
- * The following definitions describe how NuttX controls the LEDs:
- */
-
 #define LED_STARTED       0  /* LED1 */
 #define LED_HEAPALLOCATE  1  /* LED2 */
 #define LED_IRQSENABLED   2  /* LED1 + LED2 */
@@ -183,11 +157,13 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
-
-//Myled
 #define BLING_LED_R       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTH|GPIO_PIN10)
 #define BLING_LED_G       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTH|GPIO_PIN11)
 #define BLING_LED_B       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTH|GPIO_PIN12)
+
+#define LED_STATUS        (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTD|GPIO_PIN11)
+
+#define LED_COUNT  3
 
 // Buzzer (GPIOI 11)
 #define GPIO_BEEP         (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_100MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTI|GPIO_PIN11)
@@ -211,44 +187,25 @@
  * device. (See the README.txt file for other options)
  */
 
-#define GPIO_USART1_RX GPIO_USART1_RX_1
-#define GPIO_USART1_TX GPIO_USART1_TX_1
+#define GPIO_USART1_RX (GPIO_USART1_RX_1 | GPIO_SPEED_100MHz)
+#define GPIO_USART1_TX (GPIO_USART1_TX_1 | GPIO_SPEED_100MHz)
 
 /* USART2*/
-#define GPIO_USART2_RX GPIO_USART2_RX_1
-#define GPIO_USART2_TX GPIO_USART2_TX_1
+#define GPIO_USART2_RX (GPIO_USART2_RX_1 | GPIO_SPEED_100MHz)
+#define GPIO_USART2_TX (GPIO_USART2_TX_1 | GPIO_SPEED_100MHz)
 
 /* USART3*/
 #define GPIO_USART3_RX GPIO_USART3_RX_2
 #define GPIO_USART3_TX GPIO_USART3_TX_2
 
-/* PWM
- *
- * The STM32F4 Discovery has no real on-board PWM devices, but the board can
- * be configured to output a pulse train using TIM4 CH2 on PD13.
- */
-
-#define GPIO_TIM4_CH2OUT GPIO_TIM4_CH2OUT_2
-
-#define GPIO_TIM1_CH1OUT  GPIO_TIM1_CH1OUT_2 /* PE9 */
-#define GPIO_TIM1_CH1NOUT GPIO_TIM1_CH1N_3   /* PE8 */
-#define GPIO_TIM1_CH2OUT  GPIO_TIM1_CH2OUT_2 /* PE11 */
-#define GPIO_TIM1_CH2NOUT GPIO_TIM1_CH2N_3   /* PE10 */
-#define GPIO_TIM1_CH3OUT  GPIO_TIM1_CH3OUT_2 /* PE13 */
-#define GPIO_TIM1_CH3NOUT GPIO_TIM1_CH3N_3   /* PE12 */
 
 /* I2C - There is a STMPE811 TouchPanel on I2C3 using these pins: */
-#define GPIO_I2C2_SCL GPIO_I2C2_SCL_3
-#define GPIO_I2C2_SDA GPIO_I2C2_SDA_3
+#define GPIO_I2C2_SCL (GPIO_I2C2_SCL_3 | GPIO_SPEED_100MHz)
+#define GPIO_I2C2_SDA (GPIO_I2C2_SDA_3 | GPIO_SPEED_100MHz)
 
-#define GPIO_I2C3_SCL GPIO_I2C3_SCL_1
-#define GPIO_I2C3_SDA GPIO_I2C3_SDA_1
+#define GPIO_I2C3_SCL (GPIO_I2C3_SCL_1 | GPIO_SPEED_100MHz)
+#define GPIO_I2C3_SDA (GPIO_I2C3_SDA_1 | GPIO_SPEED_100MHz)
 
-
-// //simulative I2C SCL
-// #define GPIO_I2C_SCL (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_FLOAT|GPIO_SPEED_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTH|GPIO_PIN4)
-// //simulative I2C SDA
-// #define GPIO_I2C_SDA (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_FLOAT|GPIO_SPEED_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTH|GPIO_PIN5)
 // I2C RST
 #define GPIO_I2C_RST (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_PULLDOWN|GPIO_SPEED_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTD|GPIO_PIN13)
 // I2C INT
@@ -259,12 +216,6 @@
 #define GPIO_SPI1_MISO (GPIO_SPI1_MISO_2 | GPIO_SPEED_50MHz)
 #define GPIO_SPI1_MOSI (GPIO_SPI1_MOSI_2 | GPIO_SPEED_50MHz)
 #define GPIO_SPI1_SCK  (GPIO_SPI1_SCK_2  | GPIO_SPEED_50MHz)
-
-/* SPI - External SPI flash may be connected on SPI4: */
-
-#define GPIO_SPI4_MISO GPIO_SPI4_MISO_1
-#define GPIO_SPI4_MOSI GPIO_SPI4_MOSI_1
-#define GPIO_SPI4_SCK  GPIO_SPI4_SCK_1
 
 /* USB OTG HS pin configuration */
 
@@ -323,8 +274,6 @@
 #define GPIO_TIM8_CH2IN  GPIO_TIM8_CH2IN_1
 
 #ifdef CONFIG_STM32_LTDC
-# ifdef CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE
-
 /* LCD
  *
  * The STM32F429I-DISCO board contains an onboard TFT LCD connected to the
@@ -371,78 +320,6 @@
 
 /* Defined panel settings */
 
-#if defined(CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE_LANDSCAPE) || \
-    defined(CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE_RLANDSCAPE)
-#  define BOARD_LTDC_WIDTH              320
-#  define BOARD_LTDC_HEIGHT             240
-#else
-#  define BOARD_LTDC_WIDTH              240
-#  define BOARD_LTDC_HEIGHT             320
-#endif
-
-#define BOARD_LTDC_OUTPUT_BPP           16
-#define BOARD_LTDC_HFP                  10
-#define BOARD_LTDC_HBP                  20
-#define BOARD_LTDC_VFP                  4
-#define BOARD_LTDC_VBP                  2
-#define BOARD_LTDC_HSYNC                10
-#define BOARD_LTDC_VSYNC                2
-
-#define BOARD_LTDC_PLLSAIN              192
-#define BOARD_LTDC_PLLSAIR              4
-#define BOARD_LTDC_PLLSAIQ              7
-
-/* Division factor for LCD clock */
-
-#define STM32_RCC_DCKCFGR_PLLSAIDIVR    RCC_DCKCFGR_PLLSAIDIVR_DIV8
-
-/* Pixel Clock Polarity */
-
-#define BOARD_LTDC_GCR_PCPOL            0 /* !LTDC_GCR_PCPOL */
-
-/* Data Enable Polarity */
-
-#define BOARD_LTDC_GCR_DEPOL            0 /* !LTDC_GCR_DEPOL */
-
-/* Vertical Sync Polarity */
-
-#define BOARD_LTDC_GCR_VSPOL            0 /* !LTDC_GCR_VSPOL */
-
-/* Horizontal Sync Polarity */
-
-#define BOARD_LTDC_GCR_HSPOL            0 /* !LTDC_GCR_HSPOL */
-
-/* GPIO pinset */
-
-#define GPIO_LTDC_PINS                  18 /* 18-bit display */
-
-#define GPIO_LTDC_R2                    GPIO_LTDC_R2_1
-#define GPIO_LTDC_R3                    GPIO_LTDC_R3_1
-#define GPIO_LTDC_R4                    GPIO_LTDC_R4_1
-#define GPIO_LTDC_R5                    GPIO_LTDC_R5_1
-#define GPIO_LTDC_R6                    GPIO_LTDC_R6_1
-#define GPIO_LTDC_R7                    GPIO_LTDC_R7_1
-
-#define GPIO_LTDC_G2                    GPIO_LTDC_G2_1
-#define GPIO_LTDC_G3                    GPIO_LTDC_G3_1
-#define GPIO_LTDC_G4                    GPIO_LTDC_G4_1
-#define GPIO_LTDC_G5                    GPIO_LTDC_G5_1
-#define GPIO_LTDC_G6                    GPIO_LTDC_G6_1
-#define GPIO_LTDC_G7                    GPIO_LTDC_G7_1
-
-#define GPIO_LTDC_B2                    GPIO_LTDC_B2_1
-#define GPIO_LTDC_B3                    GPIO_LTDC_B3_1
-#define GPIO_LTDC_B4                    GPIO_LTDC_B4_1
-#define GPIO_LTDC_B5                    GPIO_LTDC_B5_1
-#define GPIO_LTDC_B6                    GPIO_LTDC_B6_1
-#define GPIO_LTDC_B7                    GPIO_LTDC_B7_1
-
-#define GPIO_LTDC_VSYNC                 GPIO_LTDC_VSYNC_1
-#define GPIO_LTDC_HSYNC                 GPIO_LTDC_HSYNC_1
-#define GPIO_LTDC_DE                    GPIO_LTDC_DE_1
-#define GPIO_LTDC_CLK                   GPIO_LTDC_CLK_1
-
-#else
 /* Custom LCD display configuration */
 
 #define CONFIG_STM32_LCD_BACKLIGHT  //开背光
@@ -528,36 +405,16 @@
 #define GPIO_LTDC_BL_OFF         (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_PULLUP|GPIO_SPEED_50MHz|\
                               GPIO_OUTPUT_CLEAR|GPIO_PORTD|GPIO_PIN7) 
 
-
-#endif /* Custom LCD display */
-
 /* Configure PLLSAI */
 
 #define STM32_RCC_PLLSAICFGR_PLLSAIN    RCC_PLLSAICFGR_PLLSAIN(BOARD_LTDC_PLLSAIN)
 #define STM32_RCC_PLLSAICFGR_PLLSAIR    RCC_PLLSAICFGR_PLLSAIR(BOARD_LTDC_PLLSAIR)
 #define STM32_RCC_PLLSAICFGR_PLLSAIQ    RCC_PLLSAICFGR_PLLSAIQ(BOARD_LTDC_PLLSAIQ)
 
-#endif /* CONFIG_STM32_LTDC */
+#endif /* Custom LCD display */
 
-/* L3GD20 MEMS */
-
-#define GPIO_L3GD20_DREADY (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN2)
-#define L3GD20_IRQ         (2 + STM32_IRQ_EXTI0)
-
-#define BOARD_L3GD20_GPIO_DREADY GPIO_L3GD20_DREADY
-#define BOARD_L3GD20_IRQ         L3GD20_IRQ
-
-#define GPIO_LIS3DSH_EXT0 \
-  (GPIO_INPUT|GPIO_FLOAT|GPIO_AF0|GPIO_SPEED_50MHz|GPIO_PORTE|GPIO_PIN0)
-
-#define BOARD_LIS3DSH_GPIO_EXT0 GPIO_LIS3DSH_EXT0
-
-/* DMA **********************************************************************/
-
-#define ADC1_DMA_CHAN DMAMAP_ADC1_1
 
 #ifdef CONFIG_MY_TOUCH
-
 #define GPIO_TOUCH_INT1     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_PULLDOWN|GPIO_SPEED_50MHz|\
                               GPIO_OUTPUT_CLEAR|GPIO_PORTD|GPIO_PIN12)  
 #define GPIO_TOUCH_INT2     (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_50MHz|GPIO_PORTD|GPIO_PIN12)  
@@ -570,9 +427,5 @@
  * Public Data
  ****************************************************************************/
 
-#ifdef CONFIG_MTD
-struct mtd_dev_s;
-extern struct mtd_dev_s *g_mtd_secondary;
-#endif
 
 #endif /* __BOARDS_ARM_STM32_STM32F429I_DISCO_INCLUDE_BOARD_H */

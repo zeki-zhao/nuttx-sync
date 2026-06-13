@@ -162,5 +162,19 @@ config MY_TOUCH
     ---help---
         Enable support for the touch screen on the board.
 
+config MY_BUZZER
+	bool "Support for the buzzer"
+    default n
+	---help---
+		Enable support for the buzzer on the board.
+
+config MY_INIY
+    bool "Support for personal init"
+    default n
+	---help---
+		Enable support for personal init on the board.
+
+		
+
 
 endif # ARCH_BOARD_MYSTM32F429IGT6

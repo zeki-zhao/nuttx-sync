@@ -51,12 +51,11 @@
 #define HAVE_USBDEV     
 #define HAVE_USBHOST    
 #define HAVE_USBMONITOR 
-#define HAVE_SDIO
 
 #undef  SDIO_MINOR     /* Any minor number, default 0 */
 #define SDIO_SLOTNO 0  /* Only one slot */
 
-#ifdef HAVE_SDIO
+
 #  if !defined(CONFIG_NSH_MMCSDSLOTNO)
 #    define CONFIG_NSH_MMCSDSLOTNO SDIO_SLOTNO
 #  elif CONFIG_NSH_MMCSDSLOTNO != 0
@@ -70,7 +69,6 @@
 #  else
 #    define SDIO_MINOR 0
 #  endif
-#endif
 
 /* Can't support USB host or device features if USB OTG HS is not enabled */
 
@@ -133,21 +131,6 @@
 #  undef CONFIG_STM32_SPI3
 #endif
 
-/* STMPE811 on I2C3 */
-
-#define STMPE811_ADDR1    0x41
-#define STMPE811_ADDR2    0x44
-
-#define GPIO_IO_EXPANDER (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN15)
-
-/* STM32F429 Discovery GPIOs ************************************************/
-
-/* LEDs */
-
-#define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTG|GPIO_PIN13)
-#define GPIO_LED2       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTG|GPIO_PIN14)
 
                   
 

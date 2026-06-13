@@ -24,8 +24,6 @@ set(SRCS stm32_boot.c stm32_bringup.c stm32_spi.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS stm32_autoleds.c)
-else()
-  list(APPEND SRCS stm32_userleds.c)
 endif()
 
 if(CONFIG_ARCH_BUTTONS)
@@ -90,12 +88,27 @@ if(CONFIG_FAT_DMAMEMORY)
   list(APPEND SRCS stm32_dma_alloc.c)
 endif()
 
-list(APPEND SRCS stm32_buzzer.c)
-list(APPEND SRCS stm32_myinit.c)
-list(APPEND SRCS stm32_bot_image.c)
+if(CONFIG_MY_BUZZER)
+  list(APPEND SRCS stm32_buzzer.c)
+endif()
+
+if(CONFIG_MY_INIY)
+  list(APPEND SRCS stm32_myinit.c)
+endif()
+
+if(CONFIG_NXBOOT_BOOTLOADER)
+  list(APPEND SRCS stm32_boot_image.c)
+endif()
 
 target_sources(board PRIVATE ${SRCS})
 
 target_include_directories(board PRIVATE ${CMAKE_SOURCE_DIR}/arch/arm/src/stm32)
 
-set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flat.ld")
+if(NOT CONFIG_BOOT_NXBOOT)
+  set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flat.ld")
+elseif(CONFIG_NXBOOT_BOOTLOADER)
+  set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/bootloader.ld")
+else()
+  # set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flat.ld")
+  set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/app.ld")
+endif()
