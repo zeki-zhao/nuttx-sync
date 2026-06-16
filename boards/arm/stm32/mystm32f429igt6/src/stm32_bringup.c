@@ -57,6 +57,8 @@
 # include <fcntl.h>
 #endif
 
+extern void led_indicate_init(void);
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -83,14 +85,15 @@
 int stm32_bringup(void)
 {
     int ret;
+
 #if !defined(CONFIG_NXBOOT_BOOTLOADER)
     printf(COLOR_GREEN "Hello,Zeki\nWelcome to Nuttx of STM32F429IGT6" COLOR_RESET);
 #endif
 
 #if !defined(CONFIG_NXBOOT_BOOTLOADER)
-    /* Initialize the SDIO block driver */
 
     ret = stm32_sdio_initialize();
+
     if (ret != OK){
         syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
         ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
@@ -106,9 +109,7 @@ int stm32_bringup(void)
             syslog(LOG_ERR,"ERROR: Failed to mount SD card to /mnt/sd: %d\n", ret);
         }else{
             /* Ensure required data directories exist on SD card */
-            mkdir(SD_STATE_DIR, 0777);
             mkdir(SD_LOG_DIR, 0777);
-            mkdir(SD_CONFIG_DIR, 0777);
             mkdir(SD_FIRMWARE_DIR, 0777);
         }
 #else
@@ -118,32 +119,8 @@ int stm32_bringup(void)
     }
 #endif
 
-#if defined (CONFIG_MY_LED)
-    board_myled_initialize();
-#endif
 
-#if defined (CONFIG_MY_TOUCH)
-    board_touch_initialize();
-#endif
-
-#if defined (CONFIG_MY_BUZZER)
-    board_buzzer_init();
-#endif
-
-
-#ifdef HAVE_PROC
-  /* mount the proc filesystem */
-    ret = nx_mount(NULL, CONFIG_NSH_PROC_MOUNTPOINT, "procfs", 0, NULL);
-    if (ret < 0)
-    {
-        syslog(LOG_ERR,
-                "ERROR: Failed to mount the PROC filesystem: %d\n", ret);
-        return ret;
-    }
-#endif
-
-  /* Configure SPI-based devices */
-
+/* Configure SPI-based devices */
 #if defined(CONFIG_STM32_SPI1)
   struct spi_dev_s *spi;
   /* Get the SPI port */
@@ -220,16 +197,16 @@ int stm32_bringup(void)
 #endif /* CONFIG_BOOT_NXBOOT */
         
 #if defined(CONFIG_FS_LITTLEFS)
-        FAR struct mtd_dev_s *assets = mtd_partition(mtd,
+        FAR struct mtd_dev_s *spiflash = mtd_partition(mtd,
                         ASSETS_OFFSET / geo.blocksize,
                         ASSETS_SIZE   / geo.blocksize);
 
-        ret = register_mtddriver("/dev/assets", assets, 0755, NULL);
+        ret = register_mtddriver("/dev/spiflash", spiflash, 0755, NULL);
         if (ret < 0){
-            syslog(LOG_ERR, "ERROR: Failed to register /dev/assets: %d\n", ret);
+            syslog(LOG_ERR, "ERROR: Failed to register /dev/spiflash: %d\n", ret);
         }else{
-            mkdir("/mnt/assets", 0777);
-            ret = nx_mount("/dev/assets", "/mnt/assets", "littlefs", 0,
+            mkdir("/mnt/spiflash", 0777);
+            ret = nx_mount("/dev/spiflash", "/mnt/spiflash", "littlefs", 0,
                             "autoformat");
             if (ret < 0){
                 syslog(LOG_ERR, "ERROR: Failed to mount littlefs: %d\n", ret);
@@ -240,6 +217,33 @@ int stm32_bringup(void)
 
 #endif /* CONFIG_MTD */
 #endif /* CONFIG_STM32_SPI1 */
+
+
+#if defined (CONFIG_MY_LED)
+    board_myled_initialize();
+#endif
+
+#if defined (CONFIG_MY_TOUCH)
+    board_touch_initialize();
+#endif
+
+#if defined (CONFIG_MY_BUZZER)
+    board_buzzer_init();
+#endif
+
+
+#ifdef HAVE_PROC
+  /* mount the proc filesystem */
+    ret = nx_mount(NULL, CONFIG_NSH_PROC_MOUNTPOINT, "procfs", 0, NULL);
+    if (ret < 0)
+    {
+        syslog(LOG_ERR,
+                "ERROR: Failed to mount the PROC filesystem: %d\n", ret);
+        return ret;
+    }
+#endif
+
+
 
 
 #ifdef CONFIG_VIDEO_FB
@@ -290,6 +294,11 @@ int stm32_bringup(void)
     if (ret < 0){
         syslog(LOG_ERR, "ERROR: stm32_adc_setup() failed: %d\n", ret);
     }
+#endif
+
+#if defined(CONFIG_NXBOOT_BOOTLOADER)
+    /* Init LED indicator (TIM6 for bootloader, idle-task for app) */
+    led_indicate_init();
 #endif
 
     return OK;

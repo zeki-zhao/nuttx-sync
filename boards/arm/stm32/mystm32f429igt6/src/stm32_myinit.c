@@ -27,7 +27,6 @@
 #include <nuttx/config.h>
 #include <sys/boardctl.h>
 #include <sched.h>
-#include <stdio.h>
 
 /****************************************************************************
  * External Functions
@@ -35,6 +34,7 @@
 
 extern int mylvgl_main(int argc, FAR char *argv[]);
 extern int nsh_main(int argc, FAR char *argv[]);
+extern int led_task(int argc, char *argv[]);
 
 /****************************************************************************
  * Public Functions
@@ -43,6 +43,7 @@ extern int nsh_main(int argc, FAR char *argv[]);
 int myinit_main(int argc, FAR char *argv[])
 {
     /* Start LVGL application as a background task */
+    task_create("led_hb", 100, 1024, led_task, NULL);
 
     task_create("mylvgl",
                 CONFIG_EXAMPLES_MY_LVGL_PRIORITY,

@@ -42,12 +42,13 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "stm32_gpio.h"
 #include "hardware/stm32f40xxx_rcc.h"
-#include "hardware/stm32f40xxx_gpio.h"
 #include "nvic.h"
 #include <arch/board/board.h>
 
+extern void led_indicate_init(void);
+extern void led_indicate_uninit(void);
+extern void led_indicate_set_mode(int mode);
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -152,84 +153,6 @@ bool board_force_revert_check(void)
 }
 
 /****************************************************************************
- * Name: board_indicate
- *
- * Description:
- *   Override the weak function from nxboot. Uses the red LED (PH10) to
- *   signal bootloader state:
- *     startup_msg        → LED on
- *     recovery_revert    → slow blink 3× (200ms)
- *     update_from_update → fast blink 5× (80ms)
- *     found_bootable     → LED off
- *     error states       → fast blink forever (system hangs)
- *     progress_end       → LED off
- *
- ****************************************************************************/
-
-void board_indicate(int msg)
-{
-    static bool configured = false;
-
-    if (!configured)
-    {
-        stm32_configgpio(LED_STATUS);
-        configured = true;
-    }
-
-    switch (msg)
-    {
-        case 0:  /* startup_msg */
-            stm32_gpiowrite(LED_STATUS, true);
-            break;
-
-        case 7:  /* recovery_revert */
-            for (int i = 0; i < 3; i++)
-            {
-                stm32_gpiowrite(LED_STATUS, true);
-                up_mdelay(200);
-                stm32_gpiowrite(LED_STATUS, false);
-                up_mdelay(200);
-            }
-            break;
-
-        case 9:  /* update_from_update */
-            for (int i = 0; i < 5; i++)
-            {
-                stm32_gpiowrite(LED_STATUS, true);
-                up_mdelay(80);
-                stm32_gpiowrite(LED_STATUS, false);
-                up_mdelay(80);
-            }
-            break;
-
-        case 3:  /* found_bootable_image */
-            stm32_gpiowrite(BLING_LED_R, false);
-            break;
-
-        case 4:  /* no_bootable_image */
-        case 5:  /* boardioc_image_boot_fail */
-        case 14: /* recovery_invalid */
-        case 15: /* update_failed */
-            while (1)
-            {
-                stm32_gpiowrite(LED_STATUS, true);
-                up_mdelay(100);
-                stm32_gpiowrite(LED_STATUS, false);
-                up_mdelay(100);
-            }
-            break;
-
-        default:
-            if (msg < 0)
-            {
-                /* progress_end */
-                stm32_gpiowrite(LED_STATUS, false);
-            }
-            break;
-    }
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -261,6 +184,12 @@ int board_boot_image(FAR const char *path, uint32_t hdr_size)
     uint8_t buf[BUF_SIZE] __attribute__((aligned(4)));
     struct nxboot_img_header hdr;
     struct arm_vector_table vt;
+
+    /* Debug mode: skip flash verify when debugger is connected */
+    if (getreg32(NVIC_DHCSR) & NVIC_DHCSR_C_DEBUGEN)
+    {
+        goto into_app;
+    }
 
     /* Open the MTD partition */
 
@@ -331,6 +260,7 @@ int board_boot_image(FAR const char *path, uint32_t hdr_size)
 
     if (need_update) {
         syslog(LOG_INFO, "Firmware changed, erasing and writing...\n");
+        led_indicate_set_mode(LED_MODE_FAST);
 
         ret = lseek(fd, hdr_size, SEEK_SET);
         if (ret < 0) {
@@ -406,11 +336,18 @@ int board_boot_image(FAR const char *path, uint32_t hdr_size)
         syslog(LOG_INFO, "Firmware already up to date\n");
     }
 
+    
+
     close(fd);
+
+
+into_app:
 
     /* Verify vector table — use volatile read to guarantee actual flash
      * access.
      */
+    led_indicate_set_mode(LED_MODE_OFF);
+    led_indicate_uninit();
 
     {
         volatile uint32_t *vt_base = (volatile uint32_t *)APP_FLASH_ADDR;
