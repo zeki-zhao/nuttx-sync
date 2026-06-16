@@ -20,11 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS stm32_boot.c stm32_bringup.c stm32_spi.c)
-
-if(CONFIG_ARCH_LEDS)
-  list(APPEND SRCS stm32_autoleds.c)
-endif()
+set(SRCS stm32_boot.c stm32_bringup.c stm32_spi.c stm32_led_indicate.c)
 
 if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
@@ -40,16 +36,6 @@ endif()
 
 if(CONFIG_STM32_OTGHS)
   list(APPEND SRCS stm32_usb.c)
-endif()
-
-if(CONFIG_STM32F429I_DISCO_ILI9341)
-  list(APPEND SRCS stm32_ili93414ws.c)
-endif()
-
-if(CONFIG_STM32F429I_DISCO_ILI9341_LCDIFACE
-   AND CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE
-   AND CONFIG_STM32_LTDC)
-  list(APPEND SRCS stm32_lcd.c)
 endif()
 
 if(CONFIG_PWM)

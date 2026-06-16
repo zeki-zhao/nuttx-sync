@@ -86,11 +86,11 @@ int stm32_bringup(void)
 {
     int ret;
 
-#if !defined(CONFIG_NXBOOT_BOOTLOADER)
+#ifndef CONFIG_NXBOOT_BOOTLOADER
     printf(COLOR_GREEN "Hello,Zeki\nWelcome to Nuttx of STM32F429IGT6" COLOR_RESET);
 #endif
 
-#if !defined(CONFIG_NXBOOT_BOOTLOADER)
+#ifndef CONFIG_NXBOOT_BOOTLOADER
 
     ret = stm32_sdio_initialize();
 

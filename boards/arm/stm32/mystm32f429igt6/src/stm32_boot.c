@@ -85,7 +85,6 @@ void stm32_boardinitialize(void)
 
 #ifdef CONFIG_STM32_FMC
   stm32_sdram_initialize();
-  syslog(LOG_DEBUG,"in CONFIG_STM32_FMC\n");
 #endif
 
 #ifdef HAVE_CCM_HEAP

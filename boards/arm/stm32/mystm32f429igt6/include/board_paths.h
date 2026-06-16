@@ -28,10 +28,11 @@
  ****************************************************************************/
 
 #define SD_BASE_DIR      "/mnt/sd"
-#define SD_STATE_DIR     "/mnt/sd/state"
 #define SD_LOG_DIR       "/mnt/sd/log"
-#define SD_CONFIG_DIR    "/mnt/sd/config"
 #define SD_FIRMWARE_DIR  "/mnt/sd/firmware"
 #define SD_MUSIC_DIR     "/mnt/sd/music"
+
+#define SPI_FLASH_DEVICE_STATUS_DIR     "/mnt/spiflash/status"
+#define SPI_FLASH_CONFIG_DIR     "/mnt/spiflash/config"
 
 #endif /* __BOARDS_ARM_STM32_MYSTM32F429IGT6_INCLUDE_BOARD_PATHS_H */

@@ -150,7 +150,7 @@ static void myled3_write(bool ledon)
 static int myled_restore_state(void)
 {
     char path[64];
-    snprintf(path, sizeof(path), SD_STATE_DIR "/led_status.bin");
+    snprintf(path, sizeof(path), SPI_FLASH_DEVICE_STATUS_DIR "/led_status.bin");
     int fd = open(path, O_RDONLY);
     if (fd < 0)
         return -1;
