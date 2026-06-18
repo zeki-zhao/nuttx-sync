@@ -1455,6 +1455,7 @@ config ARCH_BOARD_THINGY91
 	bool "Nordic Thingy:91 cellular IoT prototyping platform - nRF9160"
 	depends on ARCH_CHIP_NRF91
 	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This option selects the Thingy:91 cellular IoT prototyping platform - nRF9160 chip
 
@@ -1664,6 +1665,12 @@ config ARCH_BOARD_BEAGLEBONE_BLACK
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This is the port of NuttX to the TI Beaglebone Black board.
+
+config ARCH_BOARD_T3_GEM_O1
+	bool "T3 Gemstone O1"
+	depends on ARCH_CHIP_AM67
+	---help---
+		This is the port of NuttX to the T3 Gemstone O1 board.
 
 config ARCH_BOARD_PIC32MX_STARTERKIT
 	bool "Microchip PIC32MX Ethernet Starter Kit (DM320004)"
@@ -2018,6 +2025,15 @@ config ARCH_BOARD_LINUM_STM32H753BI
 	select ARCH_HAVE_BUTTONS
 	---help---
 		The Linum board is based on the STMicro STM32H753BI MCU.
+
+config ARCH_BOARD_NUCLEO_H753ZI
+	bool "STM32H753 Nucleo H753ZI"
+	depends on ARCH_CHIP_STM32H753ZI
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo H753ZI board based on the STMicro STM32H753ZI MCU.
 
 config ARCH_BOARD_OPENH743I
 	bool "Waveshare OpenH743I board"
@@ -2485,6 +2501,24 @@ config ARCH_BOARD_PINEPHONE
 	---help---
 		This options selects support for NuttX on PINE64 PinePhone based
 		on Allwinner A64 SoC with ARM Cortex-A53.
+
+config ARCH_BOARD_POCKETBEAGLE2
+	bool "BeagleBoard.org PocketBeagle 2"
+	depends on ARCH_CHIP_AM62X
+	select ARCH_HAVE_LEDS
+	---help---
+		BeagleBoard.org PocketBeagle 2 based on TI AM6254 SoC.
+		Quad Cortex-A53, 512 MB DDR4, USB-UART console on UART0.
+		https://docs.beagleboard.org/boards/pocketbeagle-2/
+
+config ARCH_BOARD_BEAGLEPLAY
+	bool "BeagleBoard.org BeaglePlay"
+	depends on ARCH_CHIP_AM62X
+	select ARCH_HAVE_LEDS
+	---help---
+		BeagleBoard.org BeaglePlay based on TI AM6254 SoC.
+		Quad Cortex-A53, 2 GB LPDDR4, GbE, WiFi/BT, mikro-BUS.
+		https://docs.beagleboard.org/boards/beagleplay/
 
 config ARCH_BOARD_PINEPHONE_PRO
 	bool "PINE64 PinePhonePro"
@@ -3162,6 +3196,16 @@ config ARCH_BOARD_NUCLEO_H563ZI
 	---help---
 		STMicro Nucleo-H563ZI board based on the STMicro STM32H563ZI MCU.
 
+config ARCH_BOARD_NUCLEO_N657X0_Q
+	bool "NUCLEO_N657X0_Q"
+	depends on ARCH_CHIP_STM32N657X0
+	select ARCH_HAVE_LEDS
+	---help---
+		STMicro Nucleo-N657X0-Q development board based on the STMicro
+		STM32N657X0 MCU (Cortex-M55).  Boots in DEV mode by loading
+		code directly into SRAM via the on-board ST-Link V3EC, with
+		the NSH console on USART1 (ST-Link Virtual COM Port).
+
 config ARCH_BOARD_STM32L562E_DK
 	bool "STM32L562E-DK"
 	depends on ARCH_CHIP_STM32L562QE
@@ -3786,6 +3830,7 @@ config ARCH_BOARD
 	default "stm32h745i-disco"             if ARCH_BOARD_STM32H745I_DISCO
 	default "stm32h750b-dk"                if ARCH_BOARD_STM32H750B_DK
 	default "linum-stm32h753bi"            if ARCH_BOARD_LINUM_STM32H753BI
+	default "nucleo-h753zi"                if ARCH_BOARD_NUCLEO_H753ZI
 	default "openh743i"                    if ARCH_BOARD_OPENH743I
 	default "portenta-h7"                  if ARCH_BOARD_PORTENTA_H7
 	default "nucleo-l073rz"                if ARCH_BOARD_NUCLEO_L073RZ
@@ -3870,6 +3915,8 @@ config ARCH_BOARD
 	default "qemu-armv8a"                  if ARCH_BOARD_QEMU_ARMV8A
 	default "pinephone"                    if ARCH_BOARD_PINEPHONE
 	default "pinephonepro"                 if ARCH_BOARD_PINEPHONE_PRO
+	default "pocketbeagle2"                if ARCH_BOARD_POCKETBEAGLE2
+	default "beagleplay"                   if ARCH_BOARD_BEAGLEPLAY
 	default "nanopi_m4"                    if ARCH_BOARD_NANOPI_M4
 	default "fvp-armv8r"                   if ARCH_BOARD_FVP_ARMV8R
 	default "fvp-armv8r-aarch32"           if ARCH_BOARD_FVP_ARMV8R_AARCH32
@@ -3936,6 +3983,7 @@ config ARCH_BOARD
 	default "b-l475e-iot01a"               if ARCH_BOARD_B_L475E_IOT01A
 	default "b-u585i-iot02a"               if ARCH_BOARD_B_U585I_IOT02A
 	default "nucleo-h563zi"                if ARCH_BOARD_NUCLEO_H563ZI
+	default "nucleo-n657x0-q"              if ARCH_BOARD_NUCLEO_N657X0_Q
 	default "nucleo-u5a5zj-q"              if ARCH_BOARD_NUCLEO_U5A5ZJ_Q
 	default "stm32l476vg-disco"            if ARCH_BOARD_STM32L476VG_DISCO
 	default "stm32l476-mdk"                if ARCH_BOARD_STM32L476_MDK
@@ -3945,6 +3993,7 @@ config ARCH_BOARD
 	default "stm32vldiscovery"             if ARCH_BOARD_STM32VL_DISCOVERY
 	default "mikroe-stm32f4"               if ARCH_BOARD_MIKROE_STM32F4
 	default "sure-pic32mx"                 if ARCH_BOARD_SUREPIC32MX
+	default "t3-gem-o1"                    if ARCH_BOARD_T3_GEM_O1
 	default "teensy-2.0"                   if ARCH_BOARD_TEENSY_20
 	default "teensy-3.x"                   if ARCH_BOARD_TEENSY_3X
 	default "teensy-4.x"                   if ARCH_BOARD_TEENSY_4X
@@ -4036,6 +4085,9 @@ endif
 if ARCH_BOARD_BEAGLEBONE_BLACK
 source "boards/arm/am335x/beaglebone-black/Kconfig"
 endif
+if ARCH_BOARD_T3_GEM_O1
+source "boards/arm/am67/t3-gem-o1/Kconfig"
+endif
 if ARCH_BOARD_C5471EVM
 source "boards/arm/c5471/c5471evm/Kconfig"
 endif
@@ -4104,6 +4156,12 @@ source "boards/arm64/a64/pinephone/Kconfig"
 endif
 if ARCH_BOARD_PINEPHONE_PRO
 source "boards/arm64/rk3399/pinephonepro/Kconfig"
+endif
+if ARCH_BOARD_POCKETBEAGLE2
+source "boards/arm64/am62x/pocketbeagle2/Kconfig"
+endif
+if ARCH_BOARD_BEAGLEPLAY
+source "boards/arm64/am62x/beagleplay/Kconfig"
 endif
 if ARCH_BOARD_FVP_ARMV8R
 source "boards/arm64/fvp-v8r/fvp-armv8r/Kconfig"
@@ -4540,6 +4598,9 @@ endif
 if ARCH_BOARD_LINUM_STM32H753BI
 source "boards/arm/stm32h7/linum-stm32h753bi/Kconfig"
 endif
+if ARCH_BOARD_NUCLEO_H753ZI
+source "boards/arm/stm32h7/nucleo-h753zi/Kconfig"
+endif
 if ARCH_BOARD_OPENH743I
 source "boards/arm/stm32h7/openh743i/Kconfig"
 endif
@@ -4587,6 +4648,9 @@ source "boards/arm/stm32l4/stm32l4r9ai-disco/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_H563ZI
 source "boards/arm/stm32h5/nucleo-h563zi/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_N657X0_Q
+source "boards/arm/stm32n6/nucleo-n657x0-q/Kconfig"
 endif
 if ARCH_BOARD_STM32L562E_DK
 source "boards/arm/stm32l5/stm32l562e-dk/Kconfig"

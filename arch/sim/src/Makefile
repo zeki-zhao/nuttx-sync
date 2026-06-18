@@ -106,6 +106,8 @@ else
 endif
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
+vpath nuttx$(EXEEXT) $(TOPDIR)
+
 CFLAGS += -fvisibility=default
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ \
@@ -139,24 +141,15 @@ sim_hostfs.c: hostfs.h
 
 STDLIBS += -lpthread
 ifeq ($(CONFIG_HOST_MACOS),y)
-ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
-  # Note: sim_macho_init.c is not in CSRCS because it's picky about
-  # the place in the object list for linking. Namely, its constructor
-  # should be the first one in the executable.
-  HEADSRC = sim_macho_init.c
-
-  # sim_macho_init.c is not compatible with chained fixups.
-  # cf. https://github.com/apache/nuttx/issues/15208
-  ifeq ($(shell $(LD) -ld_classic -no_fixup_chains 2>&1 | grep "unknown option"),)
+  ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
     LDLINKFLAGS += -ld_classic -no_fixup_chains
     LDFLAGS += -Wl,-ld_classic,-no_fixup_chains
   endif
-endif
 
-# Keep the simulator executable from exporting NuttX symbols. Otherwise dyld
-# may resolve host libc references against NuttX's internal libc implementation
-# during process initialization, which can crash before main() runs.
-LDFLAGS += -Wl,-exported_symbol,__mh_execute_header
+  # Keep the simulator executable from exporting NuttX symbols. Otherwise dyld
+  # may resolve host libc references against NuttX's internal libc implementation
+  # during process initialization, which can crash before main() runs.
+  LDFLAGS += -Wl,-exported_symbol,__mh_execute_header
 else
   STDLIBS += -lrt
 endif
@@ -369,6 +362,7 @@ $(foreach lib,$(notdir $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))), 
 
 EXTRA_LIBS := $(filter-out $(NAMEFULL_LIBS) $(NAMESPEC_LIBS),$(EXTRA_LIBS))
 EXTRA_LIBS += $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))
+EXTRA_LIB_DEPS := $(wildcard $(filter-out -%,$(EXTRA_LIBS)))
 
 # Override in Make.defs if linker is not 'ld'
 
@@ -401,7 +395,7 @@ RELLIBS += -lboard
 
 all: sim_head$(OBJEXT) libarch$(LIBEXT)
 
-.PHONY: export_startup clean distclean cleanrel depend board/libboard$(LIBEXT)
+.PHONY: export_startup clean distclean cleanrel depend FORCE
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -428,8 +422,10 @@ libarch$(LIBEXT): $(NUTTXOBJS)
 # the simulation.  However, this is a good place to keep parts of the simulation
 # that are not hardware-related.
 
-board/libboard$(LIBEXT):
+board/libboard$(LIBEXT): FORCE
 	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+
+FORCE:
 
 # A partially linked object containing only NuttX code (no interface to host OS)
 # Change the names of most symbols that conflict with libc symbols.
@@ -485,7 +481,7 @@ endef
 # stuff doesn't work there as we expect.
 # Note: _stext stuff is for CONFIG_CXX_INITIALIZE_SINIT, which in not
 # necessary for macOS.
-nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(HEADOBJ) $(LINKOBJS) $(HOSTOBJS) nuttx-names.dat
+nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(HEADOBJ) $(LINKOBJS) $(HOSTOBJS) nuttx-names.dat $(EXTRA_LIB_DEPS)
 	$(Q) echo "LD:  nuttx$(EXEEXT)"
 	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) $(EXTRALINKCMDS) \
 	     -o nuttx.rel $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
@@ -517,6 +513,9 @@ else
 	$(Q) $(call LINK_ALLSYMS_KASAN)
 	$(Q) $(call LINK_ALLSYMS_KASAN)
 	$(Q) $(call LINK_ALLSYMS_KASAN)
+endif
+ifeq ($(CONFIG_HOST_MACOS)$(CONFIG_HAVE_CXXINITIALIZE),yy)
+	$(Q) python3 $(ARCH_SRCDIR)/patch_macho_initsection.py $(TOPDIR)/$@
 endif
 	$(Q) $(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \

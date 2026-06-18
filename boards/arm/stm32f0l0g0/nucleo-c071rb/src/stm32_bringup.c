@@ -38,12 +38,16 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_IWDG
+#ifdef CONFIG_STM32_IWDG
 #  include <stm32_wdg.h>
 #endif
 
 #ifdef CONFIG_SENSORS_QENCODER
 #  include "board_qencoder.h"
+#endif
+
+#ifdef CONFIG_PWM
+#  include "board_pwm.h"
 #endif
 
 #include <arch/board/board.h>
@@ -73,7 +77,7 @@ int stm32_bringup(void)
 {
   int ret;
 
-#ifdef CONFIG_STM32F0L0G0_IWDG
+#ifdef CONFIG_STM32_IWDG
   /* Initialize the watchdog timer */
 
   stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
@@ -107,6 +111,16 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup failed: %d\n", ret);
     }
 #endif
 

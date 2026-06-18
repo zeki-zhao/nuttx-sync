@@ -162,7 +162,9 @@ ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
 		CHIP_CSRCS += esp_wifi_api.c
 		CHIP_CSRCS += esp_wlan_netdev.c
 	endif
-	CHIP_CSRCS += esp_wifi_utils.c
+	ifneq ($(CONFIG_ARCH_CHIP_ESP32H2),y)
+		CHIP_CSRCS += esp_wifi_utils.c
+	endif
 endif
 
 ifeq ($(CONFIG_ESP_MCPWM),y)
@@ -181,6 +183,10 @@ ifeq ($(CONFIG_ESPRESSIF_ADC),y)
 CHIP_CSRCS += esp_adc.c
 endif
 
+ifeq ($(CONFIG_COMP),y)
+	CHIP_CSRCS += esp_ana_cmpr.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_SHA_ACCELERATOR),y)
 	CHIP_CSRCS += esp_sha.c
 endif
@@ -193,8 +199,16 @@ ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
 	CHIP_CSRCS += esp_crypto.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_TOUCH),y)
+	CHIP_CSRCS += esp_touch.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_USE_LP_CORE),y)
 	CHIP_CSRCS += esp_ulp.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_LP_MAILBOX),y)
+	CHIP_CSRCS += esp_lp_mailbox.c
 endif
 
 ifeq ($(CONFIG_PM),y)
@@ -221,7 +235,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 627f38f94c1084b6b2d90ce09c0ce5517e8eaed7
+	ESP_HAL_3RDPARTY_VERSION = 0eb59f7e02a4735f2b9a78797e691b66740fcadb
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -271,7 +285,7 @@ endif
 ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
 ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: initializing submodules..."
-	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32c3_family components/esp_coex/lib
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32c3_family components/bt/controller/lib_esp32c6/esp32c6-bt-lib components/bt/controller/lib_esp32h2/esp32h2-bt-lib components/esp_coex/lib
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --quiet --hard
 endif
 	$(Q) echo "Applying patches..."

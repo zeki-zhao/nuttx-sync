@@ -131,6 +131,12 @@ where:
 * ``ESPTOOL_BINDIR=./`` is the path of the externally-built 2nd stage bootloader and the partition table (if applicable): when built using the ``make bootloader``, these files are placed into ``nuttx`` folder.
 * ``ESPTOOL_BAUD`` is able to change the flash baud rate if desired.
 
+To create and flash with UF2 (USB Flashing Format) binary, ``UF2=1`` option needs to be set during build phase
+(e.g ``make UF2=1 -j8``). This flag will create UF2 format file addition to binary. This output can be used to
+flash the device with `ESP USB Bridge <https://github.com/espressif/esp-usb-bridge>`__.
+To flash using ESP USB Bridge, either drag and drop the generated UF2 file onto the flasher's
+mass storage device, or use the ``UF2=1`` flag during flashing (e.g. ``make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=./ UF2=1``)
+
 Flashing NSH Example
 --------------------
 
@@ -410,7 +416,7 @@ Peripheral      Support NOTES
 ==============  ======= ====================
 ADC              Yes     Oneshot and internal temperature sensor
 AES              Yes
-Bluetooth        No
+Bluetooth        Yes
 CAN/TWAI         Yes
 DMA              Yes
 DS               No
@@ -437,6 +443,7 @@ USB Serial       Yes
 Watchdog         Yes
 Wifi             No
 XTS              No
+Analog Comp      Yes
 ==============  ======= ====================
 
 Analog-to-digital converter (ADC)

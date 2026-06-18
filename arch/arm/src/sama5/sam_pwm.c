@@ -62,12 +62,6 @@
 
 #define PWM_SINGLE 1
 
-/* Pulse counting is not supported by this driver */
-
-#ifdef CONFIG_PWM_PULSECOUNT
-#  warning CONFIG_PWM_PULSECOUNT no supported by this driver.
-#endif
-
 /* Are we using CLKA? CLKB?  If so, at what frequency? */
 
 #if defined(CONFIG_SAMA5_PWM_CLKA) && !defined(CONFIG_SAMA5_PWM_CLKA_FREQUENCY)
@@ -1022,7 +1016,7 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
    * to the CTDY (vs. the CTDYUPD) register.
    */
 
-  regval = b16toi(info->duty * cprd + b16HALF);
+  regval = b16toi(info->channels[0].duty * cprd + b16HALF);
   if (regval > cprd)
     {
       /* Rounding up could cause the duty value to exceed CPRD (?) */

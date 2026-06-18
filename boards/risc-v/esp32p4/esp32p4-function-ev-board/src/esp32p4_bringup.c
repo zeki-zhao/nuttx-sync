@@ -121,10 +121,17 @@
 #  include "espressif/esp_sdm.h"
 #endif
 
+#ifdef CONFIG_COMP
+#  include "espressif/esp_ana_cmpr.h"
+#endif
+
 #ifdef CONFIG_ESPRESSIF_USE_LP_CORE
 #  include "espressif/esp_ulp.h"
 #  ifdef CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
 #    include "ulp/ulp_code.h"
+#  endif
+#  ifdef CONFIG_ESPRESSIF_LP_MAILBOX
+#    include "espressif/esp_lp_mailbox.h"
 #  endif
 #endif
 
@@ -258,18 +265,33 @@ int esp_bringup(void)
 #endif
 
 #ifdef CONFIG_ESPRESSIF_SPI
-#  ifdef CONFIG_ESPRESSIF_SPI_SLAVE
+#  if defined(CONFIG_ESPRESSIF_SPI2_SLAVE) && defined(CONFIG_ESPRESSIF_SPI2)
   ret = board_spislavedev_initialize(ESPRESSIF_SPI2);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize SPI%d Slave driver: %d\n",
              ESPRESSIF_SPI2, ret);
     }
-#  else
+#  elif defined(CONFIG_ESPRESSIF_SPI2)
   ret = board_spidev_initialize(ESPRESSIF_SPI2);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to init spidev 2: %d\n", ret);
+    }
+#  endif
+
+#  if defined(CONFIG_ESPRESSIF_SPI3_SLAVE) && defined(CONFIG_ESPRESSIF_SPI3)
+  ret = board_spislavedev_initialize(ESPRESSIF_SPI3);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI%d Slave driver: %d\n",
+             ESPRESSIF_SPI3, ret);
+    }
+#  elif defined(CONFIG_ESPRESSIF_SPI3)
+  ret = board_spidev_initialize(ESPRESSIF_SPI3);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init spidev 3: %d\n", ret);
     }
 #  endif
 
@@ -280,6 +302,14 @@ int esp_bringup(void)
       syslog(LOG_ERR, "ERROR: Failed to init spidev 3: %d\n", ret);
     }
 #  endif /* CONFIG_ESPRESSIF_SPI_BITBANG */
+
+#  ifdef CONFIG_ESPRESSIF_LPSPI0
+  ret = board_spidev_initialize(ESPRESSIF_LPSPI0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init lpspi: %d\n", ret);
+    }
+#  endif
 #endif /* CONFIG_ESPRESSIF_SPI */
 
 #ifdef CONFIG_ESPRESSIF_SPIFLASH
@@ -447,6 +477,24 @@ int esp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESPRESSIF_ANA_COMPR0
+  ret = esp_cmprinitialize(ESPRESSIF_COMP0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_cmprinitialize(%d) failed: %d\n",
+             ESPRESSIF_COMP0, ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_ANA_COMPR1
+  ret = esp_cmprinitialize(ESPRESSIF_COMP1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_cmprinitialize(%d) failed: %d\n",
+             ESPRESSIF_COMP1, ret);
+    }
+#endif
+
 #ifdef CONFIG_ESPRESSIF_EMAC
   ret = board_emac_init();
   if (ret < 0)
@@ -456,6 +504,9 @@ int esp_bringup(void)
 #endif
 
 #ifdef CONFIG_ESPRESSIF_USE_LP_CORE
+#  ifdef CONFIG_ESPRESSIF_LP_MAILBOX
+  esp_lp_mailbox_init();
+#  endif
 
   /* ULP initialization should be the handled later than
    * peripherals to use supported peripherals properly on ULP core

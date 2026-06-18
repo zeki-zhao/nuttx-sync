@@ -264,8 +264,8 @@
  * CH1     | 1(A4) 2(A8)
  */
 
-#if defined(CONFIG_STM32L4_LPTIM2_CLK_APB1)
-#  define STM32L4_LPTIM2_FREQUENCY STM32L4_APB1_LPTIM2_CLKIN
+#if defined(CONFIG_STM32_LPTIM2_CLK_APB1)
+#  define STM32_LPTIM2_FREQUENCY STM32_APB1_LPTIM2_CLKIN
 #endif
 
 #if 1
@@ -294,7 +294,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_board_initialize
+ * Name: stm32_board_initialize
  *
  * Description:
  *   All STM32L4 architectures must provide the following entry point.
@@ -304,7 +304,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void stm32l4_board_initialize(void);
+void stm32_board_initialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

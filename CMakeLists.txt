@@ -42,6 +42,11 @@ if(POLICY CMP0115)
   cmake_policy(SET CMP0115 NEW)
 endif()
 
+if(POLICY CMP0116)
+  # transform DEPFILE paths correctly for Ninja custom commands
+  cmake_policy(SET CMP0116 NEW)
+endif()
+
 # Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24:
 
 if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
@@ -355,6 +360,10 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
 
   set(ENV{KCONFIG_CONFIG} ${CMAKE_BINARY_DIR}/.config.compressed)
 
+  # Define host before the first olddefconfig so host-dependent defaults, such
+  # as the sim toolchain choice on macOS, resolve the same way as configure.sh.
+  nuttx_sethost(CONFIG_FILE ${CMAKE_BINARY_DIR}/.config.compressed)
+
   # Do olddefconfig step to expand the abbreviated defconfig into normal config
   nuttx_olddefconfig()
 
@@ -378,9 +387,6 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
   # store original expanded .config
   configure_file(${CMAKE_BINARY_DIR}/.config ${CMAKE_BINARY_DIR}/.config.orig
                  COPYONLY)
-
-  # We define host
-  nuttx_sethost()
 
   set(NUTTX_DEFCONFIG_SAVED
       ${NUTTX_DEFCONFIG}
@@ -791,10 +797,9 @@ else()
       OUTPUT nuttx.rel
       COMMAND
         ${CMAKE_C_COMPILER} ARGS -r $<$<BOOL:${CONFIG_SIM_M32}>:-m32>
-        $<$<BOOL:${CONFIG_HOST_LINUX}>:-Wl,-z,noexecstack>
-        $<TARGET_OBJECTS:sim_head> $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--start-group>
-        ${nuttx_libs_paths} $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group> -o
-        nuttx.rel
+        $<$<BOOL:${LINUX}>:-Wl,-z,noexecstack> $<TARGET_OBJECTS:sim_head>
+        $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--start-group> ${nuttx_libs_paths}
+        $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group> -o nuttx.rel
       COMMAND ${CMAKE_OBJCOPY} --redefine-syms=nuttx-names.dat nuttx.rel
       DEPENDS ${nuttx_libs} sim_head sim_redefine_symbols
       COMMAND_EXPAND_LISTS)

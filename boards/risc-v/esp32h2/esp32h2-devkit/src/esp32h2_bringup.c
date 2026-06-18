@@ -125,12 +125,20 @@
 #  include "espressif/esp_aes.h"
 #endif
 
+#ifdef CONFIG_COMP
+#  include "espressif/esp_ana_cmpr.h"
+#endif
+
 #ifdef CONFIG_PM
 #  include "espressif/esp_pm.h"
 #endif
 
 #ifdef CONFIG_MMCSD_SPI
 #  include "esp_board_mmcsd.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_BLE
+#  include "esp_ble.h"
 #endif
 
 #include "esp32h2-devkit.h"
@@ -448,6 +456,15 @@ int esp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESPRESSIF_BLE
+  ret = esp_ble_initialize();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize BLE\n");
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_PM
   /* Configure PM */
 
@@ -471,6 +488,15 @@ int esp_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_adc_init failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_ANA_COMPR0
+  ret = esp_cmprinitialize(ESPRESSIF_COMP0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_cmprinitialize(%d) failed: %d\n",
+             ESPRESSIF_COMP0, ret);
     }
 #endif
 

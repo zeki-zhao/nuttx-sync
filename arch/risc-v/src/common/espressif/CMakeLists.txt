@@ -157,7 +157,9 @@ if(CONFIG_ESPRESSIF_WIRELESS)
     list(APPEND SRCS esp_wifi_api.c)
     list(APPEND SRCS esp_wlan_netdev.c)
   endif()
-  list(APPEND SRCS esp_wifi_utils.c)
+  if(NOT CONFIG_ARCH_CHIP_ESP32H2)
+    list(APPEND SRCS esp_wifi_utils.c)
+  endif()
 endif()
 
 if(CONFIG_ESP_MCPWM)
@@ -188,6 +190,14 @@ if(CONFIG_CRYPTO_CRYPTODEV_HARDWARE)
   list(APPEND SRCS esp_crypto.c)
 endif()
 
+if(CONFIG_ESPRESSIF_TOUCH)
+  list(APPEND SRCS esp_touch.c)
+endif()
+
+if(CONFIG_COMP)
+  list(APPEND SRCS esp_ana_cmpr.c)
+endif()
+
 if(CONFIG_ESPRESSIF_USE_LP_CORE)
   message(
     WARNING
@@ -213,7 +223,7 @@ if(DEFINED ENV{ESP_HAL_3RDPARTY_VERSION})
       CACHE STRING "ESP HAL 3rdparty version")
 else()
   set(ESP_HAL_3RDPARTY_VERSION
-      627f38f94c1084b6b2d90ce09c0ce5517e8eaed7
+      0eb59f7e02a4735f2b9a78797e691b66740fcadb
       CACHE STRING "ESP HAL 3rdparty version")
 endif()
 
@@ -313,6 +323,8 @@ if(NOT IS_DIRECTORY "${ESP_HAL_3RDPARTY_REPO}")
       COMMAND
         git submodule --quiet update --init --depth=1 components/esp_phy/lib
         components/esp_wifi/lib components/bt/controller/lib_esp32c3_family
+        components/bt/controller/lib_esp32c6/esp32c6-bt-lib
+        components/bt/controller/lib_esp32h2/esp32h2-bt-lib
         components/esp_coex/lib
       WORKING_DIRECTORY ${ESP_HAL_3RDPARTY_REPO}
       RESULT_VARIABLE GIT_SUBMODULE_RESULT)
@@ -345,6 +357,7 @@ add_custom_command(
 add_custom_target(copy_esp3rdparty_headers DEPENDS ${_gpio_sig_map} ${_irq})
 
 add_dependencies(arch copy_esp3rdparty_headers)
+add_dependencies(nuttx_context copy_esp3rdparty_headers)
 
 # ##############################################################################
 # Compiler and Linker Flags
