@@ -70,7 +70,6 @@
 
 int up_fbinitialize(int display)
 {
-  syslog(LOG_WARNING,"in up_fbinitialize\n");
   static bool initialized = false;
   int ret = OK;
 

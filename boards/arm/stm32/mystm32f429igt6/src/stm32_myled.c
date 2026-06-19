@@ -197,7 +197,6 @@ int board_myled_initialize(void)
         syslog(LOG_ERR, "restore led state failed\n");    
     }
 
-    syslog(LOG_INFO, "RGB led initialize\n");
     return 0;
 }
 
