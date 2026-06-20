@@ -365,7 +365,7 @@ static void stm32can_vputreg(uint32_t addr, uint32_t value)
 {
   /* Show the register value being written */
 
-  caninfo("%08" PRIx32 "->%08" PRIx32 "\n", addr, val);
+  caninfo("%08" PRIx32 "->%08" PRIx32 "\n", addr, value);
 
   /* Write the value */
 
@@ -971,7 +971,8 @@ static int stm32can_ioctl(struct can_dev_s *dev, int cmd,
           uint32_t regval;
 
           DEBUGASSERT(bt != NULL);
-          DEBUGASSERT(bt->bt_baud < STM32_PCLK1_FREQUENCY);
+          DEBUGASSERT(bt->bt_baud > 0 &&
+            bt->bt_baud < STM32_PCLK1_FREQUENCY);
           DEBUGASSERT(bt->bt_sjw > 0 && bt->bt_sjw <= 4);
           DEBUGASSERT(bt->bt_tseg1 > 0 && bt->bt_tseg1 <= 16);
           DEBUGASSERT(bt->bt_tseg2 > 0 && bt->bt_tseg2 <=  8);

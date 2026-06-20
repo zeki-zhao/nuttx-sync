@@ -147,6 +147,10 @@
 #  include "esp_board_mmcsd.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_BLE
+#  include "esp_ble.h"
+#endif
+
 #ifdef CONFIG_ESPRESSIF_USE_LP_CORE
 #  include "espressif/esp_ulp.h"
 #  ifdef CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
@@ -172,9 +176,6 @@
  *
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize().
  *
  * Input Parameters:
  *   None.
@@ -305,6 +306,15 @@ int esp_bringup(void)
   if (ret < 0)
     {
       _err("Failed to initialize the RTC driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_BLE
+  ret = esp_ble_initialize();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize BLE\n");
+      return ret;
     }
 #endif
 
@@ -509,7 +519,7 @@ int esp_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
+#ifdef CONFIG_PM
   /* Configure PM */
 
   ret = esp_pmconfigure();
@@ -543,11 +553,17 @@ int esp_bringup(void)
    * peripherals to use supported peripherals properly on ULP core
    */
 
-  esp_ulp_init();
-
+  ret = esp_ulp_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_ulp_init failed: %d\n", ret);
+    }
+  else
+    {
 #  ifdef CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
-  esp_ulp_load_bin((char *)esp_ulp_bin, esp_ulp_bin_len);
+      esp_ulp_load_bin((char *)esp_ulp_bin, esp_ulp_bin_len);
 #  endif
+    }
 #endif
 
 #ifdef CONFIG_NET_OA_TC6

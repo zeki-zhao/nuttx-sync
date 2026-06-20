@@ -28,24 +28,20 @@
 #include <stdio.h>
 #include <debug.h>
 #include <errno.h>
-
+#include <sys/stat.h>
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/spi/spi.h>
 
 #include "mystm32f429igt6.h"
 
-#ifdef CONFIG_STM32_SPI4
-#  include <nuttx/mmcsd.h>
+#ifdef CONFIG_FS_FAT
+#  include <arch/board/board_paths.h>
 #endif
-
 
 #ifdef CONFIG_VIDEO_FB
 #  include <nuttx/video/fb.h>
-#endif
-
-#ifdef CONFIG_USBMONITOR
-#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #ifdef CONFIG_STM32_OTGHS
@@ -55,6 +51,17 @@
 #ifdef CONFIG_INPUT_BUTTONS_LOWER
 #  include <nuttx/input/buttons.h>
 #endif
+
+#ifdef CONFIG_MTD
+# include <nuttx/mtd/mtd.h>
+# include <fcntl.h>
+#endif
+
+extern void led_indicate_init(void);
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 
 /****************************************************************************
@@ -79,7 +86,138 @@ int stm32_bringup(void)
 {
     int ret;
 
+#ifndef CONFIG_NXBOOT_BOOTLOADER
     printf(COLOR_GREEN "Hello,Zeki\nWelcome to Nuttx of STM32F429IGT6" COLOR_RESET);
+#endif
+
+#ifndef CONFIG_NXBOOT_BOOTLOADER
+
+    ret = stm32_sdio_initialize();
+
+    if (ret != OK){
+        syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
+        ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+        return ret;
+    }else{
+#if defined(CONFIG_FS_FAT) && !defined(CONFIG_DISABLE_MOUNTPOINT)
+        /* Mount the SD card to /mnt/sd if FATFS is enabled */
+        char devpath[32];
+        snprintf(devpath, sizeof(devpath), "/dev/mmcsd%d", SDIO_MINOR);
+        mkdir("/mnt/sd", 0777);
+        ret = nx_mount(devpath, "/mnt/sd", "vfat", 0, NULL);
+        if (ret < 0){
+            syslog(LOG_ERR,"ERROR: Failed to mount SD card to /mnt/sd: %d\n", ret);
+        }else{
+            /* Ensure required data directories exist on SD card */
+            mkdir(SD_LOG_DIR, 0777);
+            mkdir(SD_FIRMWARE_DIR, 0777);
+        }
+#else
+        syslog(LOG_WARN, "WARNING: SDIO device registered but FATFS not enabled, "
+                     "SD card not mounted\n");
+#endif
+    }
+#endif
+
+
+/* Configure SPI-based devices */
+#if defined(CONFIG_STM32_SPI1)
+  struct spi_dev_s *spi;
+  /* Get the SPI port */
+ #endif
+
+#if defined(CONFIG_MTD)
+    struct mtd_dev_s *mtd;
+    struct mtd_geometry_s geo;
+#endif
+
+#if defined(CONFIG_STM32_SPI1)
+    spi = stm32_spi1initialize();
+    if (!spi){
+        syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 1\n");
+        return -ENODEV;
+    }
+
+#if defined(CONFIG_MTD) && defined(CONFIG_MTD_W25)
+    /* Quick SPI1 communication test: read JEDEC ID from W25Q directly */
+    mtd = w25_initialize(spi);
+    if (!mtd){
+        syslog(LOG_ERR, "ERROR: SPI1 communication test FAILED - "
+                        "w25_initialize returned NULL (no JEDEC ID match)\n");
+    }else{
+        /* Read geometry and print flash info */
+
+        ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY,
+                        (unsigned long)((uintptr_t)&geo));
+        if (ret < 0){
+            syslog(LOG_ERR, "ERROR: Failed to get W25 geometry: %d\n", ret);
+        }
+
+        /* Parse flash partitions using mtd_partition() */
+        FAR struct mtd_dev_s *primary = mtd_partition(mtd,
+                    PRIMARY_OFFSET / geo.blocksize,
+                    PRIMARY_SIZE   / geo.blocksize);
+
+        FAR struct mtd_dev_s *secondary = mtd_partition(mtd,
+                    SECONDARY_OFFSET / geo.blocksize,
+                    SECONDARY_SIZE   / geo.blocksize);
+
+        FAR struct mtd_dev_s *recovery = mtd_partition(mtd,
+                    RECOVERY_OFFSET / geo.blocksize,
+                    RECOVERY_SIZE   / geo.blocksize);
+
+        FAR struct mtd_dev_s *config = mtd_partition(mtd,
+                    CONFIG_OFFSET / geo.blocksize,
+                    CONFIG_SIZE   / geo.blocksize);
+
+#if defined(CONFIG_MTD_PARTITION_NAMES)
+        mtd_setpartitionname(primary, "primary");
+        mtd_setpartitionname(secondary, "secondary");
+        mtd_setpartitionname(recovery, "recovery");
+        mtd_setpartitionname(config, "config");
+#endif
+
+#if defined(CONFIG_BOOT_NXBOOT)
+        /* Register OTA partitions for nxboot */
+        ret = register_mtddriver(CONFIG_NXBOOT_PRIMARY_SLOT_PATH, primary, 0755, NULL);
+        if (ret < 0)
+            syslog(LOG_ERR, "ERROR: Failed to register %s: %d\n",
+                    CONFIG_NXBOOT_PRIMARY_SLOT_PATH, ret);
+
+        ret = register_mtddriver(CONFIG_NXBOOT_SECONDARY_SLOT_PATH, secondary, 0755, NULL);
+        if (ret < 0)
+            syslog(LOG_ERR, "ERROR: Failed to register %s: %d\n",
+                    CONFIG_NXBOOT_SECONDARY_SLOT_PATH, ret);
+
+        ret = register_mtddriver(CONFIG_NXBOOT_TERTIARY_SLOT_PATH, recovery, 0755, NULL);
+        if (ret < 0)
+            syslog(LOG_ERR, "ERROR: Failed to register %s: %d\n",
+                    CONFIG_NXBOOT_TERTIARY_SLOT_PATH, ret);
+                    
+#endif /* CONFIG_BOOT_NXBOOT */
+        
+#if defined(CONFIG_FS_LITTLEFS)
+        FAR struct mtd_dev_s *spiflash = mtd_partition(mtd,
+                        ASSETS_OFFSET / geo.blocksize,
+                        ASSETS_SIZE   / geo.blocksize);
+
+        ret = register_mtddriver("/dev/spiflash", spiflash, 0755, NULL);
+        if (ret < 0){
+            syslog(LOG_ERR, "ERROR: Failed to register /dev/spiflash: %d\n", ret);
+        }else{
+            mkdir("/mnt/spiflash", 0777);
+            ret = nx_mount("/dev/spiflash", "/mnt/spiflash", "littlefs", 0,
+                            "autoformat");
+            if (ret < 0){
+                syslog(LOG_ERR, "ERROR: Failed to mount littlefs: %d\n", ret);
+            }
+        }
+#endif /* CONFIG_FS_LITTLEFS */
+    }
+
+#endif /* CONFIG_MTD */
+#endif /* CONFIG_STM32_SPI1 */
+
 
 #if defined (CONFIG_MY_LED)
     board_myled_initialize();
@@ -89,20 +227,13 @@ int stm32_bringup(void)
     board_touch_initialize();
 #endif
 
-#if defined(CONFIG_STM32_SPI4)
-  struct spi_dev_s *spi;
+#if defined (CONFIG_MY_BUZZER)
+    board_buzzer_init();
 #endif
-#if defined(CONFIG_MTD)
-  struct mtd_dev_s *mtd;
-  struct mtd_geometry_s geo;
-#endif
-#if defined(CONFIG_MTD_PARTITION_NAMES)
-  const char *partname = CONFIG_STM32F429I_DISCO_FLASH_PART_NAMES;
-#endif
+
 
 #ifdef HAVE_PROC
   /* mount the proc filesystem */
-
     ret = nx_mount(NULL, CONFIG_NSH_PROC_MOUNTPOINT, "procfs", 0, NULL);
     if (ret < 0)
     {
@@ -112,312 +243,63 @@ int stm32_bringup(void)
     }
 #endif
 
-  /* Configure SPI-based devices */
 
-#ifdef CONFIG_STM32_SPI4
-  /* Get the SPI port */
 
-  syslog(LOG_INFO, "Initializing SPI port 4\n");
-
-  spi = stm32_spibus_initialize(4);
-  if (!spi)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 4\n");
-      return -ENODEV;
-    }
-
-  syslog(LOG_INFO, "Successfully initialized SPI port 4\n");
-
-  /* Now bind the SPI interface to the SST25F064 SPI FLASH driver.  This
-   * is a FLASH device that has been added external to the board (i.e.
-   * the board does not ship from STM with any on-board FLASH.
-   */
-
-#if defined(CONFIG_MTD) && defined(CONFIG_MTD_SST25XX)
-  syslog(LOG_INFO, "Bind SPI to the SPI flash driver\n");
-
-  mtd = sst25xx_initialize(spi);
-  if (!mtd)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to bind SPI port 4 to the SPI FLASH"
-                      " driver\n");
-    }
-  else
-    {
-      syslog(LOG_INFO, "Successfully bound SPI port 4 to the SPI FLASH"
-                       " driver\n");
-
-      /* Get the geometry of the FLASH device */
-
-      ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY,
-                       (unsigned long)((uintptr_t)&geo));
-      if (ret < 0)
-        {
-          ferr("ERROR: mtd->ioctl failed: %d\n", ret);
-          return ret;
-        }
-
-#ifdef CONFIG_STM32F429I_DISCO_FLASH_PART
-        {
-          int partno;
-          int partsize;
-          int partoffset;
-          int partszbytes;
-          int erasesize;
-          const char *partstring = CONFIG_STM32F429I_DISCO_FLASH_PART_LIST;
-          const char *ptr;
-          struct mtd_dev_s *mtd_part;
-          char  partref[16];
-
-          /* Now create a partition on the FLASH device */
-
-          partno = 0;
-          ptr = partstring;
-          partoffset = 0;
-
-          /* Get the Flash erase size */
-
-          erasesize = geo.erasesize;
-
-          while (*ptr != '\0')
-            {
-              /* Get the partition size */
-
-              partsize = atoi(ptr);
-              partszbytes = (partsize << 10); /* partsize is defined in KB */
-
-              /* Check if partition size is bigger then erase block */
-
-              if (partszbytes < erasesize)
-                {
-                  ferr("ERROR: Partition size is lesser than erasesize!\n");
-                  return -1;
-                }
-
-              /* Check if partition size is multiple of erase block */
-
-              if ((partszbytes % erasesize) != 0)
-                {
-                  ferr("ERROR: Partition size is not multiple of"
-                       " erasesize!\n");
-                  return -1;
-                }
-
-              mtd_part    = mtd_partition(mtd, partoffset,
-                                          partszbytes / erasesize);
-              partoffset += partszbytes / erasesize;
-
-#ifdef CONFIG_STM32F429I_DISCO_FLASH_CONFIG_PART
-              /* Test if this is the config partition */
-
-              if (CONFIG_STM32F429I_DISCO_FLASH_CONFIG_PART_NUMBER == partno)
-                {
-                  /* Register the partition as the config device */
-
-                  mtdconfig_register(mtd_part);
-                }
-              else
-#endif
-                {
-                  /* Now initialize a SMART Flash block device and bind it
-                   * to the MTD device.
-                   */
-
-#if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
-                  snprintf(partref, sizeof(partref), "p%d", partno);
-                  smart_initialize(CONFIG_STM32F429I_DISCO_FLASH_MINOR,
-                                   mtd_part, partref);
-#endif
-                }
-
-#if defined(CONFIG_MTD_PARTITION_NAMES)
-              /* Set the partition name */
-
-              if (mtd_part == NULL)
-                {
-                  ferr("ERROR: failed to create partition %s\n", partname);
-                  return -1;
-                }
-
-              mtd_setpartitionname(mtd_part, partname);
-
-              /* Now skip to next name.  We don't need to split the string
-               * here because the MTD partition logic will only display names
-               * up to the comma, thus allowing us to use a single static
-               * name in the code.
-               */
-
-              while (*partname != ',' && *partname != '\0')
-                {
-                  /* Skip to next ',' */
-
-                  partname++;
-                }
-
-              if (*partname == ',')
-                {
-                  partname++;
-                }
-#endif
-
-              /* Update the pointer to point to the next size in the list */
-
-              while ((*ptr >= '0') && (*ptr <= '9'))
-                {
-                  ptr++;
-                }
-
-              if (*ptr == ',')
-                {
-                  ptr++;
-                }
-
-              /* Increment the part number */
-
-              partno++;
-            }
-        }
-#else /* CONFIG_STM32F429I_DISCO_FLASH_PART */
-
-      /* Configure the device with no partition support */
-
-      smart_initialize(CONFIG_STM32F429I_DISCO_FLASH_MINOR, mtd, NULL);
-
-#endif /* CONFIG_STM32F429I_DISCO_FLASH_PART */
-    }
-
-#endif /* CONFIG_MTD */
-#endif /* CONFIG_STM32_SPI4 */
 
 #ifdef CONFIG_VIDEO_FB
   /* Initialize and register the framebuffer driver */
 
-  ret = fb_register(0, 0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
+    ret = fb_register(0, 0);
+    if (ret < 0){
+        syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
     }
 #endif
 
-#if defined(CONFIG_RAMMTD) && defined(CONFIG_STM32F429I_DISCO_RAMMTD)
-  /* Create a RAM MTD device if configured */
-
-    {
-      uint8_t *start =
-          (uint8_t *) kmm_malloc(CONFIG_STM32F429I_DISCO_RAMMTD_SIZE * 1024);
-      mtd = rammtd_initialize(start,
-                              CONFIG_STM32F429I_DISCO_RAMMTD_SIZE * 1024);
-      mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
-
-      /* Now initialize a SMART Flash block device and bind it to the MTD
-       * device
-       */
-
-#if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
-      smart_initialize(CONFIG_STM32F429I_DISCO_RAMMTD_MINOR, mtd, NULL);
-#endif
-    }
-
-#endif /* CONFIG_RAMMTD && CONFIG_STM32F429I_DISCO_RAMMTD */
 
 #ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a
-   * thread will monitor for USB connection and disconnection events.
-   */
-
-  ret = stm32_usbhost_initialize();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
-      return ret;
+    /* Initialize USB host operation.  stm32_usbhost_initialize() starts a
+    * thread will monitor for USB connection and disconnection events.
+    */
+    ret = stm32_usbhost_initialize();
+    if (ret != OK){
+        syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
+        return ret;
     }
 #endif
 
-#ifdef HAVE_USBMONITOR
-  /* Start the USB Monitor */
-
-  ret = usbmonitor_start();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
-    }
-#endif
 
 #ifdef CONFIG_INPUT_BUTTONS_LOWER
   /* Register the BUTTON driver */
 
-  ret = btn_lower_initialize("/dev/buttons");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    ret = btn_lower_initialize("/dev/buttons");
+    if (ret < 0){
+        syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
     }
 #endif /* CONFIG_INPUT_BUTTONS_LOWER */
-
-#ifdef CONFIG_INPUT_STMPE811
-  /* Initialize the touchscreen */
-
-  ret = stm32_tsc_setup(0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_tsc_setup failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_SENSORS_L3GD20
-  ret = board_l3gd20_initialize(0, 5);
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize l3gd20 sensor:"
-             " %d\n", ret);
-    }
-#endif
 
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
 
-  ret = stm32_pwm_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    ret = stm32_pwm_setup();
+    if (ret < 0){
+        syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
     }
 #endif
+
 
 #ifdef CONFIG_ADC
   /* Initialize ADC and register the ADC device. */
 
-  ret = stm32_adc_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_adc_setup() failed: %d\n", ret);
+    ret = stm32_adc_setup();
+    if (ret < 0){
+        syslog(LOG_ERR, "ERROR: stm32_adc_setup() failed: %d\n", ret);
     }
 #endif
 
-
-#ifdef HAVE_SDIO
-  /* Initialize the SDIO block driver */
-
-    ret = stm32_sdio_initialize();
-    if (ret != OK)
-    {
-      syslog(LOG_DEBUG,"in %s:%d\n",__func__,__LINE__);
-      ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
-      return ret;
-    }
-#endif
-#ifdef CONFIG_MMCSD_SPI
-  /* Initialize the MMC/SD SPI driver (SPI2 is used) */
-
-  ret = stm32_mmcsd_initialize(2, CONFIG_NSH_MMCSDMINOR);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n",
-             CONFIG_NSH_MMCSDMINOR, ret);
-    }
+#if defined(CONFIG_NXBOOT_BOOTLOADER)
+    /* Init LED indicator (TIM6 for bootloader, idle-task for app) */
+    led_indicate_init();
 #endif
 
-
-
-
-//   UNUSED(ret);
-  return OK;
+    return OK;
 }

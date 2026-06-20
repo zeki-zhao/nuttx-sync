@@ -75,13 +75,22 @@
 #  define FS_ADD_BACKTRACE(fd) \
      do \
        { \
-          int n = sched_backtrace(_SCHED_GETTID(), \
-                                  (fd)->f_backtrace, \
-                                  CONFIG_FS_BACKTRACE, \
-                                  CONFIG_FS_BACKTRACE_SKIP); \
-          if (n < CONFIG_FS_BACKTRACE) \
+          FAR struct tcb_s *tcb = nxsched_get_tcb(nxsched_gettid()); \
+          if (tcb != NULL && tcb->group != NULL && \
+              (tcb->group->tg_flags & GROUP_FLAG_FD_BACKTRACE) != 0) \
             { \
-              (fd)->f_backtrace[n] = NULL; \
+              int n = sched_backtrace(tcb->pid, \
+                                      (fd)->f_backtrace, \
+                                      CONFIG_FS_BACKTRACE, \
+                                      CONFIG_FS_BACKTRACE_SKIP); \
+              if (n < CONFIG_FS_BACKTRACE) \
+                { \
+                  (fd)->f_backtrace[n] = NULL; \
+                } \
+            } \
+          else \
+            { \
+              (fd)->f_backtrace[0] = NULL; \
             } \
        } \
      while (0)
@@ -408,6 +417,43 @@ void inode_addref(FAR struct inode *inode);
  ****************************************************************************/
 
 void inode_release(FAR struct inode *inode);
+
+/****************************************************************************
+ * Name: inode_checkperm
+ *
+ * Description:
+ *   Validate open access to 'inode' for 'oflags'.  Checks driver operation
+ *   support, then pseudo-filesystem mode bits when enabled.  Mountpoints
+ *   are exempt from mode checks.
+ *
+ * Input Parameters:
+ *   inode  - The inode to check
+ *   oflags - Open flags (O_RDONLY / O_WRONLY / O_RDWR)
+ *
+ * Returned Value:
+ *   Zero (OK) on success, or a negated errno on failure.
+ *
+ ****************************************************************************/
+
+int inode_checkperm(FAR struct inode *inode, int oflags);
+
+/****************************************************************************
+ * Name: inode_checkdirperm
+ *
+ * Description:
+ *   Check parent directory 'dir' for 'amode' access on pseudo-filesystem
+ *   inodes.  NULL 'dir' (root) and mountpoints are exempt.
+ *
+ * Input Parameters:
+ *   dir   - Parent directory inode, or NULL for a root-level path
+ *   amode - Access mode bitmask (R_OK / W_OK / X_OK)
+ *
+ * Returned Value:
+ *   Zero (OK) on success, or -EACCES if permission is denied.
+ *
+ ****************************************************************************/
+
+int inode_checkdirperm(FAR struct inode *dir, int amode);
 
 /****************************************************************************
  * Name: foreach_inode

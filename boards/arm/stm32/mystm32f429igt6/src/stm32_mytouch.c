@@ -143,11 +143,9 @@ void board_touch_initialize(void)
     struct i2c_master_s *i2c;
     const char devpath[] = "/dev/mytouch";
     int ret;
-    syslog(LOG_DEBUG,"in stm32_i2c_register\n");
     i2c = stm32_i2cbus_initialize(2);
     if (i2c == NULL)
     {
-        syslog(LOG_DEBUG,"in stm32_i2c_register 198\n");
         _err("ERROR: Failed to get I2C%d interface\n", 2);
     }
     else
@@ -155,18 +153,15 @@ void board_touch_initialize(void)
         ret = i2c_register(i2c, 2);
         if (ret < 0)
         {
-            syslog(LOG_DEBUG,"in stm32_i2c_register 206\n");
             _err("ERROR: Failed to register I2C%d driver: %d\n", 2, ret);
             stm32_i2cbus_uninitialize(i2c);
         }
     }
 
     stm32_configgpio(GPIO_TOUCH_RST);
-    //DELAY
-    sleep(1); //TODO:大于100us
+    usleep(200); //delay>100us
     stm32_gpiowrite(GPIO_TOUCH_RST, 1);
-    //DELAY
-    sleep(1); //TODO:大于5ms
+    usleep(6000); //delay>5ms
     stm32_configgpio(GPIO_TOUCH_INT2);
 
     DEBUGASSERT(devpath != NULL && i2c != NULL);

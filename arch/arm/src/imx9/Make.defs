@@ -58,6 +58,10 @@ ifeq ($(CONFIG_IMX9_FLEXCAN),y)
   CHIP_CSRCS += imx9_flexcan.c
 endif
 
+ifeq ($(CONFIG_IMX9_SAR_ADC),y)
+  CHIP_CSRCS += imx9_sar_adc.c
+endif
+
 ifeq ($(CONFIG_IMX9_LPUART),y)
   CHIP_CSRCS += imx9_lpuart.c imx9_lowputc.c
 endif
@@ -66,8 +70,8 @@ ifeq ($(CONFIG_IMX9_GPIO_IRQ),y)
   CHIP_CSRCS += imx9_gpioirq.c
 endif
 
-ifeq ($(CONFIG_IMX9_FLEXIO_PWM),y)
-  CHIP_CSRCS += imx9_flexio_pwm.c
+ifeq ($(CONFIG_IMX9_FLEXIO),y)
+  CHIP_CSRCS += imx9_flexio.c
 endif
 
 ifeq ($(CONFIG_IMX9_TPM_PWM),y)

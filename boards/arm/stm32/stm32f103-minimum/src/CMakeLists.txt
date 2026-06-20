@@ -22,11 +22,8 @@
 
 set(SRCS stm32_boot.c stm32_bringup.c stm32_spi.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-  if(CONFIG_BOARDCTL_RESET)
-    list(APPEND SRCS stm32_reset.c)
-  endif()
+if(CONFIG_BOARDCTL_RESET)
+  list(APPEND SRCS stm32_reset.c)
 endif()
 
 if(CONFIG_ARCH_BUTTONS)
@@ -107,6 +104,15 @@ endif()
 
 if(CONFIG_USBMSC)
   list(APPEND SRCS stm32_usbmsc.c)
+endif()
+
+if(CONFIG_STM32_CAN)
+  if(CONFIG_STM32_CAN_CHARDRIVER)
+    list(APPEND SRCS stm32_can.c)
+  endif()
+  if(CONFIG_STM32_CAN_SOCKET)
+    list(APPEND SRCS stm32_cansock.c)
+  endif()
 endif()
 
 target_sources(board PRIVATE ${SRCS})

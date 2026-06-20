@@ -167,20 +167,6 @@ config SYSTEMTICK_HOOK
 
 endif # !SCHED_TICKLESS
 
-config SYSTEM_TIME64
-	bool "64-bit system clock"
-	default n
-	---help---
-		The system timer is incremented at the rate determined by
-		USEC_PER_TICK, typically at 100Hz. The count at any given time is
-		then the "uptime" in units of system timer ticks.  By default, the
-		system time is 32-bits wide.  Those defaults provide a range of about
-		497 days which is probably a sufficient range for "uptime".
-
-		However, if the system timer rate is significantly higher than 100Hz
-		and/or if a very long "uptime" is required, then this option can be
-		selected to support a 64-bit wide timer.
-
 config ARCH_HAVE_ADJTIME
 	bool
 	default n
@@ -272,7 +258,7 @@ config PREALLOC_TIMERS
 
 config PERF_OVERFLOW_CORRECTION
 	bool "Compensate perf count overflow"
-	depends on SYSTEM_TIME64 && (ALARM_ARCH || TIMER_ARCH || ARCH_PERF_EVENTS)
+	depends on ALARM_ARCH || TIMER_ARCH || ARCH_PERF_EVENTS
 	default n
 	---help---
 		If this option is enabled, then the perf event will be enabled
@@ -548,12 +534,13 @@ endif # INIT_FILE
 menuconfig ETC_ROMFS
 	bool "Auto-mount etc baked-in ROMFS image"
 	default n
-	depends on !DISABLE_MOUNTPOINT && FS_ROMFS
+	depends on !DISABLE_MOUNTPOINT && (FS_ROMFS || FS_CROMFS)
 	---help---
-		Mount a ROMFS filesystem at /etc and provide a system init
+		Mount a ROMFS or a CROMFS filesystem at /etc and provide a system init
 		script at /etc/init.d/rc.sysinit and a startup script
-		at /etc/init.d/rcS.  The default system init script will mount
-		a FAT FS RAMDISK at /tmp but the logic is easily extensible.
+		at /etc/init.d/rcS.  The default system init script mounts
+		/tmp as TMPFS when FS_TMPFS is enabled, otherwise it can
+		fall back to mounting a FAT FS RAMDISK at /tmp.
 
 if ETC_ROMFS
 
@@ -591,37 +578,40 @@ config ETC_FATDEVNO
 	default 1
 	depends on FS_FAT
 	---help---
-		When the default rcS file used when ETC_ROMFS is selected, it
-		will mount a FAT FS under /tmp. This is the minor number of the FAT
-		FS block device.  The default is '1' corresponding to /dev/ram1.
+		When ETC_ROMFS is selected and FS_TMPFS is disabled, the
+		default rc.sysinit script mounts a FAT FS under /tmp. This
+		is the minor number of the FAT FS block device.  The default
+		is '1' corresponding to /dev/ram1.
 
 config ETC_FATSECTSIZE
 	int "FAT sector size"
 	default 512
 	depends on FS_FAT
 	---help---
-		When the default rcS file used when ETC_ROMFS is selected, it
-		will mount a FAT FS under /tmp. This is the sector size use with the
-		FAT FS. Default is 512.
+		When ETC_ROMFS is selected and FS_TMPFS is disabled, the
+		default rc.sysinit script mounts a FAT FS under /tmp. This
+		is the sector size used with the FAT FS. Default is 512.
 
 config ETC_FATNSECTORS
 	int "FAT number of sectors"
 	default 1024
 	depends on FS_FAT
 	---help---
-		When the default rcS file used when ETC_ROMFS is selected, it
-		will mount a FAT FS under /tmp. This is the number of sectors to use
-		with the FAT FS.  Default is 1024.  The amount of memory used by the
-		FAT FS will be ETC_FATSECTSIZE * ETC_FATNSECTORS bytes.
+		When ETC_ROMFS is selected and FS_TMPFS is disabled, the
+		default rc.sysinit script mounts a FAT FS under /tmp. This
+		is the number of sectors to use with the FAT FS.  Default is
+		1024.  The amount of memory used by the FAT FS will be
+		ETC_FATSECTSIZE * ETC_FATNSECTORS bytes.
 
 config ETC_FATMOUNTPT
 	string "FAT mount point"
 	default "/tmp"
 	depends on FS_FAT
 	---help---
-		When the default rcS file used when ETC_ROMFS is selected, it
-		will mount a FAT FS under /tmp. This is the location where the FAT
-		FS will be mounted.  Default is "/tmp".
+		When ETC_ROMFS is selected and FS_TMPFS is disabled, the
+		default rc.sysinit script mounts a FAT FS under /tmp. This
+		is the location where the FAT FS will be mounted.  Default is
+		"/tmp".
 
 endif # ETC_ROMFS
 
@@ -799,12 +789,19 @@ config SCHED_USER_IDENTITY
 	bool "Support per-task User Identity"
 	default n
 	---help---
-		This selection enables functionality of getuid(), setuid(), getgid(),
-		setgid().  If this option is not selected, then stub, root-only
-		versions of these interfaces are available.  When selected, these
-		interfaces will associate a UID and/or GID with each task group.
-		Those can then be managed using the interfaces.  Child tasks will
-		inherit the UID and GID of its parent.
+		Enable per-task-group POSIX user and group credentials.
+
+		When selected, each task group tracks real, effective, and saved-set
+		UID/GID values and provides getuid(), getgid(), geteuid(),
+		getegid(), setuid(), setgid(), seteuid(), and setegid().
+
+		Child tasks inherit all credential fields from the parent task
+		group.  setuid()/setgid() update real, effective, and saved-set
+		IDs when called with effective privileges; seteuid()/setegid()
+		implement the standard POSIX privilege transition rules.
+
+		If this option is not selected, stub root-only versions of these
+		interfaces are available instead.
 
 config SCHED_THREAD_LOCAL
 	bool "Support __thread/thread_local keyword"
@@ -1486,7 +1483,7 @@ config BOARD_EARLY_INITIALIZE
 
 config BOARD_LATE_INITIALIZE
 	bool "Custom board late initialization"
-	default n
+	default y
 	---help---
 		There are three points in time where you can insert custom,
 		board-specific initialization logic:
@@ -1604,6 +1601,16 @@ config DISABLE_ALL_SIGNALS
 
 endchoice
 
+config SIG_PREALLOC_IRQ_ACTIONS
+	int "Number of pre-allocated irq actions"
+	default 4 if DEFAULT_SMALL
+	default 8 if !DEFAULT_SMALL
+	depends on !DISABLE_ALL_SIGNALS
+	---help---
+		The number of pre-allocated irq action structures.
+
+if ENABLE_ALL_SIGNALS
+
 config SIG_PREALLOC_ACTIONS
 	int "Number of pre-allocated sigactions"
 	default 4
@@ -1617,13 +1624,6 @@ config SIG_ALLOC_ACTIONS
 		The number of sigactions to allocate per time. Note that
 		if this number is larger than 1, the allocation won't be
 		returned to the heap but kept in a free list for reuse.
-
-config SIG_PREALLOC_IRQ_ACTIONS
-	int "Number of pre-allocated irq actions"
-	default 4 if DEFAULT_SMALL
-	default 8 if !DEFAULT_SMALL
-	---help---
-		The number of pre-allocated irq action structures.
 
 config SIG_EVTHREAD
 	bool "Support SIGEV_THREAD"
@@ -1738,6 +1738,8 @@ config SIG_SIGURG_ACTION
 		sigaction() to ignore SIGURG.
 
 endif # SIG_DEFAULT
+
+endif # ENABLE_ALL_SIGNALS
 
 endmenu # Signal Configuration
 
@@ -2084,7 +2086,6 @@ config CUSTOM_SEMAPHORE_MAXVALUE
 
 config HRTIMER
 	bool "High resolution timer support"
-	depends on SYSTEM_TIME64
 	default n
 	---help---
 		Enable to support high resolution timer

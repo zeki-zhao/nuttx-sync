@@ -50,6 +50,15 @@ config FTL_READAHEAD
 	default n
 	depends on DRVR_READAHEAD
 
+config FTL_BBM
+	bool
+	default n
+	---help---
+		Enable logical to physical erase-block mapping in the FTL layer for
+		MTD devices that expose bad blocks via the MTD isbad/markbad methods.
+
+		This is needed for devices that require software bad block management.
+
 config MTD_SECT512
 	bool "512B sector conversion"
 	default n
@@ -231,6 +240,7 @@ menuconfig MTD_NAND
 	bool "MTD NAND support"
 	depends on ALLOW_BSD_COMPONENTS
 	default n
+	select FTL_BBM
 	---help---
 		Enable support for NAND FLASH devices.
 
@@ -410,6 +420,7 @@ endif # RAMMTD
 config FILEMTD
 	bool "File-based MTD driver"
 	default n
+	select FTL_BBM
 	---help---
 		Build support for a File-based MTD driver.
 
@@ -1442,6 +1453,7 @@ config MTD_GD5F
 	bool "SPI-based GD5F nand FLASH"
 	default n
 	select SPI
+	select FTL_BBM
 
 if MTD_GD5F
 

@@ -41,6 +41,10 @@
 #include "esp_board_i2c.h"
 #include "esp_board_bmp180.h"
 
+#ifdef CONFIG_DEV_RNG90
+#  include "esp_board_rng90.h"
+#endif
+
 #include "espressif/esp_start.h"
 
 #ifdef CONFIG_ESPRESSIF_ADC
@@ -154,9 +158,6 @@
  *
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize().
  *
  * Input Parameters:
  *   None.
@@ -407,6 +408,15 @@ int esp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_DEV_RNG90
+  ret = board_rng90_initialize(0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize RNG90 driver: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_ESP_SDM
   struct esp_sdm_chan_config_s config =
   {
@@ -461,7 +471,7 @@ int esp_bringup(void)
     }
 #endif /* CONFIG_ESPRESSIF_LEDC */
 
-#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
+#ifdef CONFIG_PM
   /* Configure PM */
 
   ret = esp_pmconfigure();

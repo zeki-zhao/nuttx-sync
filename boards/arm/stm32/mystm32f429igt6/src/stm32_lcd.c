@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
+#include <string.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -69,7 +70,6 @@
 
 int up_fbinitialize(int display)
 {
-  syslog(LOG_WARNING,"in up_fbinitialize\n");
   static bool initialized = false;
   int ret = OK;
 
@@ -78,6 +78,23 @@ int up_fbinitialize(int display)
       /* Custom LCD display with RGB interface */
       ret = stm32_ltdcinitialize();
       initialized = (ret >= OK);
+
+      /* Clear the framebuffer to black to prevent screen flash (residual
+       * image in SDRAM from previous boot).
+       */
+
+      if (initialized)
+        {
+          FAR struct fb_vtable_s *vtable;
+          struct fb_planeinfo_s planeinfo;
+
+          vtable = stm32_ltdcgetvplane(0);
+          if (vtable != NULL &&
+              vtable->getplaneinfo(vtable, 0, &planeinfo) == OK)
+            {
+              memset(planeinfo.fbmem, 0, planeinfo.fblen);
+            }
+        }
     }
 
   return ret;

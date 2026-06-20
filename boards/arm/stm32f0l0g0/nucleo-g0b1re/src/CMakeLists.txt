@@ -32,8 +32,8 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
+if(CONFIG_ADC)
+  list(APPEND SRCS stm32_adc.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})

@@ -51,12 +51,11 @@
 #define HAVE_USBDEV     
 #define HAVE_USBHOST    
 #define HAVE_USBMONITOR 
-#define HAVE_SDIO
 
 #undef  SDIO_MINOR     /* Any minor number, default 0 */
 #define SDIO_SLOTNO 0  /* Only one slot */
 
-#ifdef HAVE_SDIO
+
 #  if !defined(CONFIG_NSH_MMCSDSLOTNO)
 #    define CONFIG_NSH_MMCSDSLOTNO SDIO_SLOTNO
 #  elif CONFIG_NSH_MMCSDSLOTNO != 0
@@ -70,7 +69,6 @@
 #  else
 #    define SDIO_MINOR 0
 #  endif
-#endif
 
 /* Can't support USB host or device features if USB OTG HS is not enabled */
 
@@ -133,21 +131,6 @@
 #  undef CONFIG_STM32_SPI3
 #endif
 
-/* STMPE811 on I2C3 */
-
-#define STMPE811_ADDR1    0x41
-#define STMPE811_ADDR2    0x44
-
-#define GPIO_IO_EXPANDER (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN15)
-
-/* STM32F429 Discovery GPIOs ************************************************/
-
-/* LEDs */
-
-#define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTG|GPIO_PIN13)
-#define GPIO_LED2       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTG|GPIO_PIN14)
 
                   
 
@@ -170,33 +153,27 @@
 
 /* SPI chip selects */
 
-#define GPIO_CS_MEMS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN1)
-#define GPIO_CS_LCD     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN2)
-#define GPIO_LCD_DC     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN13)
+#define GPIO_CS_FLASH   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTI|GPIO_PIN8)
 #define GPIO_LCD_ENABLE (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                          GPIO_OUTPUT_CLEAR|GPIO_PORTF|GPIO_PIN10)
-#define GPIO_CS_SST25   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN4)
 
-/* USB OTG HS
- *
- * PA9  OTG_HS_VBUS VBUS sensing (also connected to the green LED)
- * PC0  OTG_HS_PowerSwitchOn
- * PD5  OTG_HS_Overcurrent
- */
+/* W25Q128 partition layout (128 Mbit = 16 MB SPI NOR flash) */
 
-#define GPIO_OTGHS_VBUS (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_OPENDRAIN|GPIO_PORTB|GPIO_PIN13)
-#define GPIO_OTGHS_PWRON (GPIO_OUTPUT|GPIO_OUTPUT_SET|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTC|GPIO_PIN4)
+#define PRIMARY_OFFSET    0x000000
+#define PRIMARY_SIZE      0x100000                  /* 1 MB */
 
-#ifdef CONFIG_USBHOST
-#  define GPIO_OTGHS_OVER  (GPIO_INPUT|GPIO_EXTI|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTD|GPIO_PIN5)
+#define SECONDARY_OFFSET  (PRIMARY_OFFSET + PRIMARY_SIZE)
+#define SECONDARY_SIZE    0x100000                  /* 1 MB */
 
-#else
-#  define GPIO_OTGHS_OVER  (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTC|GPIO_PIN5)
-#endif
+#define RECOVERY_OFFSET   (SECONDARY_OFFSET + SECONDARY_SIZE)
+#define RECOVERY_SIZE     0x100000                  /* 1 MB */
+
+#define CONFIG_OFFSET     (RECOVERY_OFFSET + RECOVERY_SIZE)
+#define CONFIG_SIZE       0x10000                   /* 64 KB */
+
+#define ASSETS_OFFSET     (CONFIG_OFFSET + CONFIG_SIZE)
+#define ASSETS_SIZE       (0x1000000 - ASSETS_OFFSET)  /* Remainder ~12.94 MB */
 
 /****************************************************************************
  * Public Types
@@ -246,12 +223,18 @@ int stm32_sdio_initialize(void);
 void weak_function stm32_spidev_initialize(void);
 
 #ifdef CONFIG_MY_LED
-void board_myled_initialize(void);
+int board_myled_initialize(void);
 #endif
 
 #ifdef CONFIG_MY_TOUCH
 void board_touch_initialize(void);
 #endif
+
+void board_buzzer_init(void);
+void board_buzzer_start(int half_period_us);
+void board_buzzer_stop(void);
+void board_buzzer_set_period(int half_period_us);
+int  board_note_to_hp(const char *name);
 
 /****************************************************************************
  * Name: stm32_usbinitialize
@@ -280,26 +263,7 @@ void weak_function stm32_usbinitialize(void);
 int stm32_usbhost_initialize(void);
 #endif
 
-/****************************************************************************
- * Name: stm32_tsc_setup
- *
- * Description:
- *   This function is called by board-bringup logic to configure the
- *   touchscreen device.  This function will register the driver as
- *   /dev/inputN where N is the minor device number.
- *
- * Input Parameters:
- *   minor   - The input device minor number
- *
- * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is
- *   returned to indicate the nature of the failure.
- *
- ****************************************************************************/
 
-#ifdef CONFIG_INPUT_STMPE811
-int stm32_tsc_setup(int minor);
-#endif
 
 /****************************************************************************
  * Name: stm32_sdram_initialize
@@ -340,27 +304,9 @@ void stm32_ledpminitialize(void);
 void stm32_pmbuttons(void);
 #endif
 
-/****************************************************************************
- * Name:  stm32_ili93414ws_initialize
- *
- * Description:
- *   Initialize the device structure to control the LCD Single chip driver.
- *
- * Input Parameters:
- *
- * Returned Value:
- *   On success, this function returns a reference to the LCD control object
- *   for the specified ILI9341 LCD Single chip driver connected as 4 wire
- *   serial (spi). NULL is returned on any failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32F429I_DISCO_ILI9341
-struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
-#endif
 
 /****************************************************************************
- * Name: stm32_spi5initialize
+ * Name: stm32_spi1initialize
  *
  * Description:
  *   Initialize the selected SPI port.
@@ -381,27 +327,10 @@ struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_SPI5
-struct spi_dev_s *stm32_spi5initialize(void);
+#ifdef CONFIG_STM32_SPI1
+struct spi_dev_s *stm32_spi1initialize(void);
 #endif
 
-/****************************************************************************
- * Name: stm32_l3gd20initialize()
- *
- * Description:
- *   Initialize and register the L3GD20 3 axis gyroscope sensor driver.
- *
- * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/gyro0"
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SPI) & defined(CONFIG_SENSORS_L3GD20)
-int stm32_l3gd20initialize(const char *devpath);
-#endif
 
 /****************************************************************************
  * Name: stm32_pwm_setup

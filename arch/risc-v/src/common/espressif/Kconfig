@@ -34,6 +34,106 @@ config ESPRESSIF_FLASH_32M
 
 endchoice # ESPRESSIF_FLASH
 
+config ESPRESSIF_DONT_USE_ROM_LIBC
+	bool "Don't use ROM libc functions"
+	default n
+	---help---
+		If enabled, NuttX libc will be used instead of ROM newlib
+		functions (strdup, strndup, atoi, etc.).
+
+		This prevents cross-heap allocation issues when ROM newlib
+		allocators are not mapped to the same heap as NuttX libc.
+
+menuconfig ESPRESSIF_SPIRAM
+	bool "External SPI RAM (SPIRAM)"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable external PSRAM support through the ESP HAL component.
+
+if ESPRESSIF_SPIRAM
+
+config ESPRESSIF_SPIRAM_BOOT_INIT
+	bool "Initialize SPIRAM during early boot"
+	default y
+	---help---
+		Initialize and map external PSRAM before heap region registration.
+
+config ESPRESSIF_SPIRAM_IGNORE_NOTFOUND
+	bool "Ignore SPIRAM not found"
+	depends on !ESPRESSIF_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY
+	default n
+	---help---
+		Keep booting even if PSRAM detection fails.
+
+config ESPRESSIF_SPIRAM_MEMTEST
+	bool "Run SPIRAM memory test at boot"
+	default y
+	---help---
+		Run a basic memory test before adding PSRAM to the allocator.
+
+config ESPRESSIF_SPIRAM_USE_8LINE_MODE
+	bool "Use x8 line mode"
+	default n
+	---help---
+		Enable x8 line mode instead of x16 line mode.
+
+config ESPRESSIF_SPIRAM_ECC
+	bool "Enable SPIRAM ECC"
+	default n
+	---help---
+		Enable ECC for external PSRAM accesses.
+
+choice ESPRESSIF_SPIRAM_SPEED
+	prompt "SPIRAM speed"
+	default ESPRESSIF_SPIRAM_SPEED_200M if !ESP32P4_REV_MIN_0
+	default ESPRESSIF_SPIRAM_SPEED_80M
+
+config ESPRESSIF_SPIRAM_SPEED_20M
+	bool "20 MHz"
+
+config ESPRESSIF_SPIRAM_SPEED_80M
+	bool "80 MHz"
+
+config ESPRESSIF_SPIRAM_SPEED_200M
+	bool "200 MHz"
+	depends on !ESP32P4_REV_MIN_0
+
+config ESPRESSIF_SPIRAM_SPEED_250M
+	bool "250 MHz"
+	depends on !ESP32P4_REV_MIN_0
+
+endchoice # ESPRESSIF_SPIRAM_SPEED
+
+config ESPRESSIF_SPIRAM_SPEED
+	int
+	default 20 if ESPRESSIF_SPIRAM_SPEED_20M
+	default 80 if ESPRESSIF_SPIRAM_SPEED_80M
+	default 200 if ESPRESSIF_SPIRAM_SPEED_200M
+	default 250 if ESPRESSIF_SPIRAM_SPEED_250M
+
+config ESPRESSIF_SPIRAM_USER_HEAP
+	bool "Add SPIRAM to user heap"
+	default y
+	select ESPRESSIF_DONT_USE_ROM_LIBC
+	---help---
+		Add SPIRAM as an additional NuttX heap region.
+
+config ESPRESSIF_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY
+	bool "Allow .bss segment placed in external memory"
+	default n
+	---help---
+		If enabled, variables with EXT_RAM_BSS_ATTR attribute will be
+		placed in SPIRAM instead of internal DRAM.
+
+		BSS sections from esp-hal-3rdparty components can also be placed
+		in SPIRAM through linker fragment mappings when enabled.
+
+		Note that variables placed in SPIRAM this way are still
+		zero-initialized at startup.
+
+endif # ESPRESSIF_SPIRAM
+
 config ESPRESSIF_IDF_ENV_FPGA
 	bool "IDF FPGA Environment"
 	default n
@@ -126,6 +226,11 @@ config ESPRESSIF_CPU_FREQ_MHZ
 	default 360 if ESPRESSIF_CPU_FREQ_360
 	default 400 if ESPRESSIF_CPU_FREQ_400
 
+config ESPRESSIF_DFS
+	bool "Enable DFS (Dynamic Frequency Scaling)"
+	select PM
+	default n
+
 config ESPRESSIF_REGION_PROTECTION
 	bool "Enable region protection"
 	default y
@@ -161,6 +266,93 @@ config ESPRESSIF_HAL_ASSERTIONS
 config ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	bool
 	default n
+
+menu "Espressif DFS Options"
+	depends on ESPRESSIF_DFS
+
+choice ESPRESSIF_MIN_CPU_FREQ
+	prompt "Minimum CPU frequency"
+	default ESPRESSIF_MIN_CPU_FREQ_40 if ARCH_CHIP_ESP32P4 && ESPRESSIF_IDF_ENV_FPGA
+	default ESPRESSIF_MIN_CPU_FREQ_96 if ARCH_CHIP_ESP32H2
+	default ESPRESSIF_MIN_CPU_FREQ_160 if ARCH_CHIP_ESP32C3 || ARCH_CHIP_ESP32C6
+	default ESPRESSIF_MIN_CPU_FREQ_360 if ARCH_CHIP_ESP32P4 && ESP32P4_SELECTS_REV_LESS_V3
+	default ESPRESSIF_MIN_CPU_FREQ_400 if ARCH_CHIP_ESP32P4 && !ESP32P4_SELECTS_REV_LESS_V3
+	---help---
+		Minimum CPU frequency to be scale.
+
+config ESPRESSIF_MIN_CPU_FREQ_40
+	bool "40 MHz"
+	depends on ARCH_CHIP_ESP32C3 || ARCH_CHIP_ESP32C6 || ARCH_CHIP_ESP32P4
+	---help---
+		Set the minimum CPU frequency to 40 MHz.
+
+config ESPRESSIF_MIN_CPU_FREQ_48
+	bool "48 MHz"
+	depends on ARCH_CHIP_ESP32H2
+	---help---
+		Set the minimum CPU frequency to 48 MHz.
+
+config ESPRESSIF_MIN_CPU_FREQ_64
+	bool "64 MHz"
+	depends on ARCH_CHIP_ESP32H2
+	---help---
+		Set the minimum CPU frequency to 64 MHz.
+
+config ESPRESSIF_MIN_CPU_FREQ_80
+	bool "80 MHz"
+	depends on ARCH_CHIP_ESP32C3 || ARCH_CHIP_ESP32C6
+	---help---
+		Set the minimum CPU frequency to 80 MHz.
+
+config ESPRESSIF_MIN_CPU_FREQ_96
+	bool "96 MHz"
+	depends on ARCH_CHIP_ESP32H2
+	---help---
+		Set the minimum CPU frequency to 96 MHz.
+
+config ESPRESSIF_MIN_CPU_FREQ_160
+	bool "160 MHz"
+	depends on ARCH_CHIP_ESP32C3 || ARCH_CHIP_ESP32C6
+	---help---
+		Set the minimum CPU frequency to 160 MHz.
+
+config ESPRESSIF_MIN_CPU_FREQ_360
+	bool "360 MHz"
+	depends on ARCH_CHIP_ESP32P4 && ESP32P4_SELECTS_REV_LESS_V3
+	---help---
+		Set the minimum CPU frequency to 360 MHz.
+
+config ESPRESSIF_MIN_CPU_FREQ_400
+	bool "400 MHz"
+	depends on ARCH_CHIP_ESP32P4 && !ESP32P4_SELECTS_REV_LESS_V3
+	---help---
+		Set the minimum CPU frequency to 400 MHz.
+
+endchoice # ESPRESSIF_MIN_CPU_FREQ
+
+config ESPRESSIF_MAX_CPU_FREQ_MHZ
+	int
+	default 40 if ESPRESSIF_MAX_CPU_FREQ_40
+	default 48 if ESPRESSIF_MAX_CPU_FREQ_48
+	default 64 if ESPRESSIF_MAX_CPU_FREQ_64
+	default 80 if ESPRESSIF_MAX_CPU_FREQ_80
+	default 96 if ESPRESSIF_MAX_CPU_FREQ_96
+	default 160 if ESPRESSIF_MAX_CPU_FREQ_160
+	default 360 if ESPRESSIF_MAX_CPU_FREQ_360
+	default 400 if ESPRESSIF_MAX_CPU_FREQ_400
+
+config ESPRESSIF_MIN_CPU_FREQ_MHZ
+	int
+	default 40 if ESPRESSIF_MIN_CPU_FREQ_40
+	default 48 if ESPRESSIF_MIN_CPU_FREQ_48
+	default 64 if ESPRESSIF_MIN_CPU_FREQ_64
+	default 80 if ESPRESSIF_MIN_CPU_FREQ_80
+	default 96 if ESPRESSIF_MIN_CPU_FREQ_96
+	default 160 if ESPRESSIF_MIN_CPU_FREQ_160
+	default 360 if ESPRESSIF_MIN_CPU_FREQ_360
+	default 400 if ESPRESSIF_MIN_CPU_FREQ_400
+
+endmenu #
 
 menu "Espressif Log Level"
 	visible if DEBUG_FEATURES
@@ -290,7 +482,7 @@ config ESPRESSIF_OTA_PRIMARY_SLOT_DEVPATH
 
 config ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET
 	hex "Application image secondary slot offset"
-	default 0x120000
+	default 0x170000
 
 config ESPRESSIF_OTA_SECONDARY_SLOT_DEVPATH
 	string "Application image secondary slot device path"
@@ -298,11 +490,11 @@ config ESPRESSIF_OTA_SECONDARY_SLOT_DEVPATH
 
 config ESPRESSIF_OTA_SLOT_SIZE
 	hex "Application image slot size (in bytes)"
-	default 0x100000
+	default 0x150000
 
 config ESPRESSIF_OTA_SCRATCH_OFFSET
 	hex "Scratch partition offset"
-	default 0x220000
+	default 0x2C0000
 
 config ESPRESSIF_OTA_SCRATCH_SIZE
 	hex "Scratch partition size"
@@ -438,9 +630,10 @@ config ESPRESSIF_USE_LP_CORE
 	---help---
 		Enable LP core (Low-power core) coprocessor
 
+if ESPRESSIF_USE_LP_CORE
+
 config ESPRESSIF_ULP_COPROC_RESERVE_MEM_SIZE
 	int "RTC slow memory reserved for coprocessor"
-	depends on ESPRESSIF_USE_LP_CORE
 	default 4096
 	range 32 16352
 	---help---
@@ -449,14 +642,12 @@ config ESPRESSIF_ULP_COPROC_RESERVE_MEM_SIZE
 
 config ESPRESSIF_ULP_SHARED_MEM_SIZE
 	int "Size of the shared memory for ULP core"
-	depends on ESPRESSIF_USE_LP_CORE
 	default 16
 	---help---
 		Size of the shared memory defined in bytes.
 
 config ESPRESSIF_ULP_ENABLE_UBSAN
 	bool "Enable UBSan (undefined behavior sanitizer) for LP core application"
-	depends on ESPRESSIF_USE_LP_CORE
 	depends on DEBUG_SYMBOLS
 	default n
 	---help---
@@ -465,6 +656,272 @@ config ESPRESSIF_ULP_ENABLE_UBSAN
 		But note that it will increase code size significantly and it can happen that
 		application will not fit into RTC RAM
 
+choice ESPRESSIF_ULP_WAKEUP_SOURCE
+	prompt "LP Coprocessor wakeup source"
+	default ESPRESSIF_ULP_WAKEUP_HP_CPU
+
+config ESPRESSIF_ULP_WAKEUP_HP_CPU
+	bool "Wakeup by HP core"
+
+config ESPRESSIF_ULP_WAKEUP_LP_UART
+	depends on ESPRESSIF_LP_UART
+	bool "Wakeup by LP UART RX"
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO
+	bool "Wakeup by LP IO interrupt"
+
+config ESPRESSIF_ULP_WAKEUP_LP_TIMER
+	bool "Wakeup by LP timer"
+
+endchoice # ESPRESSIF_ULP_WAKEUP_SOURCE
+
+menu "ULP Wakeup LP IO Sources"
+	depends on ESPRESSIF_ULP_WAKEUP_LP_IO
+
+menu "GPIOs to wakeup ULP when low"
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO0_LOW
+	bool "LP_IO0"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO0 is low.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO1_LOW
+	bool "LP_IO1"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO1 is low.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO2_LOW
+	bool "LP_IO2"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO2 is low.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO3_LOW
+	bool "LP_IO3"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO3 is low.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO4_LOW
+	bool "LP_IO4"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO4 is low.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO5_LOW
+	bool "LP_IO5"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO5 is low.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO6_LOW
+	bool "LP_IO6"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO6 is low.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO7_LOW
+	bool "LP_IO7"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO7 is low.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO8_LOW
+	bool "LP_IO8"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO8 is low
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO9_LOW
+	bool "LP_IO9"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO9 is low
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO10_LOW
+	bool "LP_IO10"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO10 is low
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO11_LOW
+	bool "LP_IO11"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO11 is low
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO12_LOW
+	bool "LP_IO12"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO12 is low
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO13_LOW
+	bool "LP_IO13"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO13 is low
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO14_LOW
+	bool "LP_IO14"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO14 is low
+
+endmenu # GPIOs to wakeup ULP when low
+
+menu "GPIOs to wakeup ULP when high"
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO0_HIGH
+	bool "LP_IO0"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO0 is high.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO1_HIGH
+	bool "LP_IO1"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO1 is high.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO2_HIGH
+	bool "LP_IO2"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO2 is high.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO3_HIGH
+	bool "LP_IO3"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO3 is high.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO4_HIGH
+	bool "LP_IO4"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO4 is high.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO5_HIGH
+	bool "LP_IO5"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO5 is high.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO6_HIGH
+	bool "LP_IO6"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO6 is high.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO7_HIGH
+	bool "LP_IO7"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO7 is high.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO8_HIGH
+	bool "LP_IO8"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO8 is high
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO9_HIGH
+	bool "LP_IO9"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO9 is high
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO10_HIGH
+	bool "LP_IO10"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO10 is high
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO11_HIGH
+	bool "LP_IO11"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO11 is high
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO12_HIGH
+	bool "LP_IO12"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO12 is high
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO13_HIGH
+	bool "LP_IO13"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO13 is high
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO14_HIGH
+	bool "LP_IO14"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO14 is high
+
+endmenu # GPIOs to wakeup ULP when high
+
+endmenu # ULP Wakeup LP IO Sources
+
+config ESPRESSIF_ULP_WAKEUP_SLEEP_DURATION_US
+	int "Sleep duration of LP Coprocessor in us"
+	depends on ESPRESSIF_ULP_WAKEUP_LP_TIMER
+	default 1000000
+
+choice ESPRESSIF_ULP_WAKEUP_LPUART_MODE
+	prompt "LP Coprocessor UART Wakeup Mode"
+	depends on ESPRESSIF_ULP_WAKEUP_LP_UART
+	default ESPRESSIF_ULP_WAKEUP_LPUART_START_BIT_MODE
+
+config ESPRESSIF_ULP_WAKEUP_LPUART_ACTIVE_EDGE_THRESHOLD_MODE
+	bool "Wake-up triggered by active edge threshold"
+
+config ESPRESSIF_ULP_WAKEUP_LPUART_FIFO_THRESHOLD_MODE
+	bool "Wake-up triggered by the number of bytes received in the RX FIFO"
+
+config ESPRESSIF_ULP_WAKEUP_LPUART_START_BIT_MODE
+	bool "Wake-up triggered by the detection of a start bit"
+
+config ESPRESSIF_ULP_WAKEUP_LPUART_CHAR_SEQ_MODE
+	bool "Wake-up triggered by detecting a specific character sequence"
+
+endchoice # ESPRESSIF_ULP_WAKEUP_LPUART_MODE
+
+config ESPRESSIF_ULP_WAKEUP_LPUART_ACTIVE_EDGE_THRESHOLD
+	int "Number of RXD edge changes to to trigger wake-up"
+	depends on ESPRESSIF_ULP_WAKEUP_LPUART_ACTIVE_EDGE_THRESHOLD_MODE
+	default 3
+
+config ESPRESSIF_ULP_WAKEUP_LPUART_FIFO_THRESHOLD
+	int "Number of bytes needed to receive in the RX FIFO to trigger wake-up"
+	depends on ESPRESSIF_ULP_WAKEUP_LPUART_FIFO_THRESHOLD_MODE
+	default 8
+
+config ESPRESSIF_ULP_WAKEUP_LPUART_CHAR_SEQ
+	string "Character sequence to trigger wake-up"
+	depends on ESPRESSIF_ULP_WAKEUP_LPUART_CHAR_SEQ_MODE
+	default "esp"
+
+endif # ESPRESSIF_USE_LP_CORE
 endmenu # LP Core (Low-power core) Coprocessor Configuration
 
 menu "PM Configuration"
@@ -501,108 +958,115 @@ menu "PM EXT1 Wakeup Sources"
 
 config PM_EXT1_WAKEUP_RTC_GPIO0
 	bool "RTC_GPIO0"
-	depends on ARCH_CHIP_ESP32C6
+	depends on ARCH_CHIP_ESP32C6 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable RTC GPIO0 as an EXT1 wakeup source.
 
 config PM_EXT1_WAKEUP_RTC_GPIO1
 	bool "RTC_GPIO1"
-	depends on ARCH_CHIP_ESP32C6
+	depends on ARCH_CHIP_ESP32C6 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable RTC GPIO1 as an EXT1 wakeup source.
 
 config PM_EXT1_WAKEUP_RTC_GPIO2
 	bool "RTC_GPIO2"
-	depends on ARCH_CHIP_ESP32C6
+	depends on ARCH_CHIP_ESP32C6 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable RTC GPIO2 as an EXT1 wakeup source.
 
 config PM_EXT1_WAKEUP_RTC_GPIO3
 	bool "RTC_GPIO3"
-	depends on ARCH_CHIP_ESP32C6
+	depends on ARCH_CHIP_ESP32C6 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable RTC GPIO3 as an EXT1 wakeup source.
 
 config PM_EXT1_WAKEUP_RTC_GPIO4
 	bool "RTC_GPIO4"
-	depends on ARCH_CHIP_ESP32C6
+	depends on ARCH_CHIP_ESP32C6 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable RTC GPIO4 as an EXT1 wakeup source.
 
 config PM_EXT1_WAKEUP_RTC_GPIO5
 	bool "RTC_GPIO5"
-	depends on ARCH_CHIP_ESP32C6
+	depends on ARCH_CHIP_ESP32C6 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable RTC GPIO5 as an EXT1 wakeup source.
 
 config PM_EXT1_WAKEUP_RTC_GPIO6
 	bool "RTC_GPIO6"
-	depends on ARCH_CHIP_ESP32C6
+	depends on ARCH_CHIP_ESP32C6 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable RTC GPIO6 as an EXT1 wakeup source.
 
 config PM_EXT1_WAKEUP_RTC_GPIO7
 	bool "RTC_GPIO7"
-	depends on ARCH_CHIP_ESP32C6
+	depends on ARCH_CHIP_ESP32C6 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable RTC GPIO7 as an EXT1 wakeup source.
 
 config PM_EXT1_WAKEUP_RTC_GPIO8
 	bool "RTC_GPIO8"
-	depends on ARCH_CHIP_ESP32H2
+	depends on ARCH_CHIP_ESP32H2 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable RTC GPIO8 as an EXT1 wakeup source.
 
 config PM_EXT1_WAKEUP_RTC_GPIO9
 	bool "RTC_GPIO9"
-	depends on ARCH_CHIP_ESP32H2
+	depends on ARCH_CHIP_ESP32H2 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable RTC GPIO9 as an EXT1 wakeup source.
 
 config PM_EXT1_WAKEUP_RTC_GPIO10
 	bool "RTC_GPIO10"
-	depends on ARCH_CHIP_ESP32H2
+	depends on ARCH_CHIP_ESP32H2 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable RTC GPIO10 as an EXT1 wakeup source.
 
 config PM_EXT1_WAKEUP_RTC_GPIO11
 	bool "RTC_GPIO11"
-	depends on ARCH_CHIP_ESP32H2
+	depends on ARCH_CHIP_ESP32H2 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable RTC GPIO11 as an EXT1 wakeup source.
 
 config PM_EXT1_WAKEUP_RTC_GPIO12
 	bool "RTC_GPIO12"
-	depends on ARCH_CHIP_ESP32H2
+	depends on ARCH_CHIP_ESP32H2 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable RTC GPIO12 as an EXT1 wakeup source.
 
 config PM_EXT1_WAKEUP_RTC_GPIO13
 	bool "RTC_GPIO13"
-	depends on ARCH_CHIP_ESP32H2
+	depends on ARCH_CHIP_ESP32H2 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable RTC GPIO13 as an EXT1 wakeup source.
 
 config PM_EXT1_WAKEUP_RTC_GPIO14
 	bool "RTC_GPIO14"
-	depends on ARCH_CHIP_ESP32H2
+	depends on ARCH_CHIP_ESP32H2 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable RTC GPIO14 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO15
+	bool "RTC_GPIO15"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable RTC GPIO15 as an EXT1 wakeup source.
 
 choice PM_EXT1_WAKEUP_TRIGGER_MODE
 	prompt "PM EXT1 Wakeup Trigger Mode"
@@ -620,7 +1084,7 @@ endmenu # PM_EXT1_WAKEUP_SOURCES
 
 config PM_ULP_WAKEUP
 	bool "PM ULP Wakeup"
-	depends on ARCH_CHIP_ESP32C6 && ESPRESSIF_USE_LP_CORE
+	depends on ESPRESSIF_USE_LP_CORE
 	default n
 	---help---
 		Enable ULP coprocessor wakeup functionality.
@@ -631,7 +1095,6 @@ config PM_ULP_WAKEUP
 config PM_GPIO_WAKEUP
 	bool "PM GPIO Wakeup"
 	default n
-	depends on ARCH_CHIP_ESP32C3
 	---help---
 		Enable GPIO wakeup functionality.
 		This allows the system to wake up from PM_STANDBY
@@ -1090,6 +1553,14 @@ config PM_UART_WAKEUP_CHAR_SEQ
 
 endmenu # PM UART Wakeup Sources
 
+config PM_TOUCH_WAKEUP
+	bool "PM Touch Wakeup"
+	depends on ESPRESSIF_TOUCH
+	default n
+	---help---
+		Enable touch sensor wakeup functionality.
+		This allows the system to wake up from PM_STANDBY or PM_SLEEP
+
 config PM_ALARM_SEC
 	int "PM_STANDBY delay (seconds)"
 	default 15
@@ -1208,7 +1679,6 @@ config ESPRESSIF_LEDC
 	bool "LEDC (PWM)"
 	default n
 	select PWM
-	select ARCH_HAVE_PWM_MULTICHAN
 
 config ESPRESSIF_SHA_ACCELERATOR
 	bool "SHA Accelerator"
@@ -1221,6 +1691,42 @@ config ESPRESSIF_AES_ACCELERATOR
 	default n
 	---help---
 		Enable AES accelerator support.
+
+config ESPRESSIF_TOUCH
+	bool "Touch sensor"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Enable touch sensor support.
+
+config ESPRESSIF_ANA_COMPR
+	bool
+	default n
+	select COMP
+	select ANALOG
+
+config ESPRESSIF_ANA_COMPR0
+	bool "Analog comparator 0"
+	default n
+	depends on ARCH_CHIP_ESP32H2 || ARCH_CHIP_ESP32P4
+	select ESPRESSIF_ANA_COMPR
+	---help---
+		Enable analog comparator unit 0.
+
+config ESPRESSIF_ANA_COMPR1
+	bool "Analog comparator 1"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	select ESPRESSIF_ANA_COMPR
+	---help---
+		Enable analog comparator unit 1.
+
+config ESPRESSIF_LP_MAILBOX
+	bool "LP Mailbox"
+	default n
+	depends on ARCH_CHIP_ESP32P4 && ESPRESSIF_USE_LP_CORE
+	---help---
+		Enable lp mailbox support for data passing between cores.
 
 config ESPRESSIF_ADC
 	bool "Analog-to-digital converter (ADC)"
@@ -1235,6 +1741,11 @@ if ESPRESSIF_ADC
 config ESPRESSIF_ADC_1
 	default y
 	bool "Enable SAR ADC 1"
+
+config ESPRESSIF_ADC_1_USE_LP
+	depends on ESPRESSIF_ADC_1 && ARCH_CHIP_ESP32P4
+	default n
+	bool "Use ADC 1 as LP ADC"
 
 config ESPRESSIF_ADC_2
 	default n
@@ -1316,11 +1827,27 @@ config ESPRESSIF_SPI_SLAVE
 
 config ESPRESSIF_SPI_PERIPH
 	bool
-	depends on ESPRESSIF_SPI2
+	depends on ESPRESSIF_SPI2 || ESPRESSIF_SPI3 || ESPRESSIF_LPSPI0
 	default n
 
 config ESPRESSIF_SPI2
 	bool "SPI 2"
+	default n
+	select ESPRESSIF_SPI
+	select SPI
+	select ESPRESSIF_SPI_PERIPH
+
+config ESPRESSIF_SPI3
+	bool "SPI 3"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	select ESPRESSIF_SPI
+	select SPI
+	select ESPRESSIF_SPI_PERIPH
+
+config ESPRESSIF_LPSPI0
+	bool "LP SPI0"
+	depends on ARCH_CHIP_ESP32P4
 	default n
 	select ESPRESSIF_SPI
 	select SPI
@@ -1484,6 +2011,15 @@ config ESP_RMT
 		format, RMT can be extended to a versatile and general-purpose
 		transceiver, transmitting or receiving many other types of signals.
 
+config RMT_LOOP_TEST_MODE
+	bool "Enable RMT loop test pin mapping"
+	default n
+	depends on ESP_RMT
+	---help---
+		Use a loop test pin mapping for RMT RX/TX.
+		When enabled, board pin definitions can route RX/TX to the same
+		GPIO for loopback testing without external wiring.
+
 if ESP_RMT
 
 config RMT_DEFAULT_RX_BUFFER_SIZE
@@ -1526,11 +2062,22 @@ config ESPRESSIF_WIFI
 
 config ESPRESSIF_BLE
 	bool "BLE"
-	depends on ARCH_CHIP_ESP32C3
+	depends on !ARCH_CHIP_ESP32P4
 	default n
 	select ESPRESSIF_WIRELESS
 	---help---
 		Enable BLE support
+
+config ESPRESSIF_EMAC
+	bool "Ethernet MAC"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	select NET
+	select ARCH_PHY_INTERRUPT
+	select ESPRESSIF_HR_TIMER
+	select SCHED_LPWORK
+	---help---
+		Enable Ethernet MAC support.
 
 config ESP_COEX_SW_COEXIST_ENABLE
 	bool "Software WiFi/Bluetooth/IEEE 802.15.4 coexistence"
@@ -1806,6 +2353,123 @@ endmenu # ESP_PCNT
 
 endmenu # Peripheral Support
 
+menu "Analog Comparator Configuration"
+	depends on ESPRESSIF_ANA_COMPR
+
+if ESPRESSIF_ANA_COMPR0
+
+choice ESPRESSIF_ANA_COMPR0_REF_SRC
+	prompt "Analog comparator0 reference source"
+	default ESPRESSIF_ANA_COMPR0_REF_SRC_INTERNAL
+	---help---
+		Select reference source for the analog comparator0 unit.
+
+config ESPRESSIF_ANA_COMPR0_REF_SRC_INTERNAL
+	bool "Internal reference source"
+
+config ESPRESSIF_ANA_COMPR0_REF_SRC_EXTERNAL
+	bool "External reference source"
+
+endchoice  # ESPRESSIF_ANA_COMPR0_REF_SRC
+
+choice ESPRESSIF_ANA_COMPR0_REF_VOLT
+	prompt "Analog comparator0 reference voltage"
+	depends on ESPRESSIF_ANA_COMPR0_REF_SRC_INTERNAL
+	default ESPRESSIF_ANA_COMPR0_REF_VOLT_50_VDD
+	---help---
+		Select reference source for the analog comparator0 unit.
+
+config ESPRESSIF_ANA_COMPR0_REF_VOLT_0_VDD
+	bool "Internal reference voltage equals to 0% VDD"
+
+config ESPRESSIF_ANA_COMPR0_REF_VOLT_10_VDD
+	bool "Internal reference voltage equals to 10% VDD"
+
+config ESPRESSIF_ANA_COMPR0_REF_VOLT_20_VDD
+	bool "Internal reference voltage equals to 20% VDD"
+
+config ESPRESSIF_ANA_COMPR0_REF_VOLT_30_VDD
+	bool "Internal reference voltage equals to 30% VDD"
+
+config ESPRESSIF_ANA_COMPR0_REF_VOLT_40_VDD
+	bool "Internal reference voltage equals to 40% VDD"
+
+config ESPRESSIF_ANA_COMPR0_REF_VOLT_50_VDD
+	bool "Internal reference voltage equals to 50% VDD"
+
+config ESPRESSIF_ANA_COMPR0_REF_VOLT_60_VDD
+	bool "Internal reference voltage equals to 60% VDD"
+
+config ESPRESSIF_ANA_COMPR0_REF_VOLT_70_VDD
+	bool "Internal reference voltage equals to 70% VDD"
+endchoice  # ESPRESSIF_ANA_COMPR0_REF_SRC
+
+config ESPRESSIF_ANA_COMPR0_DEBOUNCE
+	int "PM_SLEEP delay (milliseconds)"
+	default 100
+	---help---
+		The wait time to prevent frequent interrupts caused by signal noise or bouncing in milliseconds.
+
+endif # ESPRESSIF_ANA_COMPR0
+
+if ESPRESSIF_ANA_COMPR1
+
+choice ESPRESSIF_ANA_COMPR1_REF_SRC
+	prompt "Analog comparator0 reference source"
+	default ESPRESSIF_ANA_COMPR1_REF_SRC_INTERNAL
+	---help---
+		Select reference source for the analog comparator0 unit.
+
+config ESPRESSIF_ANA_COMPR1_REF_SRC_INTERNAL
+	bool "Internal reference source"
+
+config ESPRESSIF_ANA_COMPR1_REF_SRC_EXTERNAL
+	bool "External reference source"
+
+endchoice  # ESPRESSIF_ANA_COMPR1_REF_SRC
+
+choice ESPRESSIF_ANA_COMPR1_REF_VOLT
+	prompt "Analog comparator0 reference voltage"
+	depends on ESPRESSIF_ANA_COMPR1_REF_SRC_INTERNAL
+	default ESPRESSIF_ANA_COMPR1_REF_VOLT_50_VDD
+	---help---
+		Select reference source for the analog comparator0 unit.
+
+config ESPRESSIF_ANA_COMPR1_REF_VOLT_0_VDD
+	bool "Internal reference voltage equals to 0% VDD"
+
+config ESPRESSIF_ANA_COMPR1_REF_VOLT_10_VDD
+	bool "Internal reference voltage equals to 10% VDD"
+
+config ESPRESSIF_ANA_COMPR1_REF_VOLT_20_VDD
+	bool "Internal reference voltage equals to 20% VDD"
+
+config ESPRESSIF_ANA_COMPR1_REF_VOLT_30_VDD
+	bool "Internal reference voltage equals to 30% VDD"
+
+config ESPRESSIF_ANA_COMPR1_REF_VOLT_40_VDD
+	bool "Internal reference voltage equals to 40% VDD"
+
+config ESPRESSIF_ANA_COMPR1_REF_VOLT_50_VDD
+	bool "Internal reference voltage equals to 50% VDD"
+
+config ESPRESSIF_ANA_COMPR1_REF_VOLT_60_VDD
+	bool "Internal reference voltage equals to 60% VDD"
+
+config ESPRESSIF_ANA_COMPR1_REF_VOLT_70_VDD
+	bool "Internal reference voltage equals to 70% VDD"
+endchoice  # ESPRESSIF_ANA_COMPR1_REF_SRC
+
+config ESPRESSIF_ANA_COMPR1_DEBOUNCE
+	int "PM_SLEEP delay (milliseconds)"
+	default 100
+	---help---
+		The wait time to prevent frequent interrupts caused by signal noise or bouncing in milliseconds.
+
+endif # ESPRESSIF_ANA_COMPR1
+
+endmenu # Analog Comparator Configuration
+
 menu "ADC Configuration"
 	depends on ESPRESSIF_ADC
 
@@ -1998,6 +2662,157 @@ endmenu # ADC 2 Channel Selection
 endif  # ESPRESSIF_ADC_2
 
 endmenu # ADC Configuration
+
+menu "Ethernet Configuration"
+	depends on ESPRESSIF_EMAC
+
+config ESPRESSIF_ETH_NRXDESC
+	int "RX descriptor number"
+	default 20
+	---help---
+		Number of DMA receive descriptors/buffers used by the EMAC.
+		Each buffer is CONFIG_ESPRESSIF_ETH_DMA_BUFFER_SIZE bytes.
+		The default of 20 provides headroom for TCP-style ACK bursts
+		that arrive while the upper layer is busy submitting a TX burst
+		(otherwise the EMAC asserts RX_BUFF_UNAVAILABLE and silently
+		drops incoming frames, forcing TCP retransmissions).
+
+config ESPRESSIF_ETH_NTXDESC
+	int "TX descriptor number"
+	default 20
+	---help---
+		Number of DMA transmit descriptors/buffers used by the EMAC.
+		With CONFIG_ESPRESSIF_ETH_DMA_BUFFER_SIZE=1600, each descriptor
+		holds one Ethernet frame.  TCP send() bursts up to ~12 segments
+		back-to-back; 20 descriptors gives ample headroom so that
+		esp_eth_transmit() never returns ESP_ERR_NO_MEM mid-burst.
+		If the ring is exhausted, frames are silently dropped and
+		retransmissions happen via fast-retransmit/RTO, drastically
+		degrading throughput.
+
+config ESPRESSIF_ETH_DMA_BUFFER_SIZE
+	int "DMA buffer size (bytes)"
+	default 1600
+	range 256 1600
+	---help---
+		Size of each DMA buffer used by the EMAC (must match esp_eth's
+		CONFIG_ETH_DMA_BUFFER_SIZE).  At the maximum 1600 bytes one
+		buffer holds an entire 1518-byte Ethernet frame, so a typical
+		TX uses exactly one descriptor.  Lower values cause the MAC DMA
+		to chain multiple descriptors per frame, reducing the effective
+		number of frames the ring can hold.
+
+config ESPRESSIF_ETH_TX_MAX_RETRIES
+	int "TX submit retry budget"
+	default 32
+	range 1 256
+	---help---
+		Number of times emac_transmit() retries esp_eth_transmit() when
+		the DMA TX descriptor ring is fully owned by hardware
+		(ESP_ERR_NO_MEM).  Between attempts the driver yields the CPU
+		via sched_yield() so that the RX worker (and any other peer at
+		the same priority) can run while the EMAC DMA drains its TX
+		descriptors in the background.  The default of 32 covers a
+		full ring rotation under sustained TCP bursts while remaining
+		bounded; increase if the network has very high latency between
+		TX submissions and DMA descriptor recycling.
+
+config ESPRESSIF_ETH_PHY_ADDR
+	int "PHY address"
+	default 1
+	range 0 31
+	---help---
+		Address of the external Ethernet PHY on the SMI (MDC/MDIO) bus.
+
+config ESPRESSIF_ETH_MDC_GPIO
+	int "MDC GPIO"
+	default 31 if ARCH_CHIP_ESP32P4
+	default -1
+	---help---
+		GPIO number connected to the PHY MDC pin.  The shipped default
+		corresponds to the ESP32-P4 Function EV Board V1.5.2; override
+		for other boards/SoCs.
+
+config ESPRESSIF_ETH_MDIO_GPIO
+	int "MDIO GPIO"
+	default 52 if ARCH_CHIP_ESP32P4
+	default -1
+	---help---
+		GPIO number connected to the PHY MDIO pin.  The shipped default
+		corresponds to the ESP32-P4 Function EV Board V1.5.2; override
+		for other boards/SoCs.
+
+config ESPRESSIF_ETH_RMII_CLK_GPIO
+	int "RMII REF_CLK GPIO"
+	default 50 if ARCH_CHIP_ESP32P4
+	default -1
+	---help---
+		GPIO number for the RMII 50MHz reference clock (input).  The
+		shipped default corresponds to the ESP32-P4 Function EV Board
+		V1.5.2; override for other boards/SoCs.
+
+config ESPRESSIF_ETH_RMII_TX_EN_GPIO
+	int "RMII TX_EN GPIO"
+	default 49 if ARCH_CHIP_ESP32P4
+	default -1
+	---help---
+		GPIO number connected to the RMII TX_EN pin.  Default is for the
+		ESP32-P4 Function EV Board V1.5.2.
+
+config ESPRESSIF_ETH_RMII_TXD0_GPIO
+	int "RMII TXD0 GPIO"
+	default 34 if ARCH_CHIP_ESP32P4
+	default -1
+	---help---
+		GPIO number connected to the RMII TXD0 pin.  Default is for the
+		ESP32-P4 Function EV Board V1.5.2.
+
+config ESPRESSIF_ETH_RMII_TXD1_GPIO
+	int "RMII TXD1 GPIO"
+	default 35 if ARCH_CHIP_ESP32P4
+	default -1
+	---help---
+		GPIO number connected to the RMII TXD1 pin.  Default is for the
+		ESP32-P4 Function EV Board V1.5.2.
+
+config ESPRESSIF_ETH_RMII_CRS_DV_GPIO
+	int "RMII CRS_DV GPIO"
+	default 28 if ARCH_CHIP_ESP32P4
+	default -1
+	---help---
+		GPIO number connected to the RMII CRS_DV pin.  Default is for
+		the ESP32-P4 Function EV Board V1.5.2.
+
+config ESPRESSIF_ETH_RMII_RXD0_GPIO
+	int "RMII RXD0 GPIO"
+	default 29 if ARCH_CHIP_ESP32P4
+	default -1
+	---help---
+		GPIO number connected to the RMII RXD0 pin.  Default is for the
+		ESP32-P4 Function EV Board V1.5.2.
+
+config ESPRESSIF_ETH_RMII_RXD1_GPIO
+	int "RMII RXD1 GPIO"
+	default 30 if ARCH_CHIP_ESP32P4
+	default -1
+	---help---
+		GPIO number connected to the RMII RXD1 pin.  Default is for the
+		ESP32-P4 Function EV Board V1.5.2.
+
+config ESPRESSIF_ETH_ENABLE_PHY_RSTPIN
+	bool "Enable PHY reset pin"
+	default y
+
+config ESPRESSIF_ETH_PHY_RST_GPIO
+	int "PHY reset GPIO"
+	default 51 if ARCH_CHIP_ESP32P4
+	default -1
+	depends on ESPRESSIF_ETH_ENABLE_PHY_RSTPIN
+	---help---
+		GPIO number connected to the PHY reset pin.  Default is for the
+		ESP32-P4 Function EV Board V1.5.2.
+
+endmenu # Ethernet Configuration
 
 menu "Wi-Fi Configuration"
 	depends on ESPRESSIF_WIFI
@@ -2750,6 +3565,104 @@ config ESPRESSIF_SPI2_MISOPIN
 
 endif # ESPRESSIF_SPI2
 
+if ESPRESSIF_SPI3
+
+config ESPRESSIF_SPI3_DMA
+	bool "SPI3 use GDMA"
+	default n
+	depends on ESPRESSIF_DMA
+	---help---
+		Enable support for transfers using the GDMA engine.
+
+config ESPRESSIF_SPI3_DMADESC_NUM
+	int "SPI3 Master GDMA maximum number of descriptors"
+	default 2
+	depends on ESPRESSIF_SPI3_DMA
+	---help---
+		Configure the maximum number of out-link/in-link descriptors to
+		be chained for a GDMA transfer.
+
+config ESPRESSIF_SPI3_DMATHRESHOLD
+	int "SPI3 GDMA threshold"
+	default 64
+	depends on ESPRESSIF_SPI3_DMA
+	---help---
+		When SPI GDMA is enabled, GDMA transfers whose size are below the
+		defined threshold will be performed by polling logic.
+
+choice ESPRESSIF_SPI3_MODE
+	prompt "SPI3 mode"
+	default ESPRESSIF_SPI3_MODE_MASTER
+
+config ESPRESSIF_SPI3_MODE_MASTER
+	bool "SPI3 Master mode"
+	depends on SPI_DRIVER
+	---help---
+		Configure SPI3 to operate in Master mode.
+
+config ESPRESSIF_SPI3_SLAVE
+	bool "SPI3 Slave mode"
+	depends on SPI_SLAVE
+	select ESPRESSIF_GPIO_IRQ
+	select ESPRESSIF_SPI_SLAVE
+	---help---
+		Configure SPI3 to operate in Slave mode.
+
+endchoice # ESPRESSIF_SPI3_MODE
+
+config ESPRESSIF_SPI3_SLAVE_BUFSIZE
+	int "SPI3 Slave buffer size"
+	default 2048
+	depends on ESPRESSIF_SPI3_SLAVE
+	---help---
+		Configure the size of SPI3 Slave controller's internal buffers.
+
+config ESPRESSIF_SPI3_CSPIN
+	int "SPI3 CS Pin"
+	default 20 if ARCH_CHIP_ESP32P4
+	range 0 54 if ARCH_CHIP_ESP32P4
+
+config ESPRESSIF_SPI3_CLKPIN
+	int "SPI3 CLK Pin"
+	default 22 if ARCH_CHIP_ESP32P4
+	range 0 54 if ARCH_CHIP_ESP32P4
+
+config ESPRESSIF_SPI3_MOSIPIN
+	int "SPI3 MOSI Pin"
+	default 21 if ARCH_CHIP_ESP32P4
+	range 0 54 if ARCH_CHIP_ESP32P4
+
+config ESPRESSIF_SPI3_MISOPIN
+	int "SPI3 MISO Pin"
+	default 27 if ARCH_CHIP_ESP32P4
+	range 0 54 if ARCH_CHIP_ESP32P4
+
+endif # ESPRESSIF_SPI3
+
+if ESPRESSIF_LPSPI0
+
+config ESPRESSIF_LPSPI0_CSPIN
+	int "LP SPI CS Pin"
+	default 4 if ARCH_CHIP_ESP32P4
+	range 0 15 if ARCH_CHIP_ESP32P4
+
+config ESPRESSIF_LPSPI0_CLKPIN
+	int "LP SPI CLK Pin"
+	default 8 if ARCH_CHIP_ESP32P4
+	range 0 15 if ARCH_CHIP_ESP32P4
+
+config ESPRESSIF_LPSPI0_MOSIPIN
+	int "LP SPI MOSI Pin"
+	default 7 if ARCH_CHIP_ESP32P4
+	range 0 15 if ARCH_CHIP_ESP32P4
+
+config ESPRESSIF_LPSPI0_MISOPIN
+	int "LP SPI MISO Pin"
+	default 6 if ARCH_CHIP_ESP32P4
+	range 0 15 if ARCH_CHIP_ESP32P4
+
+endif # ESPRESSIF_LPSPI0
+
 if ESPRESSIF_SPI_BITBANG
 
 choice ESPRESSIF_SPI_BITBANG_OPERATION_MODE
@@ -2964,7 +3877,7 @@ config ESPRESSIF_STORAGE_MTD_DEBUG
 config ESPRESSIF_STORAGE_MTD_OFFSET
 	hex "Storage MTD base address in SPI Flash"
 	default 0x180000 if !ESPRESSIF_BOOTLOADER_MCUBOOT
-	default 0x260000 if ESPRESSIF_BOOTLOADER_MCUBOOT
+	default 0x300000 if ESPRESSIF_BOOTLOADER_MCUBOOT
 	depends on ESPRESSIF_MTD
 	---help---
 		MTD base address in SPI Flash.
@@ -3038,8 +3951,8 @@ if ESPRESSIF_LEDC_TIMER0
 
 config ESPRESSIF_LEDC_TIMER0_CHANNELS
 	int "Number of Timer 0 channels"
-	default 2 if PWM_MULTICHAN && PWM_NCHANNELS > 1
-	default 1 if !PWM_MULTICHAN || PWM_NCHANNELS = 1
+	default 2 if PWM_NCHANNELS > 1
+	default 1 if PWM_NCHANNELS = 1
 	range 0 6
 
 config ESPRESSIF_LEDC_TIMER0_RESOLUTION
@@ -3062,8 +3975,8 @@ if ESPRESSIF_LEDC_TIMER1
 
 config ESPRESSIF_LEDC_TIMER1_CHANNELS
 	int "Number of Timer 1 channels"
-	default 2 if PWM_MULTICHAN && PWM_NCHANNELS > 1
-	default 1 if !PWM_MULTICHAN || PWM_NCHANNELS = 1
+	default 2 if PWM_NCHANNELS > 1
+	default 1 if PWM_NCHANNELS = 1
 	range 0 6
 
 config ESPRESSIF_LEDC_TIMER1_RESOLUTION
@@ -3086,8 +3999,8 @@ if ESPRESSIF_LEDC_TIMER2
 
 config ESPRESSIF_LEDC_TIMER2_CHANNELS
 	int "Number of Timer 2 channels"
-	default 2 if PWM_MULTICHAN && PWM_NCHANNELS > 1
-	default 1 if !PWM_MULTICHAN || PWM_NCHANNELS = 1
+	default 2 if PWM_NCHANNELS > 1
+	default 1 if PWM_NCHANNELS = 1
 	range 0 6
 
 config ESPRESSIF_LEDC_TIMER2_RESOLUTION
@@ -3110,8 +4023,8 @@ if ESPRESSIF_LEDC_TIMER3
 
 config ESPRESSIF_LEDC_TIMER3_CHANNELS
 	int "Number of Timer 3 channels"
-	default 2 if PWM_MULTICHAN && PWM_NCHANNELS > 1
-	default 1 if !PWM_MULTICHAN || PWM_NCHANNELS = 1
+	default 2 if PWM_NCHANNELS > 1
+	default 1 if PWM_NCHANNELS = 1
 	range 0 6
 
 config ESPRESSIF_LEDC_TIMER3_RESOLUTION
@@ -3142,7 +4055,7 @@ config ESPRESSIF_LEDC_CHANNEL3_PIN
 	int "Channel 3 pin"
 	default 5
 
-if PWM_MULTICHAN && PWM_NCHANNELS > 1
+if PWM_NCHANNELS > 1
 
 config ESPRESSIF_LEDC_CHANNEL4_PIN
 	int "Channel 4 pin"
@@ -3152,9 +4065,139 @@ config ESPRESSIF_LEDC_CHANNEL5_PIN
 	int "Channel 5 pin"
 	default 7
 
-endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+endif # PWM_NCHANNELS > 1
 
 endmenu # LEDC configuration
+
+menu "Touch Sensor Configuration"
+	depends on ESPRESSIF_TOUCH
+
+config ESP_TOUCH_CHANNEL1
+	bool "Touch Sensor Channel 1(IO2)"
+	default n
+	---help---
+		Enable touch sensor channel 1 (IO2).
+
+config ESP_TOUCH_CHANNEL2
+	bool "Touch Sensor Channel 2(IO3)"
+	default n
+	---help---
+		Enable touch sensor channel 2 (IO3).
+
+config ESP_TOUCH_CHANNEL3
+	bool "Touch Sensor Channel 3(IO4)"
+	default n
+	---help---
+		Enable touch sensor channel 3 (IO4).
+
+config ESP_TOUCH_CHANNEL4
+	bool "Touch Sensor Channel 4(IO5)"
+	default n
+	---help---
+		Enable touch sensor channel 4 (IO5).
+
+config ESP_TOUCH_CHANNEL5
+	bool "Touch Sensor Channel 5(IO6)"
+	default n
+	---help---
+		Enable touch sensor channel 5 (IO6).
+
+config ESP_TOUCH_CHANNEL6
+	bool "Touch Sensor Channel 6(IO7)"
+	default n
+	---help---
+		Enable touch sensor channel 6 (IO7).
+
+config ESP_TOUCH_CHANNEL7
+	bool "Touch Sensor Channel 7(IO8)"
+	default n
+	---help---
+		Enable touch sensor channel 7 (IO8).
+
+config ESP_TOUCH_CHANNEL8
+	bool "Touch Sensor Channel 8(IO9)"
+	default n
+	---help---
+		Enable touch sensor channel 8 (IO9).
+
+config ESP_TOUCH_CHANNEL9
+	bool "Touch Sensor Channel 9(IO10)"
+	default n
+	---help---
+		Enable touch sensor channel 9 (IO10).
+
+config ESP_TOUCH_CHANNEL10
+	bool "Touch Sensor Channel 10(IO11)"
+	default n
+	---help---
+		Enable touch sensor channel 10 (IO11).
+
+config ESP_TOUCH_CHANNEL11
+	bool "Touch Sensor Channel 11(IO12)"
+	default n
+	---help---
+		Enable touch sensor channel 11 (IO12).
+
+config ESP_TOUCH_CHANNEL12
+	bool "Touch Sensor Channel 12(IO13)"
+	default n
+	---help---
+		Enable touch sensor channel 12 (IO13).
+
+config ESP_TOUCH_CHANNEL13
+	bool "Touch Sensor Channel 13(IO14)"
+	default n
+	---help---
+		Enable touch sensor channel 13 (IO14).
+
+config ESP_TOUCH_CHANNEL14
+	bool "Touch Sensor Channel 14(IO15)"
+	default n
+	---help---
+		Enable touch sensor channel 14 (IO15).
+
+choice ESP_TOUCH_MODE
+	prompt "Touch Sensor Mode"
+	default ESP_TOUCH_MODE_CONTINUOUS
+	---help---
+		Select operating mode for touch sensor.
+
+config ESP_TOUCH_MODE_ONE_SHOT
+	bool "One-Shot Mode"
+
+config ESP_TOUCH_MODE_CONTINUOUS
+	bool "Continuous Mode"
+
+endchoice  # ESP_TOUCH_MODE
+
+config ESP_TOUCH_IRQ
+	bool "Enable touch pad interrupts"
+	depends on ARCH_IRQBUTTONS
+	default n
+	---help---
+		Enable interrupt support for the touch pads.
+
+config ESP_TOUCH_INVERTED
+	bool "Touch pad inverted threshold detection"
+	default n
+	---help---
+		Detect touch activity when read value is lower than threshold.
+
+config ESP_TOUCH_FILTER
+	bool "Touch pad filter"
+	default y
+	---help---
+		Enable internal filter for the touch pads.
+
+config ESP_TOUCH_DENOISE_LVL
+	int "Touch pad denoise level"
+	depends on ESP_TOUCH_FILTER
+	default 1
+	range 0 4
+	---help---
+		Internal denoise level for the touch pads.
+
+endmenu # Touch Sensor Configuration
 
 menu "I2S Configuration"
 	depends on ESPRESSIF_I2S

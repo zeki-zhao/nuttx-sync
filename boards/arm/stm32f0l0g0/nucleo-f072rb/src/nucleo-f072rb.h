@@ -42,14 +42,14 @@
 /* How many SPI modules does this chip support? */
 
 #if STM32_NSPI < 1
-#  undef CONFIG_STM32F0L0G0_SPI1
-#  undef CONFIG_STM32F0L0G0_SPI2
-#  undef CONFIG_STM32F0L0G0_SPI3
+#  undef CONFIG_STM32_SPI1
+#  undef CONFIG_STM32_SPI2
+#  undef CONFIG_STM32_SPI3
 #elif STM32_NSPI < 2
-#  undef CONFIG_STM32F0L0G0_SPI2
-#  undef CONFIG_STM32F0L0G0_SPI3
+#  undef CONFIG_STM32_SPI2
+#  undef CONFIG_STM32_SPI3
 #elif STM32_NSPI < 3
-#  undef CONFIG_STM32F0L0G0_SPI3
+#  undef CONFIG_STM32_SPI3
 #endif
 
 /* Nucleo-F072RB GPIOs ******************************************************/
@@ -100,9 +100,6 @@
  *
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library
  *
  ****************************************************************************/
 

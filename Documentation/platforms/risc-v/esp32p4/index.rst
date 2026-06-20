@@ -31,12 +31,19 @@ descriptions.
 * Datasheet: `ESP32-P4 Datasheet (v1.3) <https://documentation.espressif.com/esp32-p4-chip-revision-v1.3_datasheet_en.pdf>`_
 * Technical Reference Manual: `ESP32-P4 TRM (v1.3) <https://documentation.espressif.com/esp32-p4-chip-revision-v1.3_technical_reference_manual_en.pdf>`_
 
+.. note:: NuttX by default supports ESP32-P4 chip revisions v3.0 and above.
+          If your build and flash works fine but firmware does not run as
+          expected (i.e. stuck in a boot loop) then additional tuning is
+          required, see `ESP32-P4 Chip Revisions`_ section for details.
+
+
 ESP32-P4 Toolchain
 ==================
 
-A generic RISC-V toolchain can be used to build ESP32-P4 projects. It's recommended
-to use the same toolchain version used by NuttX CI for RISC-V.
-Please refer to the Docker
+A generic RISC-V toolchain can be used to build ESP32-P4 projects.
+You can use standard ``riscv32-esp-elf-gcc`` provided by ESP IDF Tools.
+However, it is recommended to use the same toolchain version as used by
+the NuttX CI for RISC-V. Please refer to our CI Docker configuration
 `container <https://github.com/apache/nuttx/tree/master/tools/ci/docker/linux/Dockerfile>`_
 and check for the current compiler version being used. For instance:
 
@@ -74,6 +81,7 @@ Add the toolchain to your ``PATH``:
   $ echo "export PATH=/path/to/your/toolchain/riscv-none-elf-gcc/bin:$PATH" >> ~/.bashrc
 
 You can edit your shell's rc files if you don't use bash.
+
 
 Building and flashing NuttX
 ===========================
@@ -193,6 +201,7 @@ The following is **not** supported when building with CMake yet; use the Make-ba
 * **ULP / LP core** — Low-power coprocessor support (``CONFIG_ESPRESSIF_USE_LP_CORE``) is
   not wired up for CMake (ULP/LP integration is TODO).
 
+
 .. _esp32p4_debug:
 
 Debugging
@@ -306,6 +315,7 @@ possible to track the root cause of the crash. Saving this output to a file and 
   Backtrace for task 0:
   0x4000bb20: up_idle at esp_idle.c:76
 
+
 Peripheral Support
 ==================
 
@@ -319,7 +329,7 @@ HP Peripherals
 ================= ======= ==================================
 Peripheral        Support NOTES
 ================= ======= ==================================
-SPI                Yes     SPI2 master/slave; bitbang
+SPI                Yes     SPI2/SPI3 master/slave; bitbang
 I2C                Yes
 I2S                Yes
 ADC                Yes
@@ -348,10 +358,12 @@ Parallel IO        No
 LCD Interface      No
 MIPI DSI           No
 Timers             Yes
+SPIRAM / PSRAM     Yes
 Watchdog           Yes     MWDT0/1 and RWDT
-Ethernet           No
+Ethernet           Yes
 Brownout           No
 Debug Probe        No
+Analog Comp        Yes     COMP0/1
 ================= ======= ==================================
 
 LP Peripherals
@@ -360,18 +372,18 @@ LP Peripherals
 ================= ======= ==================================
 Peripheral        Support NOTES
 ================= ======= ==================================
-LP SPI             No
+LP SPI             Yes
 LP I2C             Yes
 LP I2S             No
 LP UART            Yes
 LP GPIO            No
 LP Timers          No
-LP ADC             No
+LP ADC             Yes
+LP Mailbox         Yes
 Temperature        Yes     Internal temperature sensor
-Touch Sensor       No
+Touch Sensor       Yes
 eFuse              Yes     Virtual eFuses supported
 ================= ======= ==================================
-
 
 Security
 --------
@@ -400,6 +412,7 @@ PMP/PMA            Mo
    and configuration. Consult the board documentation and the
    :file:`arch/risc-v/src/common/espressif/Kconfig` for feature flags and
    pin selections.
+
 
 .. _esp32p4_ulp:
 
@@ -676,8 +689,28 @@ prefix (defined by the ``ULP_APP_NAME`` variable in the ULP application Makefile
 access the binary data (e.g., if ``ULP_APP_NAME`` is ``ulp_test``, the binary variable will be ``ulp_test_bin``)
 and ``bin_len`` keyword to access its length (e.g., ``ulp_test_bin_len`` for ``ULP_APP_NAME`` is ``ulp_test``).
 
+ULP LP-Core Wakeup Configuration
+--------------------------------
+
+By default, ULP LP-Core is woken up by HP core but other wakeup sources can be selected.
+
+The available wakeup sources are:
+
+* ``CONFIG_ESPRESSIF_ULP_WAKEUP_HP_CPU``: Wakeup by HP core
+* ``CONFIG_ESPRESSIF_ULP_WAKEUP_LP_TIMER``: Wakeup by LP timer
+* ``CONFIG_ESPRESSIF_ULP_WAKEUP_LP_UART``: Wakeup by LP UART activity
+* ``CONFIG_ESPRESSIF_ULP_WAKEUP_LP_IO``: Wakeup by LP IO
+
 Accessing the ULP LP-Core Program Variables
 -------------------------------------------
+
+The HP core can exchange data with a running ULP LP-Core application in two ways:
+
+* **Global symbols** — read and write ULP variables exported to shared memory through ``/dev/ulp``.
+* **LP Mailbox** — send and receive messages through the hardware mailbox using ``/dev/lp_mailbox``.
+
+Global Symbols
+^^^^^^^^^^^^^^
 
 Global symbols defined in the ULP application are available to the HP core through a shared memory region. To read or write ULP variables,
 direct reading/writing to such memory positions are not allowed. POSIX calls are needed instead. To access the ULP variable through the HP core,
@@ -721,6 +754,136 @@ Here is a snippet for reading and writing to a ULP variable named ``var_test`` (
       return OK;
     }
 
+LP Mailbox
+^^^^^^^^^^
+
+The ESP32-P4 LP Mailbox provides inter-core communication between the LP and HP cores.
+It exposes sixteen 32-bit message registers that both cores can read and write.
+
+To enable peripheral ``CONFIG_ESPRESSIF_LP_MAILBOX`` option needed to register the driver at boot.
+In NuttX, the LP Mailbox is exposed as ``/dev/lp_mailbox``. The HP core uses ``read()`` and
+``write()`` to exchange byte-sized messages or ``ioctl(fd, FIOC_NOTIFY, handler)``
+for interrupt callback when a message arrives to communicate with the LP core.
+On the LP side, use `ulp_lp_core_mailbox.h <https://github.com/espressif/esp-hal-3rdparty/blob/e8d8638febf5310bf5b8f9bd04cf7fab9e9a4cb0/components/ulp/lp_core/lp_core/include/ulp_lp_core_mailbox.h>`__
+API calls (e.g. ``lp_core_mailbox_receive()`` / ``lp_core_mailbox_send()``).
+
+The following example loads a ULP binary, then exchanges messages with the LP core through
+the mailbox. The LP application receives a byte, increments it, and sends it back; the HP
+application verifies the reply.
+
+- Tree view:
+
+.. code-block:: text
+
+   nuttxspace/
+   ├── nuttx/
+   └── apps/
+   └── ulp_mailbox/
+       └── Makefile
+       └── Kconfig
+       └── ulp_mailbox.c
+       └── ulp/
+           └── Makefile
+           └── ulp_main.c
+
+
+- Contents in Makefile:
+
+.. code-block:: console
+
+   include $(APPDIR)/Make.defs
+
+   PROGNAME  = $(CONFIG_EXAMPLES_ULP_MAILBOX_PROGNAME)
+   PRIORITY  = $(CONFIG_EXAMPLES_ULP_MAILBOX_PRIORITY)
+   STACKSIZE = $(CONFIG_EXAMPLES_ULP_MAILBOX_STACKSIZE)
+   MODULE    = $(CONFIG_EXAMPLES_ULP_MAILBOX)
+
+   MAINSRC = ulp_mailbox.c
+
+   include $(APPDIR)/Application.mk
+
+   include ulp/Makefile
+
+- Contents in Kconfig:
+
+.. code-block:: console
+
+   config EXAMPLES_ULP_MAILBOX
+     bool "ULP Mailbox Example"
+     default n
+
+- Contents in ulp_mailbox.c:
+
+.. code-block:: C
+
+   #include <nuttx/config.h>
+   #include <fcntl.h>
+   #include <stdio.h>
+   #include <unistd.h>
+
+   #include "ulp/ulp/ulp_code.h"
+
+   int main(int argc, char *argv[])
+   {
+     int fd;
+     int mailbox;
+     uint8_t data = 0;
+
+     fd = open("/dev/ulp", O_WRONLY);
+     write(fd, ulp_mailbox_bin, ulp_mailbox_bin_len);
+
+     mailbox = open("/dev/lp_mailbox", O_RDWR);
+
+     write(mailbox, &data, 1);
+     read(mailbox, &data, 1);
+
+     printf("LP mailbox reply: %u\n", data);
+
+     return 0;
+   }
+
+- Contents in ulp/Makefile:
+
+.. code-block:: console
+
+  ULP_APP_NAME = ulp_mailbox
+  ULP_APP_FOLDER = $(APPDIR)$(DELIM)ulp_mailbox$(DELIM)ulp
+  ULP_APP_C_SRCS = ulp_main.c
+
+  include $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)common$(DELIM)espressif$(DELIM)ulp_makefile.mk
+
+- Contents in ulp_main.c:
+
+.. code-block:: C
+
+   #include <stdint.h>
+   #include "ulp_lp_core_mailbox.h"
+
+   static lp_mailbox_t mailbox;
+
+   int main(void)
+   {
+     lp_message_t message;
+
+     lp_core_mailbox_init(&mailbox, NULL);
+     if (lp_core_mailbox_receive(mailbox, &message, UINT32_MAX) != ESP_OK)
+      {
+        return -1;
+      }
+
+     lp_core_mailbox_send(mailbox, message + 1, UINT32_MAX);
+     return 0;
+   }
+
+- Command to build::
+
+    make distclean
+    ./tools/configure.sh esp32p4-function-ev-board:nsh
+    kconfig-tweak -e CONFIG_ESPRESSIF_USE_LP_CORE
+    kconfig-tweak -e CONFIG_EXAMPLES_ULP_MAILBOX
+    make olddefconfig
+    make -j
+
 Debugging ULP LP-Core
 ---------------------
 
@@ -736,6 +899,42 @@ so ubsan can help to catch some errors. But note that it will increase code size
 it can happen that application won't fit into RTC RAM.
 To enable ubsan for ULP please add ``CONFIG_ESPRESSIF_ULP_ENABLE_UBSAN`` in menuconfig.
 
+
+ESP32-P4 Chip Revisions
+=======================
+
+.. attention:: NuttX by default supports ESP32-P4 chip revisions starting
+               from v3.0. 
+
+Different ESP32-P4 chip revisions contain internal hardware breaking
+changes. Revisions 3.0 and higher are not compatible with 0.x and 1.x.
+Older chip revisions may work but require dedicated firmware builds.
+Compatibility is verified by the 2nd stage bootloader against following
+firmware build parameters: ``CONFIG_ESP32P4_SELECTS_REV_LESS_V3``,
+``CONFIG_ESP32P4_REV_*``, ``CONFIG_ESP_REV_*``,
+and ``CONFIG_ESP_EFUSE_BLOCK_REV_*``.
+These parameters are set with ``make menuconfig`` in the ``System Type`` menu:
+
+* ``Select ESP32-P4 revisions <3.0`` - enable if your chip is older than v3.0.
+* ``Minimum Supported ESP32-P4 Revision`` - select minimum chip revision
+  on which the firmware can boot, refuse to boot otherwise (boot loop).
+  Note that older chip revisions may contain bugs or have missing features.
+  Selecting wide range of supported revisions will increase firmware size.
+* ``Minimum Supported ESP32-P4 eFuse Block Revision`` - select minimum eFuse
+  block revision on which the firmware can boot, refuse to boot otherwise
+  (boot loop).
+
+You can check your chip revision with ``esptool`` utility that is used
+by ``make flash`` command, for instance::
+
+    esptool v5.2.0
+    Connected to ESP32-P4 on /dev/cuaU0:
+    Chip type:          ESP32-P4 (revision v1.3)
+    Features:           Dual Core + LP Core, 400MHz
+    Crystal frequency:  40MHz
+    MAC:                XXX
+
+
 Supported Boards
 ================
 
@@ -744,3 +943,13 @@ Supported Boards
   :maxdepth: 1
 
   boards/*/*
+
+Other Boards
+------------
+
+* `WaveShare ESP32-P4-Nano <https://www.waveshare.com/wiki/ESP32-P4-NANO>`_
+  is similar in design to
+  :ref:`ESP32-P4-Function-EV-Board <esp32p4-function-ev-board>`.
+  Aside from a few onboard component differences you can play around using
+  existing configurations for start. Note that it may contain ESP32-P4 v1.3 so
+  additional configuration tuning is required (see `ESP32-P4 Chip Revisions`_).

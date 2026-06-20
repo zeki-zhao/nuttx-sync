@@ -36,20 +36,16 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
 
-if(CONFIG_STM32H7_SPI)
+if(CONFIG_STM32_SPI)
   list(APPEND SRCS stm32_spi.c)
 endif()
 
-if(CONFIG_STM32H7_OTGHS)
+if(CONFIG_STM32_OTGHS)
   list(APPEND SRCS stm32_usb.c)
 endif()
 
 if(CONFIG_BOARDCTL_UNIQUEID)
   list(APPEND SRCS stm32_uid.c)
-endif()
-
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinitialize.c)
 endif()
 
 if(CONFIG_DEV_GPIO)

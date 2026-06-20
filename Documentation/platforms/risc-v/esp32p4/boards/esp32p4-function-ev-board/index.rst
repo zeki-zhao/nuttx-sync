@@ -1,3 +1,5 @@
+.. _esp32p4-function-ev-board:
+
 ==========================
 ESP32-P4-Function-EV-Board
 ==========================
@@ -177,6 +179,46 @@ adc
 Enables the ADC driver. ADC unit(s) are registered (``/dev/adc0`` as ADC1).
 Attenuation, mode, and channel set can be adjusted in ``ADC Configuration``.
 
+analog_cmpr
+-----------
+
+Enables the analog comparator driver. Driver unit is registered as ``/dev/anacmpr0``
+for analog comparator unit0. For each unit, the reference is either internal,
+comparing the source input against a fraction of VDD in 10% steps from 0% to 70%
+(for example, 50% VDD triggers when the source crosses half the supply voltage), or
+external, comparing the source GPIO against the voltage on the external reference
+pin. Reference source and debounce timeout for each unit can be adjusted in
+``Analog Comparator Configuration``.
+
+Comparator GPIOs are fixed by hardware and cannot be remapped. Following table demonstrates
+which pins are dedicated for comparator:
+
+======== =================================================================================
+Pin      Role
+======== =================================================================================
+GPIO52   Input source for unit0
+GPIO51   External reference input (if external reference source is selected for unit0)
+GPIO54   Input source for unit1
+GPIO53   External reference input (if external reference source is selected for unit1)
+======== =================================================================================
+
+The following snippet demonstrates how to read the comparator result:
+
+.. code-block:: C
+
+   int fd;
+   int ret;
+   int res;
+
+   fd = open("/dev/anacmpr0", O_RDONLY);
+   ret = read(fd, &res, sizeof(res));
+
+autopm
+------
+
+This configuration makes the device automatically enter the low power consumption mode
+when in the idle state, powering off the cpu and other peripherals.
+
 bmp180
 ------
 
@@ -203,6 +245,19 @@ efuse
 -----
 
 Enables the eFuse driver (supports virtual eFuses). Access via ``/dev/efuse``.
+
+ethernet
+--------
+
+Enables using the in-chip ethernet MAC controller attached to the board's PHY pins.
+This example enables the DHCP client and the ping tool to test the Ethernet connection, which
+should be working out of the box when the ethernet cable is connected to the board::
+
+    nsh> ifconfig
+    eth0	Link encap:Ethernet HWaddr 30:ed:a0:ec:f1:60 at RUNNING mtu 1500
+          inet addr:10.0.10.50 DRaddr:10.0.10.1 Mask:255.255.255.0
+
+It also provides the iperf tool to test the Ethernet connection.
 
 gpio
 ----
@@ -291,10 +346,31 @@ System switch to the PM sleep mode, you need to enter::
     nsh> pmconfig relax normal
     nsh> pmconfig relax normal
 
+To save power without using sleep modes, lowering the clock speed is another approach. For dynamic frequency scaling
+``CONFIG_ESPRESSIF_DFS`` option needs to enabled and minimum CPU frequency needs to set under ``CONFIG_ESPRESSIF_MIN_CPU_FREQ`` option.
+With these options, the device scales the CPU clock according to workload.
+
+psram_usrheap
+-------------
+
+This configuration enables allocating the userspace heap into SPIRAM and reserves the
+internal RAM for kernel heap. For instance, for a 32MB PSRAM::
+
+    nsh> free
+          total       used       free    maxused    maxfree  nused  nfree name
+        602004       6492     595512       6872     595512     36      1 Kmem
+      33554428       4276   33550152       4656   33550152      8      1 Umem
+
 pwm
 ---
 
 Demonstrates PWM via LEDC. The ``pwm`` app toggles output with default frequency/duty.
+
+python
+------
+
+This configuration enables the Python for ESP32-P4.
+Please refer to the :doc:`Python Interpreter </applications/interpreters/python/index>` page.
 
 qencoder
 --------
@@ -309,7 +385,7 @@ Demonstrates the hardware RNG.
 rmt
 ---
 
-Configures an RMT TX/RX pair and the ``rmtchar`` example. Also includes ``ws2812`` for addressable LEDs.
+Configures an RMT TX/RX pair and the ``irtest`` example. Also includes ``ws2812`` for addressable LEDs.
 
 rtc
 ---

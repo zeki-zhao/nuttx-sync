@@ -43,6 +43,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
 #define GNSS_PATH_FMT          "/dev/ttyGNSS%d"
 
 #define GNSS_PARSE_BUFFERSIZE  256
@@ -741,7 +747,7 @@ static void gnss_push_event(FAR void *priv, FAR const void *data,
  *   count   - The array size of nbuffer.
  *
  * Returned Value:
- *   OK if the driver was successfully register; A negated errno value is
+ *   OK if the driver was successfully registered; A negated errno value is
  *   returned on any failure.
  *
  ****************************************************************************/

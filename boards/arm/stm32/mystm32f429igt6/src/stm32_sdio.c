@@ -36,7 +36,6 @@
 
 #include "mystm32f429igt6.h"
 
-#ifdef HAVE_SDIO
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -47,7 +46,7 @@
 /* Card detections requires card support and a card detection GPIO */
 
 #define HAVE_NCD   1
-#if !defined(HAVE_SDIO) || !defined(GPIO_SDIO_NCD)
+#if !defined(GPIO_SDIO_NCD)
 #  undef HAVE_NCD
 #endif
 
@@ -155,6 +154,3 @@ static int stm32_ncd_interrupt(int irq, void *context, void *arg)
 #endif
 
 
-
-
-#endif /* HAVE_SDIO */

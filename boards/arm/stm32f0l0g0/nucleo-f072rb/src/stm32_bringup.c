@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 #undef HAVE_I2C_DRIVER
-#if defined(CONFIG_STM32F0L0G0_I2C1) && defined(CONFIG_I2C_DRIVER)
+#if defined(CONFIG_STM32_I2C1) && defined(CONFIG_I2C_DRIVER)
 #  define HAVE_I2C_DRIVER 1
 #endif
 
@@ -56,9 +56,6 @@
  *
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library
  *
  ****************************************************************************/
 

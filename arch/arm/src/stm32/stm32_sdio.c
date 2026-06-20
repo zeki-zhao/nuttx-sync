@@ -49,6 +49,7 @@
 #include "arm_internal.h"
 #include "stm32.h"
 #include "stm32_dma.h"
+#include "stm32_gpio.h"
 #include "stm32_sdio.h"
 
 #ifdef CONFIG_STM32_SDIO
@@ -3047,14 +3048,14 @@ struct sdio_dev_s *sdio_initialize(int slotno)
    */
 
 #ifndef CONFIG_SDIO_MUXBUS
-  stm32_configgpio(GPIO_SDIO_D0 | SDIO_PULLUP_ENABLE);
+  stm32_configgpio(GPIO_SDIO_D0_0 | SDIO_PULLUP_ENABLE | GPIO_SPEED_50MHz);
 #ifndef CONFIG_STM32_SDIO_WIDTH_D1_ONLY
-  stm32_configgpio(GPIO_SDIO_D1 | SDIO_PULLUP_ENABLE);
-  stm32_configgpio(GPIO_SDIO_D2 | SDIO_PULLUP_ENABLE);
-  stm32_configgpio(GPIO_SDIO_D3 | SDIO_PULLUP_ENABLE);
+  stm32_configgpio(GPIO_SDIO_D1_0 | SDIO_PULLUP_ENABLE | GPIO_SPEED_50MHz);
+  stm32_configgpio(GPIO_SDIO_D2_0 | SDIO_PULLUP_ENABLE | GPIO_SPEED_50MHz);
+  stm32_configgpio(GPIO_SDIO_D3_0 | SDIO_PULLUP_ENABLE | GPIO_SPEED_50MHz);
 #endif
-  stm32_configgpio(GPIO_SDIO_CK | SDIO_PULLUP_ENABLE);
-  stm32_configgpio(GPIO_SDIO_CMD | SDIO_PULLUP_ENABLE);
+  stm32_configgpio(GPIO_SDIO_CK_0 | SDIO_PULLUP_ENABLE | GPIO_SPEED_50MHz);
+  stm32_configgpio(GPIO_SDIO_CMD_0 | SDIO_PULLUP_ENABLE | GPIO_SPEED_50MHz);
 #endif
 
   /* Reset the card and assure that it is in the initial, unconfigured

@@ -24,12 +24,12 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = imx9_boardinit.c imx9_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += imx9_appinit.c
-endif
-
 ifeq ($(CONFIG_PWM),y)
 CSRCS += imx9_pwm.c
+endif
+
+ifeq ($(CONFIG_DSHOT),y)
+CSRCS += imx9_dshot.c
 endif
 
 ifeq ($(CONFIG_IMX9_LPI2C),y)

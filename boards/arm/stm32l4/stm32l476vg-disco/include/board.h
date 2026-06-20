@@ -76,8 +76,8 @@
  */
 
 #if 0
-#define GPIO_USART1_RX GPIO_USART1_RX_2    / * PB7  * /
-#define GPIO_USART1_TX GPIO_USART1_TX_2    / * PB6  * /
+#define GPIO_USART1_RX GPIO_USART1_RX_2    /* PB7 */
+#define GPIO_USART1_TX GPIO_USART1_TX_2    /* PB6 */
 #endif
 
 /* USART2: Connected to STLink Debug via PD5, PD6
@@ -281,7 +281,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_board_initialize
+ * Name: stm32_board_initialize
  *
  * Description:
  *   All STM32L4 architectures must provide the following entry point.
@@ -291,7 +291,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void stm32l4_board_initialize(void);
+void stm32_board_initialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

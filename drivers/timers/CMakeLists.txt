@@ -86,6 +86,14 @@ if(CONFIG_PWM)
   list(APPEND SRCS pwm.c)
 endif()
 
+if(CONFIG_PULSECOUNT)
+  list(APPEND SRCS pulsecount.c)
+endif()
+
+if(CONFIG_DSHOT)
+  list(APPEND SRCS dshot.c)
+endif()
+
 if(CONFIG_CAPTURE)
   list(APPEND SRCS capture.c)
 

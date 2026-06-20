@@ -213,12 +213,7 @@
  * Description:
  *   Perform architecture specific initialization
  *
- *   CONFIG_BOARDCTL=y:
- *     If CONFIG_NSH_ARCHINITIALIZE=y:
- *       Called from the NSH library (or other application)
- *     Otherwise, assumed to be called from some other application.
- *
- *   Otherwise CONFIG_BOARD_LATE_INITIALIZE=y:
+ *   CONFIG_BOARD_LATE_INITIALIZE=y:
  *     Called from board_late_initialize().
  *
  *   Otherwise, bad news:  Never called
@@ -372,6 +367,30 @@ int stm32_hyt271initialize(int devno);
 
 #ifdef CONFIG_SENSORS_DS18B20
 int stm32_ds18b20initialize(int devno);
+#endif
+
+/****************************************************************************
+ * Name: stm32_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_CAN_CHARDRIVER
+int stm32_can_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_cansock_setup
+ *
+ * Description:
+ *  Initialize CAN socket interface
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_CAN_SOCKET
+int stm32_cansock_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

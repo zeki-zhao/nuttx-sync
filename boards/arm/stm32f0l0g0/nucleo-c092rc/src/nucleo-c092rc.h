@@ -92,9 +92,6 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library
- *
  ****************************************************************************/
 
 int stm32_bringup(void);
@@ -119,7 +116,7 @@ int stm32_adc_setup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN_CHARDRIVER
+#ifdef CONFIG_STM32_FDCAN_CHARDRIVER
 int stm32_can_setup(void);
 #endif
 
@@ -131,7 +128,7 @@ int stm32_can_setup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN_SOCKET
+#ifdef CONFIG_STM32_FDCAN_SOCKET
 int stm32_cansock_setup(void);
 #endif
 

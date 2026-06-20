@@ -24,16 +24,10 @@ CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
-else
-CSRCS += stm32_userleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS +=  stm32_buttons.c
-endif
-
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinit.c
 endif
 
 ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
@@ -48,18 +42,7 @@ ifeq ($(CONFIG_STM32_OTGHS),y)
 CSRCS += stm32_usb.c
 endif
 
-ifeq ($(CONFIG_INPUT_STMPE811),y)
-CSRCS += stm32_stmpe811.c
-endif
-
-ifeq ($(CONFIG_STM32F429I_DISCO_ILI9341),y)
-CSRCS += stm32_ili93414ws.c
-endif
-
-ifeq ($(and \
-      $(CONFIG_STM32F429I_DISCO_ILI9341_LCDIFACE), \
-      $(CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE), \
-      $(CONFIG_STM32_LTDC)),)
+ifeq ($(CONFIG_STM32_LTDC),y)
 CSRCS += stm32_lcd.c
 endif
 
@@ -90,6 +73,8 @@ endif
 ifeq ($(CONFIG_STM32_SDIO),y)
 CSRCS += stm32_sdio.c
 endif
+
+CSRCS += stm32_myinit.c
 
 DEPPATH += --dep-path board
 VPATH += :board

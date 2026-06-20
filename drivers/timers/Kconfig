@@ -5,7 +5,7 @@
 
 menu "Timer Driver Support"
 
-config ARCH_HAVE_PWM_PULSECOUNT
+config ARCH_HAVE_PULSECOUNT
 	bool
 	default n
 
@@ -17,10 +17,6 @@ config ARCH_HAVE_PWM_DEADTIME
 	bool
 	default n
 
-config ARCH_HAVE_PWM_MULTICHAN
-	bool
-	default n
-
 config PWM
 	bool "PWM Driver Support"
 	default n
@@ -28,17 +24,17 @@ config PWM
 		This selection enables building of the "upper-half" PWM driver.
 		See include/nuttx/timers/pwm.h for further PWM driver information.
 
-if PWM
-
-config PWM_PULSECOUNT
-	bool "PWM Pulse Count Support"
+config PULSECOUNT
+	bool "Pulse Count Support"
 	default n
-	depends on ARCH_HAVE_PWM_PULSECOUNT
+	depends on ARCH_HAVE_PULSECOUNT
 	---help---
 		Some hardware will support generation of a fixed number of pulses.
 		This might be used, for example to support a stepper motor.  If the
 		hardware will support a fixed pulse count, then this configuration
 		should be set to enable the capability.
+
+if PWM
 
 config PWM_OVERWRITE
 	bool "PWM Overwrite Support"
@@ -64,16 +60,6 @@ config PWM_DEADTIME
 		For detailed description about deadtime functionality please refer
 		to architecture manuals and datasheets.
 
-config PWM_MULTICHAN
-	bool "PWM Multiple Output Channel Support"
-	default n
-	depends on ARCH_HAVE_PWM_MULTICHAN
-	depends on !PWM_PULSECOUNT
-	---help---
-		Enables support for multiple output channels per timer.
-
-if PWM_MULTICHAN
-
 config PWM_NCHANNELS
 	int "Number of Output Channels Per Timer"
 	default 1
@@ -82,7 +68,6 @@ config PWM_NCHANNELS
 		Specifies the number of output channels per timer.  Each timer
 		may support fewer output channels than this value.
 
-endif # PWM_MULTICHAN
 endif # PWM
 
 config CAPTURE
@@ -111,6 +96,24 @@ config FAKE_CAPTURE
 		Enables a fake capture driver for testing purposes.
 
 endif # CAPTURE
+
+config DSHOT
+	bool "DShot Driver Support"
+	default n
+	---help---
+		This selection enables the DShot driver for ESC control.
+
+if DSHOT
+
+config DSHOT_NCHANNELS
+	int "Maximum DShot channels in API structs"
+	default 8
+	range 1 16
+	---help---
+		Specifies the number of output channels per timer.  Each timer
+		may support fewer output channels than this value.
+
+endif # DSHOT
 
 config TIMER
 	bool "Timer Support"

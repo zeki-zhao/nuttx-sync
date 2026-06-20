@@ -72,9 +72,14 @@
 #include "esp_app_format.h"
 #endif
 
+#include "bootloader_mem.h"
 #include "bootloader_flash_priv.h"
 #include "esp_private/startup_internal.h"
 #include "esp_private/spi_flash_os.h"
+#ifdef CONFIG_ESPRESSIF_SPIRAM
+#  include "esp_psram.h"
+#  include "esp_private/esp_psram_extram.h"
+#endif
 
 #if SOC_APM_SUPPORTED
 #  include "hal/apm_hal.h"
@@ -475,6 +480,8 @@ void sys_startup_fn(void)
 
 void __esp_start(void)
 {
+  esp_err_t ret;
+
   esp_cpu_intr_set_ivt_addr(&_vector_table);
 
 #if SOC_INT_CLIC_SUPPORTED
@@ -490,15 +497,16 @@ void __esp_start(void)
   uint32_t cache_mmu_irom_size;
 #endif
 
+  bootloader_clear_bss_section();
+
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
   if (bootloader_init() != 0)
     {
       ets_printf("Hardware init failed, aborting\n");
       while (true);
     }
-#else
-  bootloader_clear_bss_section();
 #endif
+
   /* Initialize the per CPU areas */
 
 #ifdef CONFIG_RISCV_PERCPU_SCRATCH
@@ -550,17 +558,57 @@ void __esp_start(void)
 
   esp_rtc_init();
 
+  esp_mspi_pin_init();
+
   /* Configure SPI Flash chip state */
 
   spi_flash_init_chip_state();
 
   esp_mmu_map_init();
 
+#ifdef CONFIG_ESPRESSIF_SPIRAM
+  ret = esp_psram_chip_init();
+  if (ret != ESP_OK)
+    {
+#  ifndef CONFIG_ESPRESSIF_SPIRAM_IGNORE_NOTFOUND
+      PANIC();
+#  endif
+    }
+
+#  ifdef CONFIG_ESPRESSIF_SPIRAM_BOOT_INIT
+  if (ret == ESP_OK)
+    {
+      ret = esp_psram_init();
+      if (ret != ESP_OK)
+        {
+#    ifndef CONFIG_ESPRESSIF_SPIRAM_IGNORE_NOTFOUND
+          PANIC();
+#    endif
+        }
+    }
+#  endif
+#endif
+
   /* Configures the CPU clock, RTC slow and fast clocks, and performs
    * RTC slow clock calibration.
    */
 
   esp_clk_init();
+
+  esp_mspi_pin_reserve();
+
+  bootloader_init_mem();
+
+#ifdef CONFIG_ESPRESSIF_SPIRAM_MEMTEST
+  if (esp_psram_is_initialized() && !esp_psram_extram_test())
+    {
+      PANIC();
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY
+  esp_psram_bss_init();
+#endif
 
   /* Disable clock of unused peripherals */
 
@@ -612,6 +660,8 @@ void __esp_start(void)
   showprogress("D");
 
   nx_start();
+
+  UNUSED(ret);
 
   for (; ; );
 }

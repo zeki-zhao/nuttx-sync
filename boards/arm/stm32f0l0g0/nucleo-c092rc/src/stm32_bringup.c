@@ -28,6 +28,7 @@
 
 #include <nuttx/debug.h>
 
+#include <errno.h>
 #include <sys/types.h>
 
 #ifdef CONFIG_INPUT_BUTTONS
@@ -38,12 +39,20 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_IWDG
+#ifdef CONFIG_STM32_IWDG
 #  include <stm32_wdg.h>
+#endif
+
+#ifdef CONFIG_PULSECOUNT
+#  include "stm32_pulsecount.h"
 #endif
 
 #ifdef CONFIG_SENSORS_QENCODER
 #  include "board_qencoder.h"
+#endif
+
+#ifdef CONFIG_PWM
+#  include "board_pwm.h"
 #endif
 
 #include <arch/board/board.h>
@@ -67,19 +76,37 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library
- *
  ****************************************************************************/
 
 int stm32_bringup(void)
 {
+#ifdef CONFIG_PULSECOUNT
+  struct pulsecount_lowerhalf_s *pulsecount;
+#endif
   int ret;
 
-#ifdef CONFIG_STM32F0L0G0_IWDG
+#ifdef CONFIG_STM32_IWDG
   /* Initialize the watchdog timer */
 
   stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
+#endif
+
+#ifdef CONFIG_PULSECOUNT
+  /* Initialize and register the pulse count driver. */
+
+  pulsecount = stm32_pulsecountinitialize(1);
+  if (pulsecount == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pulsecountinitialize failed\n");
+      return -ENODEV;
+    }
+
+  ret = pulsecount_register("/dev/pulsecount0", pulsecount);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: pulsecount_register failed: %d\n", ret);
+      return ret;
+    }
 #endif
 
 #if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
@@ -113,7 +140,17 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN_CHARDRIVER
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_STM32_FDCAN_CHARDRIVER
   /* Initialize CAN and register the CAN driver. */
 
   ret = stm32_can_setup();
@@ -123,7 +160,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN_SOCKET
+#ifdef CONFIG_STM32_FDCAN_SOCKET
   /* Initialize CAN socket interface */
 
   ret = stm32_cansock_setup();

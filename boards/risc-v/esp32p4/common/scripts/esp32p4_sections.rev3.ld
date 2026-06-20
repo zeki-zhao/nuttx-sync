@@ -20,6 +20,8 @@
  *
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 /* Default entry point: */
 
 ENTRY(__start);
@@ -303,6 +305,8 @@ SECTIONS
     *libarch.a:esp_cache.*(.literal .literal.* .text .text.*)
     *libarch.a:cache_utils.*(.literal .literal.* .text .text.*)
     *libarch.a:memspi_host_driver.*(.literal .literal.* .text .text.*)
+    *libarch.a:esp_psram_impl_ap_hex.*(.literal .literal.* .text .text.*)
+    *libarch.a:esp_psram.*(.literal.esp_psram_get_heap_size_to_protect .text.esp_psram_get_heap_size_to_protect)
 
     *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
 
@@ -470,6 +474,8 @@ SECTIONS
     *libarch.a:esp_cache.*(.rodata .rodata.*)
     *libarch.a:cache_utils.*(.rodata .rodata.*)
     *libarch.a:memspi_host_driver.*(.rodata .rodata.*)
+    *libarch.a:esp_psram_impl_ap_hex.*(.rodata .rodata.*)
+    *libarch.a:cpu_region_protect.*(.rodata .rodata.*)
 
     esp_head.*(.rodata .rodata.*)
     esp_start.*(.rodata .rodata.*)
@@ -522,7 +528,9 @@ SECTIONS
     *(COMMON)
 
     *(.dynbss .dynsbss .gnu.linkonce.b .gnu.linkonce.b.* .gnu.linkonce.sb .gnu.linkonce.sb.* .gnu.linkonce.sb2 .gnu.linkonce.sb2.* .sbss .sbss.* .sbss2 .sbss2.* .scommon .share.mem)
+#ifndef CONFIG_ESPRESSIF_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY
     *(.ext_ram.bss .ext_ram.bss.*)
+#endif
 
     . = ALIGN(4);
     _ebss = ABSOLUTE(.);
@@ -533,6 +541,17 @@ SECTIONS
     . = ALIGN(4);
     _bss_end = ABSOLUTE(.);
   } > sram_seg
+
+#ifdef CONFIG_ESPRESSIF_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY
+  /* This section holds .ext_ram.bss data and places it in external RAM. */
+  .ext_ram.bss (NOLOAD) :
+  {
+    _ext_ram_bss_start = ABSOLUTE(.);
+    *(.ext_ram.bss .ext_ram.bss.*)
+    . = ALIGN(4);
+    _ext_ram_bss_end = ABSOLUTE(.);
+  } > ext_ram_seg
+#endif
 
   .flash.text :
   {

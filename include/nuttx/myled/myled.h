@@ -1,30 +1,102 @@
-#ifndef __DRIVERS_MY_LED_H__
-#define __DRIVERS_MY_LED_H__
+/**
+*   @file   stm32_myled.h
+*
+*   @{ 
+*/
+/***********************************************************************************************************************
+*   Platform             : nuttx
+*   Author               : zeki_zhao@163.com
+*   All Rights Reserved.
+***********************************************************************************************************************/
+#ifndef __DRIVERS_MYLED_H
+#define __DRIVERS_MYLED_H
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+
+/***********************************************************************************************************************
+*                                                     INCLUDE FILES
+* 1) system and project includes
+* 2) needed interfaces from external units
+* 3) internal and external interfaces from this unit
+***********************************************************************************************************************/
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <nuttx/fs/ioctl.h>
+#include <stdint.h>
 
 
-#define SLEDIOC_SET         0x0000
-#define SLEDIOC_GET         0x0001
+#ifdef CONFIG_MY_LED
 
-struct myled_status_s{
-    unsigned char  state;
-};
 
-struct myled_param_s{
-    short num;
-    struct myled_status_s on;
-};
+/*add user code*/
+
+
+/***********************************************************************************************************************
+*                                            SOURCE FILE VERSION INFORMATION
+***********************************************************************************************************************/
+#define STM32_MYLED_SW_MAJOR_VERSION             0
+#define STM32_MYLED_SW_MINOR_VERSION             0
+#define STM32_MYLED_SW_PATCH_VERSION             0
+
+
+/***********************************************************************************************************************
+*                                                  FILE VERSION CHECKS
+***********************************************************************************************************************/
+
+
+/***********************************************************************************************************************
+*                                                   DEFINES AND MACROS
+***********************************************************************************************************************/
+
+#define SLEDIOC_SET         0x0000  /* Toggle the GPIO */
+#define SLEDIOC_GET         0x0001  /* Get GPIO state */
+/***********************************************************************************************************************
+*                                                        ENUMS
+***********************************************************************************************************************/
+
+
+/***********************************************************************************************************************
+*                                              STRUCTURES AND OTHER TYPEDEFS
+***********************************************************************************************************************/
+/* 设备状态&配置文件缓存 */
+typedef struct {
+    uint32_t magic;
+    uint16_t core_len;
+    uint16_t led_count;
+    uint16_t reserved_led;
+    uint8_t  led_state[4];  /* 每bit表示一颗LED，最大支持32路 */
+} device_file_t;
 
 struct myled_lower_s{
-    CODE bool (*getio)(int lednum);
-    CODE void (*setio)(int lednum, bool ledon);
-    CODE void (*ioctl)(int lednum, bool ledon);
+    CODE bool (*read)(void);
+    CODE void (*write)(bool ledon);
 };
 
-int myled_register(FAR const char *path, FAR void *lower);
-// extern struct myled_lower_s myled_lower;
+/***********************************************************************************************************************
+*                                              GLOBAL VARIABLE PROTOTYPES
+***********************************************************************************************************************/
+extern device_file_t g_led_file;
 
+/***********************************************************************************************************************
+*                                              GLOBAL FUNCTION PROTOTYPES
+***********************************************************************************************************************/
+int myled_register(FAR const char *path, FAR void *lower);
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+int stm32_myled_initialize(void);
+
+#endif /* CONFIG_STM32_MYLED */
+
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* __STM32_MYLED_H */
+/** @} */
+

@@ -54,7 +54,7 @@ void stm32_boardinitialize(void)
   board_autoled_initialize();
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_SPI
+#ifdef CONFIG_STM32_SPI
   /* Configure SPI chip selects */
 
   stm32_spidev_initialize();
@@ -78,10 +78,6 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-  /* Perform board bring-up here instead of from the
-   * board_app_initialize().
-   */
-
   stm32_bringup();
 }
 #endif

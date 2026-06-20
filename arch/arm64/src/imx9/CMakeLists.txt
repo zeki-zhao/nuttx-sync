@@ -45,6 +45,10 @@ if(CONFIG_IMX9_FLEXIO_PWM)
   list(APPEND SRCS imx9_flexio_pwm.c)
 endif()
 
+if(CONFIG_IMX9_FLEXIO_DSHOT)
+  list(APPEND SRCS imx9_flexio_dshot.c)
+endif()
+
 if(CONFIG_IMX9_TPM_PWM)
   list(APPEND SRCS imx9_tpm_pwm.c)
 endif()
@@ -99,6 +103,10 @@ endif()
 
 if(CONFIG_IMX9_FLEXCAN)
   list(APPEND SRCS imx9_flexcan.c)
+endif()
+
+if(CONFIG_IMX9_SAR_ADC)
+  list(APPEND SRCS imx9_sar_adc.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

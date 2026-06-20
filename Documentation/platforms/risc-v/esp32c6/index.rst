@@ -131,6 +131,12 @@ where:
 * ``ESPTOOL_BINDIR=./`` is the path of the externally-built 2nd stage bootloader and the partition table (if applicable): when built using the ``make bootloader``, these files are placed into ``nuttx`` folder.
 * ``ESPTOOL_BAUD`` is able to change the flash baud rate if desired.
 
+To create and flash with UF2 (USB Flashing Format) binary, ``UF2=1`` option needs to be set during build phase
+(e.g ``make UF2=1 -j8``). This flag will create UF2 format file addition to binary. This output can be used to
+flash the device with `ESP USB Bridge <https://github.com/espressif/esp-usb-bridge>`__.
+To flash using ESP USB Bridge, either drag and drop the generated UF2 file onto the flasher's
+mass storage device, or use the ``UF2=1`` flag during flashing (e.g. ``make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=./ UF2=1``)
+
 Flashing NSH Example
 --------------------
 
@@ -419,7 +425,7 @@ Peripheral      Support NOTES
 ==============  ======= ====================
 ADC              Yes     Oneshot and internal temperature sensor
 AES              Yes
-Bluetooth        No
+Bluetooth        Yes
 CAN/TWAI         Yes
 DMA              Yes
 ECC              No
@@ -697,18 +703,18 @@ based on the default KConfig values:
      - 64KB
    * - Primary Application Slot (/dev/ota0)
      - 0x020000
-     - 1MB
+     - 1.4MB
    * - Secondary Application Slot (/dev/ota1)
-     - 0x120000
-     - 1MB
+     - 0x170000
+     - 1.4MB
    * - Scratch Partition (/dev/otascratch)
-     - 0x220000
+     - 0x2C0000
      - 256KB
    * - Storage MTD (optional)
-     - 0x260000
+     - 0x300000
      - 1MB
    * - Available Flash
-     - 0x360000+
+     - 0x400000+
      - Remaining
 
 .. raw:: html
@@ -737,27 +743,27 @@ virtual E-Fuses are later enabled.
     0x020000  ├─────────────────────────────┤
               │                             │
               │      Primary App Slot       │
-              │            (1MB)            │
+              │            (1.4MB)          │
               │          /dev/ota0          │
               │                             │
-    0x120000  ├─────────────────────────────┤
+    0x170000  ├─────────────────────────────┤
               │                             │
               │     Secondary App Slot      │
-              │            (1MB)            │
+              │            (1.4MB)          │
               │          /dev/ota1          │
               │                             │
-    0x220000  ├─────────────────────────────┤
+    0x2C0000  ├─────────────────────────────┤
               │                             │
               │      Scratch Partition      │
               │           (256KB)           │
               │       /dev/otascratch       │
               │                             │
-    0x260000  ├─────────────────────────────┤
+    0x300000  ├─────────────────────────────┤
               │                             │
-              │    Storage MTD (optional)   │
+              │   Storage MTD (optional)    │
               │            (1MB)            │
               │                             │
-    0x360000  ├─────────────────────────────┤
+    0x400000  ├─────────────────────────────┤
               │                             │
               │       Available Flash       │
               │         (Remaining)         │
@@ -767,11 +773,11 @@ virtual E-Fuses are later enabled.
 The key KConfig options that control this layout:
 
 - ``ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET`` (default: 0x20000)
-- ``ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET`` (default: 0x120000)
-- ``ESPRESSIF_OTA_SLOT_SIZE`` (default: 0x100000)
-- ``ESPRESSIF_OTA_SCRATCH_OFFSET`` (default: 0x220000)
+- ``ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET`` (default: 0x170000)
+- ``ESPRESSIF_OTA_SLOT_SIZE`` (default: 0x150000)
+- ``ESPRESSIF_OTA_SCRATCH_OFFSET`` (default: 0x2C0000)
 - ``ESPRESSIF_OTA_SCRATCH_SIZE`` (default: 0x40000)
-- ``ESPRESSIF_STORAGE_MTD_OFFSET`` (default: 0x260000 when MCUBoot enabled)
+- ``ESPRESSIF_STORAGE_MTD_OFFSET`` (default: 0x300000 when MCUBoot enabled)
 - ``ESPRESSIF_STORAGE_MTD_SIZE`` (default: 0x100000)
 
 For MCUBoot operation:
@@ -1098,6 +1104,18 @@ Here is a snippet for reading and writing to a ULP variable named ``var_test`` (
 
       return OK;
     }
+
+ULP LP-Core Wakeup Configuration
+--------------------------------
+
+By default, ULP LP-Core is woken up by HP core but other wakeup sources can be selected.
+
+The available wakeup sources are:
+
+* ``CONFIG_ESPRESSIF_ULP_WAKEUP_HP_CPU``: Wakeup by HP core
+* ``CONFIG_ESPRESSIF_ULP_WAKEUP_LP_TIMER``: Wakeup by LP timer
+* ``CONFIG_ESPRESSIF_ULP_WAKEUP_LP_UART``: Wakeup by LP UART activity
+* ``CONFIG_ESPRESSIF_ULP_WAKEUP_LP_IO``: Wakeup by LP IO
 
 Debugging ULP LP-Core
 ---------------------

@@ -57,6 +57,10 @@ if(CONFIG_IMX9_FLEXCAN)
   list(APPEND SRCS imx9_flexcan.c)
 endif()
 
+if(CONFIG_IMX9_SAR_ADC)
+  list(APPEND SRCS imx9_sar_adc.c)
+endif()
+
 if(CONFIG_IMX9_LPUART)
   list(APPEND SRCS imx9_lpuart.c imx9_lowputc.c)
 endif()
@@ -65,8 +69,8 @@ if(CONFIG_IMX9_GPIO_IRQ)
   list(APPEND SRCS imx9_gpioirq.c)
 endif()
 
-if(CONFIG_IMX9_FLEXIO_PWM)
-  list(APPEND SRCS imx9_flexio_pwm.c)
+if(CONFIG_IMX9_FLEXIO)
+  list(APPEND SRCS imx9_flexio.c)
 endif()
 
 if(CONFIG_IMX9_TPM_PWM)

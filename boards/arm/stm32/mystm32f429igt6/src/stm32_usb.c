@@ -60,7 +60,7 @@
 #endif
 
 #ifndef CONFIG_STM32F429IDISCO_USBHOST_STACKSIZE
-#  define CONFIG_STM32F429IDISCO_USBHOST_STACKSIZE 1024
+#  define CONFIG_STM32F429IDISCO_USBHOST_STACKSIZE 2048
 #endif
 
 /****************************************************************************
@@ -127,19 +127,6 @@ static int usbhost_waiter(int argc, char *argv[])
 
 void stm32_usbinitialize(void)
 {
-  /* The OTG FS has an internal soft pull-up.
-   * No GPIO configuration is required
-   */
-
-  /* Configure the OTG FS VBUS sensing GPIO,
-   * Power On, and Overcurrent GPIOs
-   */
-
-#ifdef CONFIG_STM32_OTGHS
-  stm32_configgpio(GPIO_OTGHS_VBUS);
-  stm32_configgpio(GPIO_OTGHS_PWRON);
-  stm32_configgpio(GPIO_OTGHS_OVER);
-#endif
 }
 
 /****************************************************************************
@@ -191,6 +178,16 @@ int stm32_usbhost_initialize(void)
   if (ret != OK)
     {
       uerr("ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_USBHOST_HIDKBD
+  /* Initialize the HID keyboard class */
+
+  ret = usbhost_kbdinit();
+  if (ret != OK)
+    {
+      uerr("ERROR: Failed to register the HID keyboard class\n");
     }
 #endif
 
@@ -246,20 +243,6 @@ int stm32_usbhost_initialize(void)
 #ifdef CONFIG_USBHOST
 void stm32_usbhost_vbusdrive(int iface, bool enable)
 {
-  DEBUGASSERT(iface == 0);
-
-  if (enable)
-    {
-      /* Enable the Power Switch by driving the enable pin low */
-
-      stm32_gpiowrite(GPIO_OTGHS_PWRON, false);
-    }
-  else
-    {
-      /* Disable the Power Switch by driving the enable pin high */
-
-      stm32_gpiowrite(GPIO_OTGHS_PWRON, true);
-    }
 }
 #endif
 
@@ -283,7 +266,7 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
 #ifdef CONFIG_USBHOST
 int stm32_setup_overcurrent(xcpt_t handler, void *arg)
 {
-  return stm32_gpiosetevent(GPIO_OTGHS_OVER, true, true, true, handler, arg);
+  return 0;
 }
 #endif
 

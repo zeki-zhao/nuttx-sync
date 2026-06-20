@@ -97,13 +97,13 @@ static void stm32_i2c_register(int bus)
 #if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
 static void stm32_i2ctool(void)
 {
-#ifdef CONFIG_STM32F0L0G0_I2C1
+#ifdef CONFIG_STM32_I2C1
   stm32_i2c_register(1);
 #endif
-#ifdef CONFIG_STM32F0L0G0_I2C2
+#ifdef CONFIG_STM32_I2C2
   stm32_i2c_register(2);
 #endif
-#ifdef CONFIG_STM32F0L0G0_I2C3
+#ifdef CONFIG_STM32_I2C3
   stm32_i2c_register(3);
 #endif
 }
@@ -121,9 +121,6 @@ static void stm32_i2ctool(void)
  *
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library
  *
  ****************************************************************************/
 

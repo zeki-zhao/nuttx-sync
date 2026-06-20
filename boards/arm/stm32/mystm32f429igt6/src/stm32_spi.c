@@ -44,8 +44,8 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_SPI5
-struct spi_dev_s *g_spidev5 = NULL;
+#ifdef CONFIG_STM32_SPI1
+struct spi_dev_s *g_spidev1 = NULL;
 #endif
 
 /****************************************************************************
@@ -63,14 +63,8 @@ struct spi_dev_s *g_spidev5 = NULL;
 
 void weak_function stm32_spidev_initialize(void)
 {
-#ifdef CONFIG_STM32_SPI5
-  stm32_configgpio(GPIO_CS_MEMS);    /* MEMS chip select */
-  stm32_configgpio(GPIO_CS_LCD);     /* LCD chip select */
-  stm32_configgpio(GPIO_LCD_DC);     /* LCD Data/Command select */
-  stm32_configgpio(GPIO_LCD_ENABLE); /* LCD enable select */
-#endif
-#if defined(CONFIG_STM32_SPI4) && defined(CONFIG_MTD_SST25XX)
-  stm32_configgpio(GPIO_CS_SST25);   /* SST25 FLASH chip select */
+#ifdef CONFIG_STM32_SPI1
+  stm32_configgpio(GPIO_CS_FLASH);   /* W25Q128 flash chip select */
 #endif
 }
 
@@ -107,6 +101,13 @@ void stm32_spi1select(struct spi_dev_s *dev,
 {
   spiinfo("devid: %d CS: %s\n",
           (int)devid, selected ? "assert" : "de-assert");
+
+#if defined(CONFIG_MTD_W25)
+  if (devid == SPIDEV_FLASH(0))
+    {
+      stm32_gpiowrite(GPIO_CS_FLASH, !selected);
+    }
+#endif
 }
 
 uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
@@ -168,18 +169,6 @@ void stm32_spi5select(struct spi_dev_s *dev,
 {
   spiinfo("devid: %d CS: %s\n",
           (int)devid, selected ? "assert" : "de-assert");
-
-#if defined(CONFIG_STM32F429I_DISCO_ILI9341)
-  if (devid == SPIDEV_DISPLAY(0))
-    {
-      stm32_gpiowrite(GPIO_CS_LCD, !selected);
-    }
-  else
-#endif
-
-    {
-      stm32_gpiowrite(GPIO_CS_MEMS, !selected);
-    }
 }
 
 uint8_t stm32_spi5status(struct spi_dev_s *dev, uint32_t devid)
@@ -263,7 +252,7 @@ int stm32_spi5cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #endif /* CONFIG_SPI_CMDDATA */
 
 /****************************************************************************
- * Name: stm32_spi5initialize
+ * Name: stm32_spi1initialize
  *
  * Description:
  *   Initialize the selected SPI port.
@@ -283,15 +272,19 @@ int stm32_spi5cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_SPI5
-struct spi_dev_s *stm32_spi5initialize(void)
+#ifdef CONFIG_STM32_SPI1
+struct spi_dev_s * stm32_spi1initialize(void)
 {
-  if (!g_spidev5)
+  if (!g_spidev1)
     {
-      g_spidev5 = stm32_spibus_initialize(5);
+      /* Enable SPI1 peripheral clock (not done by SPI driver itself) */
+
+      modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_SPI1EN);
+
+      g_spidev1 = stm32_spibus_initialize(1);
     }
 
-  return g_spidev5;
+  return g_spidev1;
 }
 #endif
 #endif /* CONFIG_STM32_SPI1 || ... CONFIG_STM32_SPI5 */

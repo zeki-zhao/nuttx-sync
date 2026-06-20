@@ -32,7 +32,7 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
 
-if(CONFIG_STM32F0L0G0_SPI)
+if(CONFIG_STM32_SPI)
   list(APPEND SRCS stm32_spi.c)
 endif()
 
@@ -42,10 +42,6 @@ endif()
 
 if(CONFIG_SENSORS_QENCODER)
   list(APPEND SRCS stm32_qencoder.c)
-endif()
-
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})
