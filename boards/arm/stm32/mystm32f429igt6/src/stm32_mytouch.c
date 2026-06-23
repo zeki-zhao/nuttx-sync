@@ -61,7 +61,7 @@ static int my_gt9xx_irq_attach(const struct gt9xx_board_s *state,xcpt_t isr, voi
   wlinfo("Attach IRQ\n");
   g_isr = isr;
   g_arg = arg;
-  stm32_gpiosetevent(GPIO_TOUCH_INT2, false, true, false, g_isr, g_arg); //TODO:在形参出设置了触发方式
+  stm32_gpiosetevent(GPIO_TOUCH_INT, false, true, false, g_isr, g_arg); //TODO:在形参出设置了触发方式
   return OK;
 }
 
@@ -95,13 +95,13 @@ static void my_gt9xx_irq_enable(const struct gt9xx_board_s *state,
     {
         /* Configure the EXTI interrupt using the SAVED handler */
 
-        stm32_gpiosetevent(GPIO_TOUCH_INT2, false, true, false, g_isr, g_arg);
+        stm32_gpiosetevent(GPIO_TOUCH_INT, false, true, false, g_isr, g_arg);
     }
     else
     {
         /* Configure the EXTI interrupt with a NULL handler to disable it */
 
-        stm32_gpiosetevent(GPIO_TOUCH_INT2, false, false, false,NULL, NULL);
+        stm32_gpiosetevent(GPIO_TOUCH_INT, false, false, false,NULL, NULL);
     }
 
     leave_critical_section(flags);
@@ -157,12 +157,14 @@ void board_touch_initialize(void)
             stm32_i2cbus_uninitialize(i2c);
         }
     }
+    stm32_configgpio(GPIO_TOUCH_INT_FIRST); //Int_Gpio first config
 
     stm32_configgpio(GPIO_TOUCH_RST);
     usleep(200); //delay>100us
     stm32_gpiowrite(GPIO_TOUCH_RST, 1);
     usleep(6000); //delay>5ms
-    stm32_configgpio(GPIO_TOUCH_INT2);
+
+    stm32_configgpio(GPIO_TOUCH_INT);
 
     DEBUGASSERT(devpath != NULL && i2c != NULL);
     gt9xx_register(devpath, i2c, TOUCH_ADDR, &my_gt9xx);
